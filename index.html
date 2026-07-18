@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🦴 CastCountdown — How Long Left in Your Cast?</title>
+  <meta name="description" 
+        content="Find out exactly how many days left in your cast. 
+                 Track your healing journey and share it!"/>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ======================== -->
+  <!--        HEADER            -->
+  <!-- ======================== -->
+  <header>
+    <div class="logo">🦴 CastCountdown</div>
+    <p class="tagline">Track your healing. Share your journey.</p>
+  </header>
+
+  <!-- ======================== -->
+  <!--     STEP 1: THE FORM     -->
+  <!-- ======================== -->
+  <main>
+    <section id="form-section" class="card">
+      <h2>Let's build your countdown ⏱️</h2>
+
+      <!-- Bone Picker -->
+      <div class="form-group">
+        <label for="bone">🦴 Which bone did you break?</label>
+        <select id="bone">
+          <option value="">-- Select bone --</option>
+          <option value="finger">Finger</option>
+          <option value="wrist">Wrist</option>
+          <option value="forearm">Forearm</option>
+          <option value="elbow">Elbow</option>
+          <option value="clavicle">Collarbone (Clavicle)</option>
+          <option value="ankle">Ankle</option>
+          <option value="tibia">Tibia (Shin)</option>
+          <option value="foot">Foot / Toes</option>
+          <option value="femur">Femur (Thigh)</option>
+        </select>
+      </div>
+
+      <!-- Fracture Type -->
+      <div class="form-group">
+        <label for="fracture">💥 How bad is the fracture?</label>
+        <select id="fracture">
+          <option value="">-- Select type --</option>
+          <option value="simple">Simple (clean break)</option>
+          <option value="displaced">Displaced (bone moved)</option>
+          <option value="complex">Complex / Comminuted</option>
+        </select>
+      </div>
+
+      <!-- Age -->
+      <div class="form-group">
+        <label for="age">🎂 How old are you?</label>
+        <input type="number" id="age" 
+               placeholder="Enter your age" 
+               min="1" max="120"/>
+      </div>
+
+      <!-- Cast Date -->
+      <div class="form-group">
+        <label for="castDate">📅 When did you get your cast?</label>
+        <input type="date" id="castDate"/>
+      </div>
+
+      <!-- Smoking -->
+      <div class="form-group">
+        <label>🚬 Do you smoke?</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="smoking" value="no" checked/> 
+            No
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="smoking" value="yes"/> 
+            Yes
+          </label>
+        </div>
+      </div>
+
+      <!-- Diabetes -->
+      <div class="form-group">
+        <label>🩸 Do you have diabetes?</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="diabetes" value="no" checked/> 
+            No
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="diabetes" value="yes"/> 
+            Yes
+          </label>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <p id="error-msg" class="error hidden">
+        ⚠️ Please fill in all fields!
+      </p>
+
+      <!-- Submit Button -->
+      <button id="calculate-btn" onclick="calculate()">
+        Show My Countdown 🚀
+      </button>
+    </section>
+
+    <!-- ======================== -->
+    <!--   STEP 2: THE COUNTDOWN  -->
+    <!-- ======================== -->
+    <section id="result-section" class="card hidden">
+
+      <!-- Bone & Type Label -->
+      <div class="result-label">
+        <span id="result-bone-label">Broken Wrist</span> · 
+        <span id="result-fracture-label">Simple Fracture</span>
+      </div>
+
+      <!-- Days Left BIG NUMBER -->
+      <div class="days-left-container">
+        <div id="days-left" class="days-left">--</div>
+        <div class="days-left-text">DAYS LEFT</div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress-container">
+        <div class="progress-bar-bg">
+          <div id="progress-bar" class="progress-bar-fill"></div>
+        </div>
+        <div id="progress-label" class="progress-label">0% healed</div>
+      </div>
+
+      <!-- Healing Phase -->
+      <div id="phase-box" class="phase-box">
+        <div id="phase-icon" class="phase-icon">🔴</div>
+        <div>
+          <div id="phase-name" class="phase-name">Inflammation Phase</div>
+          <div id="phase-desc" class="phase-desc">
+            Your body is building the scaffolding
+          </div>
+        </div>
+      </div>
+
+      <!-- Date Info -->
+      <div class="dates-row">
+        <div class="date-item">
+          <div class="date-label">📅 Cast On</div>
+          <div id="cast-date-display" class="date-value">--</div>
+        </div>
+        <div class="date-divider">→</div>
+        <div class="date-item">
+          <div class="date-label">🎯 Est. Off</div>
+          <div id="off-date-display" class="date-value">--</div>
+        </div>
+      </div>
+
+      <!-- Modifiers Applied -->
+      <div id="modifiers-box" class="modifiers-box hidden">
+        <p class="modifiers-title">⚠️ Healing adjustments applied:</p>
+        <ul id="modifiers-list"></ul>
+      </div>
+
+      <!-- Share Button -->
+      <button id="share-btn" onclick="shareCountdown()">
+        📤 Share My Countdown
+      </button>
+
+      <!-- Reset Button -->
+      <button id="reset-btn" class="secondary-btn" onclick="resetForm()">
+        🔄 Start Over
+      </button>
+
+      <!-- Canvas for share image (hidden) -->
+      <canvas id="share-canvas" 
+              width="600" height="400" 
+              style="display:none;">
+      </canvas>
+
+    </section>
+
+    <!-- ======================== -->
+    <!--   CAST OFF CELEBRATION   -->
+    <!-- ======================== -->
+    <section id="celebrate-section" class="card hidden">
+      <div class="celebrate-emoji">🎉🦴🎉</div>
+      <h2>IT'S CAST-OFF DAY!</h2>
+      <p class="celebrate-text">
+        You made it! Your healing journey is complete!
+      </p>
+      <div class="celebrate-stats">
+        <div class="stat">
+          <div id="total-days-stat" class="stat-number">--</div>
+          <div class="stat-label">Days in Cast</div>
+        </div>
+        <div class="stat">
+          <div id="bone-stat" class="stat-number">--</div>
+          <div class="stat-label">Bone Healed</div>
+        </div>
+      </div>
+      <button id="celebrate-share-btn" onclick="shareCelebration()">
+        📤 Share My Cast-Off Day!
+      </button>
+      <button class="secondary-btn" onclick="resetForm()">
+        Track Another Bone 🦴
+      </button>
+    </section>
+
+    <!-- ======================== -->
+    <!--   MEDICAL DISCLAIMER     -->
+    <!-- ======================== -->
+    <div class="disclaimer">
+      ⚠️ <strong>Medical Disclaimer:</strong> This tool provides general 
+      estimates based on published orthopedic literature. It is 
+      <strong>NOT medical advice</strong>. Your actual cast duration is 
+      determined by your treating physician based on X-rays and clinical 
+      examination. <strong>Never remove your cast yourself.</strong> 
+      Always follow your doctor's instructions.
+    </div>
+
+  </main>
+
+  <!-- ======================== -->
+  <!--        FOOTER            -->
+  <!-- ======================== -->
+  <footer>
+    <p>🦴 CastCountdown · Free for everyone · 
+       <a href="#">castcountdown.me</a>
+    </p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script src="share.js"></script>
+
+</body>
+</html>
