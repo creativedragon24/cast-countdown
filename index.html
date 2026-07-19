@@ -1,137 +1,239 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🦴 CastCountdown — How Long Left in Your Cast?</title>
-  <meta name="description" 
-        content="Find out exactly how many days left in your cast. 
-                 Track your healing journey and share it!"/>
-  <link rel="stylesheet" href="style.css" />
+  <title>🦴 CastCountdown — Track Your Healing Journey</title>
+  <meta name="description" content="How many days left in your cast? Track your bone healing and share it!"/>
+
+  <!-- ===================== -->
+  <!-- FAMOUS GITHUB LIBRARIES -->
+  <!-- ===================== -->
+
+  <!-- 1. Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+
+  <!-- 2. Animate.css (github.com/animate-css/animate.css ⭐ 81k) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+  <!-- 3. Three.js (github.com/mrdoob/three.js ⭐ 99k) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- 4. Vanta.js 3D Backgrounds (github.com/tengbao/vanta ⭐ 8k) -->
+  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+
+  <!-- 5. GSAP (github.com/greensock/GSAP ⭐ 19k) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- 6. Typed.js (github.com/mattboldt/typed.js ⭐ 14k) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+
+  <!-- 7. Particles.js (github.com/VincentGarreau/particles.js ⭐ 28k) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
+
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
+
+  <!-- 3D VANTA BACKGROUND -->
+  <div id="vanta-bg"></div>
+
+  <!-- CONFETTI CANVAS -->
+  <canvas id="confetti-canvas"></canvas>
 
   <!-- ======================== -->
   <!--        HEADER            -->
   <!-- ======================== -->
-  <header>
-    <div class="logo">🦴 CastCountdown</div>
-    <p class="tagline">Track your healing. Share your journey.</p>
-  </header>
+  <header id="main-header">
+    <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">🌙</button>
+    <div class="header-inner">
 
-  <!-- ======================== -->
-  <!--     STEP 1: THE FORM     -->
-  <!-- ======================== -->
-  <main>
-    <section id="form-section" class="card">
-      <h2>Let's build your countdown ⏱️</h2>
-
-      <!-- Bone Picker -->
-      <div class="form-group">
-        <label for="bone">🦴 Which bone did you break?</label>
-        <select id="bone">
-          <option value="">-- Select bone --</option>
-          <option value="finger">Finger</option>
-          <option value="wrist">Wrist</option>
-          <option value="forearm">Forearm</option>
-          <option value="elbow">Elbow</option>
-          <option value="clavicle">Collarbone (Clavicle)</option>
-          <option value="ankle">Ankle</option>
-          <option value="tibia">Tibia (Shin)</option>
-          <option value="foot">Foot / Toes</option>
-          <option value="femur">Femur (Thigh)</option>
-        </select>
+      <!-- Animated 3D Bone Logo -->
+      <div class="logo-3d" id="logo-3d">
+        <canvas id="bone-canvas" width="80" height="80"></canvas>
       </div>
 
-      <!-- Fracture Type -->
-      <div class="form-group">
-        <label for="fracture">💥 How bad is the fracture?</label>
-        <select id="fracture">
-          <option value="">-- Select type --</option>
-          <option value="simple">Simple (clean break)</option>
-          <option value="displaced">Displaced (bone moved)</option>
-          <option value="complex">Complex / Comminuted</option>
-        </select>
+      <div class="logo animate__animated animate__bounceInDown">
+        🦴 CastCountdown
       </div>
 
-      <!-- Age -->
-      <div class="form-group">
-        <label for="age">🎂 How old are you?</label>
-        <input type="number" id="age" 
-               placeholder="Enter your age" 
-               min="1" max="120"/>
-      </div>
-
-      <!-- Cast Date -->
-      <div class="form-group">
-        <label for="castDate">📅 When did you get your cast?</label>
-        <input type="date" id="castDate"/>
-      </div>
-
-      <!-- Smoking -->
-      <div class="form-group">
-        <label>🚬 Do you smoke?</label>
-        <div class="radio-group">
-          <label class="radio-label">
-            <input type="radio" name="smoking" value="no" checked/> 
-            No
-          </label>
-          <label class="radio-label">
-            <input type="radio" name="smoking" value="yes"/> 
-            Yes
-          </label>
-        </div>
-      </div>
-
-      <!-- Diabetes -->
-      <div class="form-group">
-        <label>🩸 Do you have diabetes?</label>
-        <div class="radio-group">
-          <label class="radio-label">
-            <input type="radio" name="diabetes" value="no" checked/> 
-            No
-          </label>
-          <label class="radio-label">
-            <input type="radio" name="diabetes" value="yes"/> 
-            Yes
-          </label>
-        </div>
-      </div>
-
-      <!-- Error Message -->
-      <p id="error-msg" class="error hidden">
-        ⚠️ Please fill in all fields!
+      <!-- Typed.js animated tagline -->
+      <p class="tagline">
+        <span id="typed-tagline"></span>
       </p>
 
-      <!-- Submit Button -->
-      <button id="calculate-btn" onclick="calculate()">
-        Show My Countdown 🚀
+      <!-- Floating stats bar -->
+      <div class="stats-bar animate__animated animate__fadeInUp">
+        <div class="stat-pill">🌍 178M fractures/year</div>
+        <div class="stat-pill">⚡ Free forever</div>
+        <div class="stat-pill">📤 Share in 1 tap</div>
+      </div>
+
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Step Indicator -->
+    <div class="step-indicator">
+      <div class="step-dot active" id="dot-1"></div>
+      <div class="step-dot" id="dot-2"></div>
+      <div class="step-dot" id="dot-3"></div>
+    </div>
+
+    <!-- ======================== -->
+    <!--     FORM SECTION         -->
+    <!-- ======================== -->
+    <section id="form-section" class="card glass-card">
+      <h2 class="card-title">
+        <span class="title-emoji">⚡</span>
+        Build Your Countdown
+      </h2>
+
+      <!-- BONE PICKER -->
+      <div class="form-group">
+        <label class="form-label">🦴 Which bone did you break?</label>
+        <div class="bone-grid" id="bone-grid">
+          <div class="bone-option" onclick="selectBone('finger','Finger')" data-bone="finger">
+            <span class="bone-emoji">☝️</span>
+            <span class="bone-name">Finger</span>
+          </div>
+          <div class="bone-option" onclick="selectBone('wrist','Wrist')" data-bone="wrist">
+            <span class="bone-emoji">🤚</span>
+            <span class="bone-name">Wrist</span>
+          </div>
+          <div class="bone-option" onclick="selectBone('forearm','Forearm')" data-bone="forearm">
+            <span class="bone-emoji">💪</span>
+            <span class="bone-name">Forearm</span>
+          </div>
+          <div class="bone-option" onclick="selectBone('elbow','Elbow')" data-bone="elbow">
+            <span class="bone-emoji">🦾</span>
+            <span class="bone-name">Elbow</span>
+          </div>
+          <div class="bone-option" onclick="selectBone('clavicle','Collarbone')" data-bone="clavicle">
+            <span class="bone-emoji">🎽</span>
+            <span class="bone-name">Collarbone</span>
+          </div>
+          <div class="bone-option" onclick="selectBone('ankle','Ankle')" data-bone="ankle">
+            <span class="bone-emoji">🦶</span>
+            <span class="bone-name">Ankle</span>
+          </div>
+          <div class="bone-option" onclick="selectBone('tibia','Shin')" data-bone="tibia">
+            <span class="bone-emoji">🦵</span>
+            <span class="bone-name">Shin</span>
+          </div>
+          <div class="bone-option" onclick="selectBone('foot','Foot')" data-bone="foot">
+            <span class="bone-emoji">👟</span>
+            <span class="bone-name">Foot</span>
+          </div>
+          <div class="bone-option" onclick="selectBone('femur','Thigh')" data-bone="femur">
+            <span class="bone-emoji">🦿</span>
+            <span class="bone-name">Thigh</span>
+          </div>
+        </div>
+        <input type="hidden" id="bone"/>
+      </div>
+
+      <!-- FRACTURE TYPE -->
+      <div class="form-group">
+        <label class="form-label">💥 How bad is the fracture?</label>
+        <div class="fracture-grid">
+          <div class="fracture-option" onclick="selectFracture('simple')">
+            <span class="frac-emoji">😌</span>
+            <span class="frac-name">Simple</span>
+            <span class="frac-desc">Clean break</span>
+          </div>
+          <div class="fracture-option" onclick="selectFracture('displaced')">
+            <span class="frac-emoji">😬</span>
+            <span class="frac-name">Displaced</span>
+            <span class="frac-desc">Bone moved</span>
+          </div>
+          <div class="fracture-option" onclick="selectFracture('complex')">
+            <span class="frac-emoji">😱</span>
+            <span class="frac-name">Complex</span>
+            <span class="frac-desc">Multiple pieces</span>
+          </div>
+        </div>
+        <input type="hidden" id="fracture"/>
+      </div>
+
+      <!-- AGE -->
+      <div class="form-group">
+        <label class="form-label" for="age">🎂 How old are you?</label>
+        <input type="number" id="age" placeholder="Enter your age" min="1" max="120" class="modern-input"/>
+      </div>
+
+      <!-- CAST DATE -->
+      <div class="form-group">
+        <label class="form-label" for="castDate">📅 When did you get your cast?</label>
+        <input type="date" id="castDate" class="modern-input"/>
+      </div>
+
+      <!-- SMOKING -->
+      <div class="form-group">
+        <label class="form-label">🚬 Do you smoke?</label>
+        <div class="radio-group">
+          <input type="radio" name="smoking" value="no" id="smoke-no" checked/>
+          <div class="radio-card selected-no" id="card-smoke-no" onclick="selectRadio('smoking','no')">✅ No</div>
+          <input type="radio" name="smoking" value="yes" id="smoke-yes"/>
+          <div class="radio-card" id="card-smoke-yes" onclick="selectRadio('smoking','yes')">🚬 Yes</div>
+        </div>
+      </div>
+
+      <!-- DIABETES -->
+      <div class="form-group">
+        <label class="form-label">🩸 Do you have diabetes?</label>
+        <div class="radio-group">
+          <input type="radio" name="diabetes" value="no" id="diab-no" checked/>
+          <div class="radio-card selected-no" id="card-diab-no" onclick="selectRadio('diabetes','no')">✅ No</div>
+          <input type="radio" name="diabetes" value="yes" id="diab-yes"/>
+          <div class="radio-card" id="card-diab-yes" onclick="selectRadio('diabetes','yes')">🩸 Yes</div>
+        </div>
+      </div>
+
+      <!-- ERROR -->
+      <p id="error-msg" class="error hidden animate__animated animate__shakeX">
+        ⚠️ Please fill in all fields! Pick a bone and fracture type!
+      </p>
+
+      <!-- SUBMIT -->
+      <button id="calculate-btn" onclick="calculate()" class="main-btn">
+        <span class="btn-text">Show My Countdown 🚀</span>
+        <span class="btn-shine"></span>
       </button>
     </section>
 
     <!-- ======================== -->
-    <!--   STEP 2: THE COUNTDOWN  -->
+    <!--     RESULT SECTION       -->
     <!-- ======================== -->
-    <section id="result-section" class="card hidden">
+    <section id="result-section" class="card glass-card hidden">
 
-      <!-- Bone & Type Label -->
       <div class="result-label">
-        <span id="result-bone-label">Broken Wrist</span> · 
+        <span id="result-bone-label">Broken Wrist</span>
+        &nbsp;·&nbsp;
         <span id="result-fracture-label">Simple Fracture</span>
       </div>
 
-      <!-- Days Left BIG NUMBER -->
+      <!-- Big 3D Days Counter -->
       <div class="days-left-container">
+        <div class="days-glow-ring"></div>
         <div id="days-left" class="days-left">--</div>
         <div class="days-left-text">DAYS LEFT</div>
       </div>
 
-      <!-- Progress Bar -->
+      <!-- Animated Progress Bar -->
       <div class="progress-container">
         <div class="progress-bar-bg">
-          <div id="progress-bar" class="progress-bar-fill"></div>
+          <div id="progress-bar" class="progress-bar-fill">
+            <div class="progress-shimmer"></div>
+          </div>
         </div>
-        <div id="progress-label" class="progress-label">0% healed</div>
+        <div class="progress-label">
+          <span>Cast On 📅</span>
+          <span id="progress-label">0% healed</span>
+          <span>Cast Off 🎯</span>
+        </div>
       </div>
 
       <!-- Healing Phase -->
@@ -139,13 +241,11 @@
         <div id="phase-icon" class="phase-icon">🔴</div>
         <div>
           <div id="phase-name" class="phase-name">Inflammation Phase</div>
-          <div id="phase-desc" class="phase-desc">
-            Your body is building the scaffolding
-          </div>
+          <div id="phase-desc" class="phase-desc">Your body is building the scaffolding</div>
         </div>
       </div>
 
-      <!-- Date Info -->
+      <!-- Dates -->
       <div class="dates-row">
         <div class="date-item">
           <div class="date-label">📅 Cast On</div>
@@ -158,39 +258,32 @@
         </div>
       </div>
 
-      <!-- Modifiers Applied -->
+      <!-- Modifiers -->
       <div id="modifiers-box" class="modifiers-box hidden">
-        <p class="modifiers-title">⚠️ Healing adjustments applied:</p>
+        <p class="modifiers-title">⚡ Healing adjustments applied:</p>
         <ul id="modifiers-list"></ul>
       </div>
 
       <!-- Share Button -->
-      <button id="share-btn" onclick="shareCountdown()">
+      <button id="share-btn" onclick="shareCountdown()" class="share-btn">
         📤 Share My Countdown
+        <span class="btn-shine"></span>
       </button>
 
-      <!-- Reset Button -->
-      <button id="reset-btn" class="secondary-btn" onclick="resetForm()">
-        🔄 Start Over
-      </button>
+      <!-- Reset -->
+      <button class="secondary-btn" onclick="resetForm()">🔄 Start Over</button>
 
-      <!-- Canvas for share image (hidden) -->
-      <canvas id="share-canvas" 
-              width="600" height="400" 
-              style="display:none;">
-      </canvas>
-
+      <!-- Hidden canvas -->
+      <canvas id="share-canvas" width="600" height="400" style="display:none;"></canvas>
     </section>
 
     <!-- ======================== -->
-    <!--   CAST OFF CELEBRATION   -->
+    <!--    CELEBRATION SCREEN    -->
     <!-- ======================== -->
-    <section id="celebrate-section" class="card hidden">
-      <div class="celebrate-emoji">🎉🦴🎉</div>
-      <h2>IT'S CAST-OFF DAY!</h2>
-      <p class="celebrate-text">
-        You made it! Your healing journey is complete!
-      </p>
+    <section id="celebrate-section" class="card glass-card hidden">
+      <div class="celebrate-emoji animate__animated animate__bounceIn">🎉🦴🎉</div>
+      <h2 class="celebrate-title">IT'S CAST-OFF DAY!</h2>
+      <p class="celebrate-text">You made it! Your healing journey is complete!</p>
       <div class="celebrate-stats">
         <div class="stat">
           <div id="total-days-stat" class="stat-number">--</div>
@@ -201,40 +294,40 @@
           <div class="stat-label">Bone Healed</div>
         </div>
       </div>
-      <button id="celebrate-share-btn" onclick="shareCelebration()">
-        📤 Share My Cast-Off Day!
+      <button id="celebrate-share-btn" onclick="shareCelebration()" class="celebrate-btn">
+        📤 Share My Cast-Off Day! 🎉
       </button>
-      <button class="secondary-btn" onclick="resetForm()">
-        Track Another Bone 🦴
-      </button>
+      <button class="secondary-btn" onclick="resetForm()">Track Another Bone 🦴</button>
     </section>
 
-    <!-- ======================== -->
-    <!--   MEDICAL DISCLAIMER     -->
-    <!-- ======================== -->
+    <!-- DISCLAIMER -->
     <div class="disclaimer">
-      ⚠️ <strong>Medical Disclaimer:</strong> This tool provides general 
-      estimates based on published orthopedic literature. It is 
-      <strong>NOT medical advice</strong>. Your actual cast duration is 
-      determined by your treating physician based on X-rays and clinical 
-      examination. <strong>Never remove your cast yourself.</strong> 
-      Always follow your doctor's instructions.
+      ⚠️ <strong>Medical Disclaimer:</strong>
+      This tool provides general estimates based on published orthopedic literature.
+      It is <strong>NOT medical advice</strong>. Your actual cast duration is
+      determined by your treating physician. <strong>Never remove your cast yourself.</strong>
     </div>
 
   </main>
 
-  <!-- ======================== -->
-  <!--        FOOTER            -->
-  <!-- ======================== -->
   <footer>
-    <p>🦴 CastCountdown · Free for everyone · 
-       <a href="#">castcountdown.me</a>
+    <p>🦴 CastCountdown · Free forever ·
+      <a href="https://castcountdown.me">castcountdown.me</a>
+    </p>
+    <p class="footer-libs">
+      Powered by
+      <a href="https://threejs.org" target="_blank">Three.js</a> ·
+      <a href="https://gsap.com" target="_blank">GSAP</a> ·
+      <a href="https://vantajs.com" target="_blank">Vanta.js</a> ·
+      <a href="https://mattboldt.com/demos/typed-js/" target="_blank">Typed.js</a>
     </p>
   </footer>
 
   <script src="data.js"></script>
   <script src="app.js"></script>
   <script src="share.js"></script>
+  <script src="extras.js"></script>
+  <script src="effects.js"></script>
 
 </body>
 </html>
