@@ -1,166 +1,159 @@
 // ============================================
-//   SHARE CARD GENERATOR
-//   Draws a beautiful image on HTML Canvas
-//   then shares it via Web Share API
+//   SHARE.JS — SHARE CARD GENERATOR
 // ============================================
 
 function shareCountdown() {
   const saved = localStorage.getItem('castData');
   if (!saved) return;
-  const data  = JSON.parse(saved);
-  generateAndShare(data, false);
+  generateAndShare(JSON.parse(saved), false);
 }
 
 function generateAndShare(data, isCelebration) {
-
-  const canvas  = document.getElementById('share-canvas');
-  const ctx     = canvas.getContext('2d');
-
-  // Canvas size
+  const canvas = document.getElementById('share-canvas');
+  const ctx    = canvas.getContext('2d');
   canvas.width  = 600;
   canvas.height = 400;
 
-  // --- Background Gradient ---
-  const gradient = ctx.createLinearGradient(0, 0, 600, 400);
+  // Background gradient
+  const bg = ctx.createLinearGradient(0, 0, 600, 400);
   if (isCelebration) {
-    gradient.addColorStop(0, '#f7971e');
-    gradient.addColorStop(1, '#ffd200');
+    bg.addColorStop(0, '#f7971e');
+    bg.addColorStop(1, '#ffd200');
   } else {
-    gradient.addColorStop(0, '#667eea');
-    gradient.addColorStop(1, '#764ba2');
+    bg.addColorStop(0, '#0a0a1a');
+    bg.addColorStop(0.5, '#1a0a2e');
+    bg.addColorStop(1, '#0a0a1a');
   }
-  ctx.fillStyle = gradient;
+  ctx.fillStyle = bg;
   ctx.fillRect(0, 0, 600, 400);
 
-  // --- White Card in Middle ---
-  ctx.fillStyle    = 'rgba(255,255,255,0.95)';
-  roundRect(ctx, 40, 40, 520, 320, 20);
+  // Decorative circles
+  ctx.beginPath();
+  ctx.arc(500, 80, 120, 0, Math.PI * 2);
+  ctx.fillStyle = isCelebration
+    ? 'rgba(255,255,255,0.08)'
+    : 'rgba(108,99,255,0.15)';
+  ctx.fill();
 
-  // --- Calculate values ---
+  ctx.beginPath();
+  ctx.arc(100, 350, 80, 0, Math.PI * 2);
+  ctx.fillStyle = isCelebration
+    ? 'rgba(255,255,255,0.06)'
+    : 'rgba(236,72,153,0.1)';
+  ctx.fill();
+
+  // White card
+  ctx.fillStyle = isCelebration
+    ? 'rgba(255,255,255,0.2)'
+    : 'rgba(255,255,255,0.06)';
+  roundRect(ctx, 40, 40, 520, 320, 24);
+
+  // Calculate values
   const castDateObj   = new Date(data.castDate);
   const today         = new Date();
-  const daysSinceCast = Math.floor(
-    (today - castDateObj) / (1000 * 60 * 60 * 24)
-  );
+  const daysSinceCast = Math.floor((today - castDateObj) / 86400000);
   const daysLeft      = Math.max(data.totalDays - daysSinceCast, 0);
-  const percentHealed = Math.min(
-    Math.round((daysSinceCast / data.totalDays) * 100),
-    100
-  );
+  const percent       = Math.min(Math.round((daysSinceCast / data.totalDays) * 100), 100);
 
-  // --- App Name ---
-  ctx.fillStyle  = '#667eea';
-  ctx.font       = 'bold 22px Segoe UI';
-  ctx.textAlign  = 'center';
-  ctx.fillText('🦴 CastCountdown', 300, 90);
+  ctx.textAlign = 'center';
 
-  // --- Bone & Fracture ---
-  ctx.fillStyle  = '#718096';
-  ctx.font       = '16px Segoe UI';
-  ctx.fillText(`${data.boneName} · ${data.fractureName}`, 300, 120);
+  // App name
+  ctx.fillStyle = isCelebration ? '#1a1a2e' : '#6c63ff';
+  ctx.font      = 'bold 20px Nunito, sans-serif';
+  ctx.fillText('🦴 CastCountdown', 300, 85);
+
+  // Bone info
+  ctx.fillStyle = isCelebration ? 'rgba(26,26,46,0.6)' : 'rgba(255,255,255,0.4)';
+  ctx.font      = '14px Nunito, sans-serif';
+  ctx.fillText(`${data.boneName} · ${data.fractureName}`, 300, 112);
 
   if (isCelebration) {
-    // --- CELEBRATION CARD ---
-    ctx.fillStyle = '#f7971e';
-    ctx.font      = 'bold 60px Segoe UI';
-    ctx.fillText('🎉', 300, 200);
+    ctx.font      = '60px sans-serif';
+    ctx.fillText('🎉', 300, 195);
 
-    ctx.fillStyle = '#2d3748';
-    ctx.font      = 'bold 28px Segoe UI';
+    ctx.fillStyle = '#1a1a2e';
+    ctx.font      = 'bold 32px Nunito, sans-serif';
     ctx.fillText("I'M CAST FREE!", 300, 240);
 
-    ctx.fillStyle = '#4a5568';
-    ctx.font      = '18px Segoe UI';
-    ctx.fillText(`${data.totalDays} days of healing complete!`, 300, 272);
+    ctx.fillStyle = 'rgba(26,26,46,0.6)';
+    ctx.font      = '18px Nunito, sans-serif';
+    ctx.fillText(`${data.totalDays} days of healing — DONE! 🏆`, 300, 272);
 
   } else {
-    // --- COUNTDOWN CARD ---
+    // Big days number
+    ctx.font      = 'bold 90px Nunito, sans-serif';
+    ctx.fillStyle = 'white';
+    ctx.fillText(daysLeft, 300, 230);
 
-    // Big days left number
-    ctx.fillStyle = '#667eea';
-    ctx.font      = 'bold 80px Segoe UI';
-    ctx.fillText(daysLeft, 300, 220);
+    ctx.font      = 'bold 13px Nunito, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.fillText('D A Y S  L E F T', 300, 255);
 
-    ctx.fillStyle = '#a0aec0';
-    ctx.font      = 'bold 14px Segoe UI';
-    ctx.letterSpacing = '4px';
-    ctx.fillText('DAYS LEFT', 300, 248);
-
-    // Progress bar background
-    ctx.fillStyle    = '#edf2f7';
-    roundRect(ctx, 80, 266, 440, 16, 8);
+    // Progress bar bg
+    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+    roundRect(ctx, 80, 272, 440, 14, 7);
 
     // Progress bar fill
-    const fillWidth  = Math.round(440 * (percentHealed / 100));
-    ctx.fillStyle    = '#667eea';
-    if (fillWidth > 0) {
-      roundRect(ctx, 80, 266, fillWidth, 16, 8);
+    const fillW = Math.round(440 * (percent / 100));
+    if (fillW > 0) {
+      const grad = ctx.createLinearGradient(80, 0, 80 + fillW, 0);
+      grad.addColorStop(0, '#6c63ff');
+      grad.addColorStop(1, '#ec4899');
+      ctx.fillStyle = grad;
+      roundRect(ctx, 80, 272, fillW, 14, 7);
     }
 
-    // Percent label
-    ctx.fillStyle = '#4a5568';
-    ctx.font      = 'bold 13px Segoe UI';
-    ctx.fillText(`${percentHealed}% healed`, 300, 302);
+    // Percent
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font      = 'bold 12px Nunito, sans-serif';
+    ctx.fillText(`${percent}% healed`, 300, 306);
   }
 
-  // --- Website URL ---
-  ctx.fillStyle = '#a0aec0';
-  ctx.font      = '13px Segoe UI';
+  // Website URL
+  ctx.fillStyle = isCelebration ? 'rgba(26,26,46,0.4)' : 'rgba(255,255,255,0.25)';
+  ctx.font      = '12px Nunito, sans-serif';
   ctx.fillText('castcountdown.me', 300, 340);
 
-  // --- Share the image ---
+  // Share!
   canvas.toBlob(async (blob) => {
-    const file = new File(
-      [blob],
-      'my-cast-countdown.png',
-      { type: 'image/png' }
-    );
+    const file = new File([blob], 'castcountdown.png', { type: 'image/png' });
 
-    // Try native share first (mobile)
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({
-          title:  '🦴 My Cast Countdown!',
-          text:   isCelebration
-            ? `I'm finally CAST FREE after ${data.totalDays} days! 🎉 Track your cast at castcountdown.me`
-            : `Only ${daysLeft} days until my cast comes off! I'm ${percentHealed}% healed! Track yours at castcountdown.me`,
-          files:  [file]
+          title: '🦴 CastCountdown',
+          text:  isCelebration
+            ? `🎉 I'm finally CAST FREE after ${data.totalDays} days! Track yours → castcountdown.me`
+            : `🦴 Only ${daysLeft} days until my cast comes off! I'm ${percent}% healed! → castcountdown.me`,
+          files: [file]
         });
-      } catch (err) {
-        // User cancelled — that's fine
-        downloadImage(canvas);
+      } catch (e) {
+        downloadCanvas(canvas);
       }
     } else {
-      // Desktop fallback — just download the image
-      downloadImage(canvas);
+      downloadCanvas(canvas);
     }
   }, 'image/png');
 }
 
-// ============================================
-//   DOWNLOAD AS IMAGE (Desktop Fallback)
-// ============================================
-function downloadImage(canvas) {
-  const link    = document.createElement('a');
-  link.download = 'my-cast-countdown.png';
-  link.href     = canvas.toDataURL('image/png');
-  link.click();
+function downloadCanvas(canvas) {
+  const a  = document.createElement('a');
+  a.href   = canvas.toDataURL('image/png');
+  a.download = 'my-cast-countdown.png';
+  a.click();
 }
 
-// ============================================
-//   HELPER: Draw Rounded Rectangle
-// ============================================
-function roundRect(ctx, x, y, width, height, radius) {
+function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-  ctx.lineTo(x + radius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y,     x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h,     x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y,         x + r, y);
   ctx.closePath();
   ctx.fill();
 }
