@@ -1,1475 +1,935 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CastCountdown — Your Healing Stats</title>
-<meta name="description" content="Enter your cast dates and see your healing journey as live stats."/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cast Countdown 🦴</title>
+  <style>
+    /* ──────────────────────────────────────
+       GLOBAL
+    ────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ═══════════════════════════════════════
-   CASTCOUNTDOWN — NEAL.FUN LIFE STATS
-   Inspired by neal.fun/life-stats
-═══════════════════════════════════════ */
+    :root {
+      --bg: #0f0f13;
+      --card: #1a1a24;
+      --accent: #7b61ff;
+      --accent2: #ff6b6b;
+      --accent3: #43e97b;
+      --accent4: #f7971e;
+      --text: #f0f0f5;
+      --muted: #8888aa;
+      --border: #2a2a3a;
+    }
 
-:root{
-  --bg:     #f7f3eb;
-  --ink:    #111111;
-  --dim:    #999999;
-  --soft:   #eeebe3;
-  --card:   #ffffff;
-  --border: #e8e4dc;
-  --red:    #e63946;
-  --orange: #f4a261;
-  --green:  #2a9d8f;
-  --blue:   #457b9d;
-  --purple: #6c63ff;
-  --yellow: #e9c46a;
-}
+    html { scroll-behavior: smooth; }
 
-*{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;}
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-body{
-  font-family:'Inter',system-ui,sans-serif;
-  background:var(--bg);
-  color:var(--ink);
-  min-height:100vh;
-  -webkit-font-smoothing:antialiased;
-}
+    /* ──────────────────────────────────────
+       SCREEN 1 — INPUT
+    ────────────────────────────────────── */
+    #screen-input {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      background: radial-gradient(ellipse at 50% 0%, #1e1040 0%, #0f0f13 70%);
+    }
 
-/* ── TOPBAR ── */
-.topbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:18px 28px;
-  border-bottom:2px solid var(--ink);
-  background:var(--bg);
-  position:sticky;
-  top:0;
-  z-index:200;
-}
-.tb-logo{
-  font-size:1rem;
-  font-weight:900;
-  letter-spacing:-0.5px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.tb-logo-bone{
-  animation:wobble 4s ease-in-out infinite;
-  display:inline-block;
-}
-@keyframes wobble{
-  0%,85%,100%{transform:rotate(0deg);}
-  88%{transform:rotate(-20deg);}
-  92%{transform:rotate(20deg);}
-  96%{transform:rotate(-10deg);}
-}
-.tb-right{
-  font-size:0.72rem;
-  font-weight:600;
-  color:var(--dim);
-  letter-spacing:1px;
-  text-transform:uppercase;
-}
+    .input-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.8rem 2.5rem;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 0 60px #7b61ff22;
+    }
 
-/* ── INTRO SCREEN ── */
-#introScreen{
-  min-height:calc(100vh - 62px);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  padding:40px 24px;
-  text-align:center;
-}
+    .input-card h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 0.3rem;
+      letter-spacing: -0.5px;
+    }
 
-.intro-tag{
-  font-size:0.7rem;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:3px;
-  color:var(--dim);
-  margin-bottom:20px;
-}
+    .input-card h1 span { color: var(--accent); }
 
-.intro-title{
-  font-size:clamp(3rem,10vw,6.5rem);
-  font-weight:900;
-  letter-spacing:-4px;
-  line-height:0.9;
-  color:var(--ink);
-  margin-bottom:24px;
-}
+    .subtitle {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-bottom: 2rem;
+    }
 
-.intro-title .accent{
-  color:var(--purple);
-  display:inline-block;
-  position:relative;
-}
+    .field {
+      margin-bottom: 1.4rem;
+    }
 
-.intro-title .accent::after{
-  content:'';
-  position:absolute;
-  bottom:6px;left:0;
-  width:100%;height:5px;
-  background:var(--purple);
-  border-radius:3px;
-}
+    .field label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.45rem;
+    }
 
-.intro-desc{
-  font-size:1.05rem;
-  color:var(--dim);
-  font-weight:500;
-  max-width:420px;
-  line-height:1.6;
-  margin-bottom:48px;
-}
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      background: #12121c;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 1rem;
+      padding: 0.7rem 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
 
-/* ── INPUT CARD ── */
-.input-card{
-  background:var(--card);
-  border:2px solid var(--ink);
-  border-radius:20px;
-  padding:32px 28px;
-  width:100%;
-  max-width:420px;
-  box-shadow:6px 6px 0 var(--ink);
-  text-align:left;
-}
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--accent);
+    }
 
-.input-card h2{
-  font-size:1rem;
-  font-weight:800;
-  margin-bottom:6px;
-}
+    .field select option { background: #1a1a24; }
 
-.input-card p{
-  font-size:0.78rem;
-  color:var(--dim);
-  font-weight:500;
-  margin-bottom:24px;
-  line-height:1.5;
-}
+    .field textarea { resize: vertical; min-height: 70px; }
 
-/* The "ask your doctor" highlight */
-.doc-tip{
-  display:flex;
-  align-items:flex-start;
-  gap:10px;
-  padding:12px 14px;
-  background:#fff9ec;
-  border:2px solid var(--yellow);
-  border-radius:12px;
-  margin-bottom:20px;
-  font-size:0.78rem;
-  font-weight:600;
-  color:#7c5c00;
-  line-height:1.5;
-}
+    .btn-go {
+      width: 100%;
+      padding: 0.9rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      letter-spacing: 0.02em;
+      transition: background 0.2s, transform 0.1s;
+    }
 
-.doc-tip-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px;}
+    .btn-go:hover { background: #6247e0; transform: translateY(-1px); }
+    .btn-go:active { transform: translateY(0); }
 
-/* Date inputs */
-.date-row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-  margin-bottom:16px;
-}
+    .bone-icon {
+      font-size: 3rem;
+      text-align: center;
+      margin-bottom: 0.6rem;
+      animation: bounce 2s infinite;
+    }
 
-.date-group{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
+    @keyframes bounce {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
 
-.date-group label{
-  font-size:0.68rem;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:2px;
-  color:var(--dim);
-}
+    /* ──────────────────────────────────────
+       SCREEN 2 — STATS
+    ────────────────────────────────────── */
+    #screen-stats {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
 
-.date-inp{
-  padding:13px 14px;
-  border:2px solid var(--border);
-  border-radius:12px;
-  font-size:0.9rem;
-  font-family:inherit;
-  font-weight:700;
-  color:var(--ink);
-  background:var(--bg);
-  outline:none;
-  transition:border-color 0.15s;
-  -webkit-appearance:none;
-  width:100%;
-}
-.date-inp:focus{border-color:var(--ink);}
+    /* HERO BANNER */
+    .hero {
+      width: 100%;
+      background: radial-gradient(ellipse at 50% 0%, #1e1040 0%, #0f0f13 70%);
+      text-align: center;
+      padding: 3rem 1rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--border);
+    }
 
-/* Optional fields */
-.optional-row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-bottom:20px;
-}
+    .hero-greeting {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
 
-.opt-group label{
-  font-size:0.65rem;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:1.5px;
-  color:var(--dim);
-  display:block;
-  margin-bottom:6px;
-}
+    .hero-title {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
 
-.sel{
-  width:100%;
-  padding:11px 12px;
-  border:2px solid var(--border);
-  border-radius:10px;
-  font-size:0.85rem;
-  font-family:inherit;
-  font-weight:600;
-  color:var(--ink);
-  background:var(--bg);
-  outline:none;
-  -webkit-appearance:none;
-  cursor:pointer;
-}
+    .hero-title span { color: var(--accent); }
 
-/* Error */
-.err{
-  padding:10px 14px;
-  background:#fff0f0;
-  border:2px solid var(--red);
-  border-radius:10px;
-  font-size:0.78rem;
-  font-weight:700;
-  color:var(--red);
-  margin-bottom:14px;
-  display:none;
-}
+    /* COUNTDOWN RING */
+    .countdown-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1.2rem;
+    }
 
-/* Go button */
-.go{
-  width:100%;
-  padding:17px;
-  background:var(--ink);
-  color:#fff;
-  border:2px solid var(--ink);
-  border-radius:14px;
-  font-size:1rem;
-  font-weight:900;
-  font-family:inherit;
-  cursor:pointer;
-  box-shadow:4px 4px 0 rgba(0,0,0,0.2);
-  transition:all 0.12s;
-  letter-spacing:0.3px;
-}
-.go:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 rgba(0,0,0,0.2);}
-.go:active{transform:translate(2px,2px);box-shadow:2px 2px 0 rgba(0,0,0,0.2);}
+    .cd-block {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.7rem 1.2rem;
+      min-width: 80px;
+      text-align: center;
+    }
 
-/* ── STATS SCREEN ── */
-#statsScreen{display:none;}
+    .cd-num {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      display: block;
+      line-height: 1;
+    }
 
-/* Big countdown hero (black bar like Life Stats) */
-.hero-bar{
-  background:var(--ink);
-  color:#fff;
-  padding:60px 24px 50px;
-  text-align:center;
-  position:relative;
-  overflow:hidden;
-}
+    .cd-label {
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 0.2rem;
+    }
 
-.hero-bar::before{
-  content:'🦴';
-  position:absolute;
-  font-size:24rem;
-  opacity:0.03;
-  top:50%;left:50%;
-  transform:translate(-50%,-50%) rotate(-20deg);
-  pointer-events:none;
-}
+    /* PROGRESS BAR */
+    .progress-section {
+      width: 100%;
+      max-width: 640px;
+      margin: 1.5rem auto 0;
+      padding: 0 1.5rem;
+    }
 
-.hero-eyebrow{
-  font-size:0.68rem;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:4px;
-  color:rgba(255,255,255,0.35);
-  margin-bottom:16px;
-}
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
 
-.hero-name{
-  font-size:1.1rem;
-  font-weight:800;
-  color:rgba(255,255,255,0.6);
-  margin-bottom:8px;
-}
+    .progress-bar-bg {
+      width: 100%;
+      height: 10px;
+      background: #2a2a3a;
+      border-radius: 99px;
+      overflow: hidden;
+    }
 
-/* Live counter */
-.live-counter{
-  font-size:clamp(5rem,18vw,9rem);
-  font-weight:900;
-  line-height:1;
-  letter-spacing:-4px;
-  color:#fff;
-  margin-bottom:4px;
-  transition:all 0.3s;
-}
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent3));
+      border-radius: 99px;
+      transition: width 0.6s ease;
+    }
 
-.live-unit{
-  font-size:0.72rem;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:6px;
-  color:rgba(255,255,255,0.3);
-  margin-bottom:32px;
-}
+    /* SCROLL CONTENT */
+    .scroll-content {
+      width: 100%;
+      max-width: 680px;
+      padding: 2.5rem 1.2rem 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
 
-/* Progress strip */
-.progress-strip{
-  width:100%;
-  max-width:440px;
-  margin:0 auto 10px;
-  height:6px;
-  background:rgba(255,255,255,0.1);
-  border-radius:99px;
-  overflow:hidden;
-}
-.progress-fill{
-  height:100%;
-  border-radius:99px;
-  width:0;
-  transition:width 1.4s cubic-bezier(.4,0,.2,1);
-  background:#fff;
-}
-.progress-text{
-  font-size:0.7rem;
-  font-weight:700;
-  color:rgba(255,255,255,0.35);
-  letter-spacing:2px;
-  text-transform:uppercase;
-  margin-top:6px;
-}
+    /* STAT CARD */
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.5rem 1.8rem;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
 
-/* Milestone badges */
-.milestones{
-  display:flex;
-  gap:8px;
-  justify-content:center;
-  flex-wrap:wrap;
-  margin-top:24px;
-}
-.badge{
-  padding:5px 14px;
-  border-radius:99px;
-  font-size:0.7rem;
-  font-weight:700;
-  border:1.5px solid rgba(255,255,255,0.15);
-  color:rgba(255,255,255,0.45);
-  transition:all 0.3s;
-}
-.badge.unlocked{
-  border-color:rgba(255,255,255,0.6);
-  color:#fff;
-  background:rgba(255,255,255,0.1);
-}
-.badge.next{
-  border-color:rgba(255,255,255,0.3);
-  color:rgba(255,255,255,0.3);
-  border-style:dashed;
-}
+    .stat-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
-/* ── STATS GRID (Life Stats style) ── */
-.stats-wrap{
-  max-width:640px;
-  margin:0 auto;
-  padding:32px 20px 60px;
-}
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px;
+      height: 100%;
+      border-radius: 4px 0 0 4px;
+    }
 
-.stats-section-title{
-  font-size:0.65rem;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:3px;
-  color:var(--dim);
-  margin-bottom:16px;
-  padding-bottom:8px;
-  border-bottom:1px solid var(--border);
-}
+    .accent-purple::before  { background: var(--accent); }
+    .accent-red::before     { background: var(--accent2); }
+    .accent-green::before   { background: var(--accent3); }
+    .accent-orange::before  { background: var(--accent4); }
+    .accent-blue::before    { background: #38bdf8; }
+    .accent-pink::before    { background: #f472b6; }
 
-.stats-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
-  margin-bottom:32px;
-}
+    .stat-icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.4rem;
+    }
 
-/* Individual stat cell — exact Life Stats feel */
-.stat-cell{
-  background:var(--card);
-  border:2px solid var(--border);
-  border-radius:14px;
-  padding:18px 16px;
-  position:relative;
-  overflow:hidden;
-  transition:transform 0.2s, box-shadow 0.2s;
-}
-.stat-cell:hover{
-  transform:translateY(-3px);
-  box-shadow:0 8px 24px rgba(0,0,0,0.08);
-}
-.stat-cell.wide{
-  grid-column:span 2;
-}
-.stat-cell.color-red   {border-left:4px solid var(--red);   background:#fff8f8;}
-.stat-cell.color-green {border-left:4px solid var(--green); background:#f5fbfb;}
-.stat-cell.color-blue  {border-left:4px solid var(--blue);  background:#f5f9fc;}
-.stat-cell.color-orange{border-left:4px solid var(--orange);background:#fff9f4;}
-.stat-cell.color-purple{border-left:4px solid var(--purple);background:#f8f7ff;}
-.stat-cell.color-yellow{border-left:4px solid var(--yellow);background:#fdfbf0;}
+    .stat-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+    }
 
-.stat-label{
-  font-size:0.65rem;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:2px;
-  color:var(--dim);
-  margin-bottom:10px;
-}
-.stat-number{
-  font-size:2.4rem;
-  font-weight:900;
-  letter-spacing:-2px;
-  line-height:1;
-  color:var(--ink);
-  margin-bottom:4px;
-}
-.stat-number.big{font-size:3.2rem;}
-.stat-number.med{font-size:1.8rem;}
-.stat-sub{
-  font-size:0.72rem;
-  font-weight:500;
-  color:var(--dim);
-  line-height:1.4;
-}
+    .stat-value {
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
 
-/* Inline bar inside stat cell */
-.mini-bar{
-  width:100%;
-  height:4px;
-  background:#eee;
-  border-radius:99px;
-  margin-top:10px;
-  overflow:hidden;
-}
-.mini-fill{
-  height:100%;
-  border-radius:99px;
-  transition:width 1.5s cubic-bezier(.4,0,.2,1);
-}
+    .stat-desc {
+      margin-top: 0.5rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
 
-/* Phase display (big cell) */
-.phase-display{
-  display:flex;
-  align-items:center;
-  gap:16px;
-}
-.phase-emoji-big{font-size:2.8rem;}
-.phase-info-title{font-size:1rem;font-weight:900;color:var(--ink);margin-bottom:4px;}
-.phase-info-desc{font-size:0.75rem;color:var(--dim);line-height:1.5;}
+    /* FACT CARD */
+    .fact-card {
+      background: linear-gradient(135deg, #1a1a24 0%, #1e1040 100%);
+      border: 1px solid #7b61ff44;
+      border-radius: 18px;
+      padding: 1.5rem 1.8rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
 
-/* Fact cells */
-.fact-cell{
-  background:var(--ink);
-  color:#fff;
-  border:2px solid var(--ink);
-}
-.fact-cell .stat-label{color:rgba(255,255,255,0.4);}
-.fact-cell .stat-number{color:#fff;}
-.fact-cell .stat-sub{color:rgba(255,255,255,0.5);}
+    .fact-card.visible { opacity: 1; transform: translateY(0); }
 
-/* ── BUTTONS ── */
-.btn-row{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  max-width:640px;
-  margin:0 auto;
-  padding:0 20px 40px;
-}
+    .fact-emoji { font-size: 2rem; flex-shrink: 0; margin-top: 0.1rem; }
 
-.share-btn{
-  width:100%;
-  padding:18px;
-  background:var(--purple);
-  color:#fff;
-  border:2px solid var(--purple);
-  border-radius:14px;
-  font-size:1rem;
-  font-weight:900;
-  font-family:inherit;
-  cursor:pointer;
-  box-shadow:4px 4px 0 #4a42cc;
-  transition:all 0.12s;
-}
-.share-btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #4a42cc;}
-.share-btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #4a42cc;}
+    .fact-content h3 {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 0.35rem;
+    }
 
-.reset-btn{
-  width:100%;
-  padding:15px;
-  background:transparent;
-  border:2px solid var(--border);
-  border-radius:14px;
-  font-size:0.88rem;
-  font-weight:700;
-  font-family:inherit;
-  cursor:pointer;
-  color:var(--dim);
-  transition:all 0.15s;
-}
-.reset-btn:hover{border-color:var(--ink);color:var(--ink);}
+    .fact-content p {
+      font-size: 0.95rem;
+      color: #ccc;
+      line-height: 1.6;
+    }
 
-/* ── DISCLAIMER ── */
-.disc{
-  max-width:640px;
-  margin:0 auto;
-  padding:0 20px 60px;
-}
-.disc-inner{
-  padding:14px 16px;
-  background:#fff8f8;
-  border-left:4px solid var(--red);
-  border-radius:0 10px 10px 0;
-  font-size:0.72rem;
-  color:#7f1d1d;
-  line-height:1.6;
-  font-weight:500;
-}
+    /* SECTION DIVIDER */
+    .section-header {
+      text-align: center;
+      padding: 0.5rem 0;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
 
-/* ── CELEBRATION ── */
-#celScreen{
-  display:none;
-  min-height:calc(100vh - 62px);
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  padding:40px 24px;
-  text-align:center;
-}
+    .section-header.visible { opacity: 1; transform: translateY(0); }
 
-.cel-emoji{
-  font-size:5rem;
-  display:block;
-  margin-bottom:20px;
-  animation:bounce 0.8s ease-in-out infinite alternate;
-}
-@keyframes bounce{from{transform:translateY(0);}to{transform:translateY(-16px);}}
+    .section-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+    }
 
-.cel-title{
-  font-size:clamp(2.5rem,8vw,5rem);
-  font-weight:900;
-  letter-spacing:-3px;
-  color:var(--ink);
-  margin-bottom:10px;
-}
-.cel-sub{font-size:1rem;color:var(--dim);font-weight:500;margin-bottom:40px;}
+    .section-header .line {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 0.4rem auto 0;
+      border-radius: 2px;
+    }
 
-.cel-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
-  max-width:420px;
-  width:100%;
-  margin-bottom:32px;
-}
-.cel-card{
-  background:var(--card);
-  border:2px solid var(--border);
-  border-radius:14px;
-  padding:20px;
-  text-align:center;
-}
-.cel-num{
-  font-size:2.5rem;
-  font-weight:900;
-  letter-spacing:-2px;
-  color:var(--ink);
-}
-.cel-lab{
-  font-size:0.65rem;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:2px;
-  color:var(--dim);
-  margin-top:6px;
-}
+    /* RESET BTN */
+    .reset-btn {
+      margin: 2rem auto;
+      display: block;
+      padding: 0.75rem 2rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
 
-/* Confetti */
-#confetti{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:9999;
-}
+    .reset-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-/* Share canvas */
-#shareCanvas{display:none;}
+    /* CONFETTI / CELEBRATION */
+    .celebration {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: #0f0f13ee;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
 
-/* ── FOOTER ── */
-.footer{
-  border-top:2px solid var(--border);
-  padding:20px 24px;
-  text-align:center;
-  font-size:0.72rem;
-  color:var(--dim);
-  font-weight:600;
-}
-.footer a{color:var(--ink);font-weight:900;text-decoration:none;}
+    .celebration.show { display: flex; }
 
-/* ── HIDDEN ── */
-.hidden{display:none!important;}
+    .celebration h1 {
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      font-weight: 900;
+      color: var(--accent3);
+      margin-bottom: 1rem;
+      animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    }
 
-/* Pop animation */
-@keyframes pop{
-  0%{transform:scale(1);}
-  40%{transform:scale(0.94);}
-  70%{transform:scale(1.06);}
-  100%{transform:scale(1);}
-}
-.pop{animation:pop 0.3s cubic-bezier(.34,1.56,.64,1);}
+    .celebration p { color: var(--muted); font-size: 1.1rem; }
 
-/* Slide up animation */
-@keyframes slideUp{
-  from{opacity:0;transform:translateY(16px);}
-  to{opacity:1;transform:translateY(0);}
-}
-.slide-up{animation:slideUp 0.5s ease forwards;}
+    @keyframes popIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
 
-/* ── MOBILE ── */
-@media(max-width:420px){
-  .intro-title{font-size:3rem;letter-spacing:-2px;}
-  .live-counter{font-size:5rem;}
-  .date-row,.optional-row,.stats-grid,.cel-grid{grid-template-columns:1fr;}
-  .stat-cell.wide{grid-column:span 1;}
-  .stat-number.big{font-size:2.5rem;}
-}
+    .confetti-strip {
+      display: flex;
+      gap: 0.5rem;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      animation: spin 2s linear infinite;
+    }
 
-</style>
+    @keyframes spin {
+      0%   { transform: rotate(-5deg); }
+      50%  { transform: rotate(5deg); }
+      100% { transform: rotate(-5deg); }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 420px) {
+      .input-card { padding: 2rem 1.3rem; }
+      .cd-num { font-size: 1.5rem; }
+    }
+  </style>
 </head>
 <body>
 
-<canvas id="confetti"></canvas>
-
-<!-- ════════════════ TOPBAR ════════════════ -->
-<div class="topbar">
-  <div class="tb-logo">
-    <span class="tb-logo-bone">🦴</span>
-    CastCountdown
-  </div>
-  <div class="tb-right">Free · No login</div>
-</div>
-
-<!-- ════════════════ INTRO / FORM SCREEN ════════════════ -->
-<div id="introScreen">
-
-  <div class="intro-tag">Your cast healing stats</div>
-
-  <h1 class="intro-title">
-    Cast<br/><span class="accent">Stats</span>
-  </h1>
-
-  <p class="intro-desc">
-    Enter your cast dates and see your entire
-    healing journey turned into live stats —
-    just like a game.
-  </p>
-
+<!-- ════════════════════════════════════════
+     SCREEN 1 — INPUT
+════════════════════════════════════════ -->
+<section id="screen-input">
   <div class="input-card">
+    <div class="bone-icon">🦴</div>
+    <h1>Cast <span>Countdown</span></h1>
+    <p class="subtitle">Turn your recovery into a real-time adventure</p>
 
-    <h2>Two dates. That's it.</h2>
-    <p>Ask your doctor for your removal date — they always have a target date. Enter both dates below for your personal healing stats.</p>
-
-    <!-- THE KEY: Ask doctor box -->
-    <div class="doc-tip">
-      <span class="doc-tip-icon">💡</span>
-      <span>
-        <strong>Ask your doctor:</strong>
-        "What is my estimated cast removal date?"
-        Write it down and enter it below.
-        Only your doctor knows the real date!
-      </span>
+    <div class="field">
+      <label>📅 Date Cast Was Applied</label>
+      <input type="date" id="cast-start" />
     </div>
 
-    <!-- DATES -->
-    <div class="date-row">
-      <div class="date-group">
-        <label for="castOn">Cast put on</label>
-        <input type="date" id="castOn" class="date-inp"/>
-      </div>
-      <div class="date-group">
-        <label for="castOff">Doctor's removal date</label>
-        <input type="date" id="castOff" class="date-inp"/>
-      </div>
+    <div class="field">
+      <label>📅 Date Cast Will Be Removed</label>
+      <input type="date" id="cast-end" />
     </div>
 
-    <!-- OPTIONAL -->
-    <div class="optional-row">
-      <div class="opt-group">
-        <label>Bone broken</label>
-        <select id="boneSel" class="sel">
-          <option value="">— Optional —</option>
-          <option value="Finger">☝️ Finger</option>
-          <option value="Wrist">🤚 Wrist</option>
-          <option value="Forearm">💪 Forearm</option>
-          <option value="Elbow">🦾 Elbow</option>
-          <option value="Collarbone">🎽 Collarbone</option>
-          <option value="Ankle">🦶 Ankle</option>
-          <option value="Shin">🦵 Shin</option>
-          <option value="Foot">👟 Foot</option>
-          <option value="Thigh">🦿 Thigh</option>
-        </select>
-      </div>
-      <div class="opt-group">
-        <label>How you broke it</label>
-        <select id="howSel" class="sel">
-          <option value="">— Optional —</option>
-          <option value="Playing sports">⚽ Sports</option>
-          <option value="A fall">🤸 A fall</option>
-          <option value="A car accident">🚗 Car accident</option>
-          <option value="Work injury">🔧 Work injury</option>
-          <option value="Skateboarding">🛹 Skateboarding</option>
-          <option value="Cycling">🚴 Cycling</option>
-          <option value="Random bad luck">🤦 Bad luck</option>
-          <option value="Other">💫 Other</option>
-        </select>
-      </div>
+    <div class="field">
+      <label>🦴 Which Bone Did You Break?</label>
+      <select id="bone-type">
+        <option value="">— select bone —</option>
+        <option value="Radius (Wrist)">Radius (Wrist)</option>
+        <option value="Ulna (Forearm)">Ulna (Forearm)">Ulna (Forearm)</option>
+        <option value="Humerus (Upper Arm)">Humerus (Upper Arm)</option>
+        <option value="Tibia (Shin)">Tibia (Shin)</option>
+        <option value="Fibula (Lower Leg)">Fibula (Lower Leg)</option>
+        <option value="Femur (Thigh)">Femur (Thigh)</option>
+        <option value="Clavicle (Collarbone)">Clavicle (Collarbone)</option>
+        <option value="Metatarsal (Foot)">Metatarsal (Foot)</option>
+        <option value="Phalanx (Finger/Toe)">Phalanx (Finger/Toe)</option>
+        <option value="Other">Other</option>
+      </select>
     </div>
 
-    <div class="err" id="errBox">
-      ⚠️ Please fill in both dates!
+    <div class="field">
+      <label>⚡ Fracture Type</label>
+      <select id="fracture-type">
+        <option value="">— select type —</option>
+        <option value="Hairline">Hairline</option>
+        <option value="Stress">Stress</option>
+        <option value="Simple (Clean Break)">Simple (Clean Break)</option>
+        <option value="Comminuted (Multiple Pieces)">Comminuted (Multiple Pieces)</option>
+        <option value="Compound (Open)">Compound (Open)</option>
+        <option value="Greenstick">Greenstick</option>
+        <option value="Avulsion">Avulsion</option>
+      </select>
     </div>
 
-    <button class="go" onclick="buildStats()">
-      See My Healing Stats →
-    </button>
+    <div class="field">
+      <label>👤 Your Name (optional)</label>
+      <input type="text" id="user-name" placeholder="e.g. Alex" maxlength="30" />
+    </div>
 
+    <button class="btn-go" onclick="startStats()">Let's See My Stats →</button>
   </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     CELEBRATION OVERLAY
+════════════════════════════════════════ -->
+<div class="celebration" id="celebration">
+  <div class="confetti-strip">🎉🦴🎊🩹🎉🦴🎊</div>
+  <h1>Cast Day! 🎉</h1>
+  <p>Today is the day your cast comes off!<br>You did it — you're officially healed!</p>
+  <button class="btn-go" style="margin-top:2rem;max-width:220px" onclick="document.getElementById('celebration').classList.remove('show')">
+    See My Journey →
+  </button>
 </div>
 
-<!-- ════════════════ STATS SCREEN ════════════════ -->
-<div id="statsScreen">
+<!-- ════════════════════════════════════════
+     SCREEN 2 — STATS
+════════════════════════════════════════ -->
+<section id="screen-stats">
 
-  <!-- BIG LIVE HERO -->
-  <div class="hero-bar">
-    <div class="hero-eyebrow">Your healing journey</div>
-    <div class="hero-name" id="hName">Broken Wrist</div>
-
-    <!-- Live countdown -->
-    <div class="live-counter" id="liveCounter">0</div>
-    <div class="live-unit">days left</div>
-
-    <!-- Progress strip -->
-    <div class="progress-strip">
-      <div class="progress-fill" id="progFill"></div>
+  <!-- STICKY HERO -->
+  <div class="hero">
+    <p class="hero-greeting">🩹 Your Recovery Journey</p>
+    <h1 class="hero-title" id="hero-title">Cast <span>Countdown</span></h1>
+    <div class="countdown-wrap" id="countdown-wrap">
+      <div class="cd-block"><span class="cd-num" id="cd-days">--</span><div class="cd-label">Days</div></div>
+      <div class="cd-block"><span class="cd-num" id="cd-hours">--</span><div class="cd-label">Hours</div></div>
+      <div class="cd-block"><span class="cd-num" id="cd-mins">--</span><div class="cd-label">Minutes</div></div>
+      <div class="cd-block"><span class="cd-num" id="cd-secs">--</span><div class="cd-label">Seconds</div></div>
     </div>
-    <div class="progress-text" id="progText">0% healed</div>
-
-    <!-- Milestone badges -->
-    <div class="milestones" id="milestones"></div>
-  </div>
-
-  <!-- STATS SECTIONS -->
-  <div class="stats-wrap">
-
-    <!-- ─ TIME ─ -->
-    <div class="stats-section-title">⏱ Time</div>
-    <div class="stats-grid">
-
-      <div class="stat-cell color-purple">
-        <div class="stat-label">Days remaining</div>
-        <div class="stat-number big" id="sDaysLeft">--</div>
-        <div class="stat-sub">until cast removal</div>
+    <div class="progress-section">
+      <div class="progress-label">
+        <span>Cast Applied</span>
+        <span id="pct-label">0% healed</span>
       </div>
-
-      <div class="stat-cell color-blue">
-        <div class="stat-label">Days completed</div>
-        <div class="stat-number big" id="sDaysDone">--</div>
-        <div class="stat-sub">days in cast so far</div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
       </div>
-
-      <div class="stat-cell color-green">
-        <div class="stat-label">Total cast time</div>
-        <div class="stat-number" id="sTotalDays">--</div>
-        <div class="stat-sub" id="sTotalWeeks">-- weeks</div>
-      </div>
-
-      <div class="stat-cell color-orange">
-        <div class="stat-label">Healing speed</div>
-        <div class="stat-number" id="sSpeed">--</div>
-        <div class="stat-sub" id="sSpeedSub">% per day</div>
-      </div>
-
-    </div>
-
-    <!-- ─ PROGRESS ─ -->
-    <div class="stats-section-title">📊 Progress</div>
-    <div class="stats-grid">
-
-      <div class="stat-cell wide">
-        <div class="stat-label">Healing phase</div>
-        <div class="phase-display">
-          <div class="phase-emoji-big" id="phaseEmoji">🔴</div>
-          <div>
-            <div class="phase-info-title" id="phaseTitle">Inflammation</div>
-            <div class="phase-info-desc" id="phaseDesc">Blood clot forming, repair cells arriving</div>
-          </div>
-        </div>
-        <div class="mini-bar" style="margin-top:14px;">
-          <div class="mini-fill" id="phaseMini" style="background:var(--red);"></div>
-        </div>
-      </div>
-
-      <div class="stat-cell color-green">
-        <div class="stat-label">% Healed</div>
-        <div class="stat-number big" id="sPct">--</div>
-        <div class="stat-sub">out of 100%</div>
-        <div class="mini-bar">
-          <div class="mini-fill" id="pctMini" style="background:var(--green);"></div>
-        </div>
-      </div>
-
-      <div class="stat-cell color-red">
-        <div class="stat-label">% Remaining</div>
-        <div class="stat-number big" id="sPctLeft">--</div>
-        <div class="stat-sub">still to go</div>
-        <div class="mini-bar">
-          <div class="mini-fill" id="pctLeftMini" style="background:var(--red);"></div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ─ BODY STATS (Life Stats flavour!) ─ -->
-    <div class="stats-section-title">🔬 What your body has done</div>
-    <div class="stats-grid">
-
-      <div class="stat-cell color-red fact-cell">
-        <div class="stat-label">Heartbeats since cast</div>
-        <div class="stat-number med" id="sHeartbeats">--</div>
-        <div class="stat-sub">at 70 bpm average</div>
-      </div>
-
-      <div class="stat-cell color-blue fact-cell">
-        <div class="stat-label">Breaths taken</div>
-        <div class="stat-number med" id="sBreaths">--</div>
-        <div class="stat-sub">at 15 per minute</div>
-      </div>
-
-      <div class="stat-cell color-purple fact-cell">
-        <div class="stat-label">Bone cells created</div>
-        <div class="stat-number med" id="sBoneCells">--</div>
-        <div class="stat-sub">osteoblasts at work</div>
-      </div>
-
-      <div class="stat-cell fact-cell">
-        <div class="stat-label">Calories healing burns</div>
-        <div class="stat-number med" id="sCalories">--</div>
-        <div class="stat-sub">fracture healing uses ~50 extra/day</div>
-      </div>
-
-    </div>
-
-    <!-- ─ DATES ─ -->
-    <div class="stats-section-title">📅 Key dates</div>
-    <div class="stats-grid">
-
-      <div class="stat-cell">
-        <div class="stat-label">Cast put on</div>
-        <div class="stat-number med" id="sCastOn">--</div>
-        <div class="stat-sub">day this all started</div>
-      </div>
-
-      <div class="stat-cell color-green">
-        <div class="stat-label">Doctor's removal date</div>
-        <div class="stat-number med" id="sCastOff">--</div>
-        <div class="stat-sub" id="sCastOffSub">estimated by doctor</div>
-      </div>
-
-      <div class="stat-cell color-orange">
-        <div class="stat-label">Halfway point</div>
-        <div class="stat-number med" id="sHalfway">--</div>
-        <div class="stat-sub" id="sHalfwaySub">50% healed milestone</div>
-      </div>
-
-      <div class="stat-cell color-blue">
-        <div class="stat-label">Nearest milestone</div>
-        <div class="stat-number med" id="sMilestone">--</div>
-        <div class="stat-sub" id="sMilestoneSub">next big achievement</div>
-      </div>
-
-    </div>
-
-    <!-- ─ FUN FACTS ─ -->
-    <div class="stats-section-title">💡 Bone science</div>
-    <div class="stats-grid">
-
-      <div class="stat-cell wide color-yellow">
-        <div class="stat-label">Did you know</div>
-        <div class="stat-number med" id="sBoneFact" style="font-size:1rem;letter-spacing:-0.5px;line-height:1.4;">Loading...</div>
-        <div class="stat-sub" style="margin-top:8px;">Bone science fact</div>
-      </div>
-
-      <div class="stat-cell color-green">
-        <div class="stat-label">Bone hardness rank</div>
-        <div class="stat-number" id="sBoneHard">--</div>
-        <div class="stat-sub" id="sBoneHardSub">out of all bones</div>
-      </div>
-
-      <div class="stat-cell color-purple">
-        <div class="stat-label">Global cast wearers</div>
-        <div class="stat-number med">~18,600</div>
-        <div class="stat-sub">people in a cast right now (est.)</div>
-      </div>
-
-    </div>
-
-  </div>
-
-  <!-- SHARE + RESET -->
-  <div class="btn-row">
-    <button class="share-btn" onclick="doShare()">📤 Share My Cast Stats</button>
-    <button class="reset-btn" onclick="doReset()">← Enter new dates</button>
-  </div>
-
-  <!-- DISCLAIMER -->
-  <div class="disc">
-    <div class="disc-inner">
-      ⚠️ <strong>Medical disclaimer:</strong>
-      This tool uses your doctor's date — it does not predict healing times.
-      Only your treating physician decides when to remove your cast.
-      <strong>Never remove your cast yourself.</strong>
-      Stats are estimates for fun/educational purposes.
     </div>
   </div>
 
-</div>
-
-<!-- ════════════════ CELEBRATION SCREEN ════════════════ -->
-<div id="celScreen">
-
-  <span class="cel-emoji">🎉</span>
-  <h1 class="cel-title">Cast-Off Day!</h1>
-  <p class="cel-sub">You made it. Healing complete!</p>
-
-  <div class="cel-grid">
-    <div class="cel-card">
-      <div class="cel-num" id="celTotal">--</div>
-      <div class="cel-lab">Total days</div>
-    </div>
-    <div class="cel-card">
-      <div class="cel-num" id="celBone">--</div>
-      <div class="cel-lab">Bone healed</div>
-    </div>
-    <div class="cel-card">
-      <div class="cel-num" id="celHearts">--</div>
-      <div class="cel-lab">Heartbeats</div>
-    </div>
-    <div class="cel-card">
-      <div class="cel-num" id="celBreaths">--</div>
-      <div class="cel-lab">Breaths</div>
-    </div>
+  <!-- SCROLLING CONTENT -->
+  <div class="scroll-content" id="scroll-content">
+    <!-- cards injected by JS -->
   </div>
 
-  <div style="display:flex;flex-direction:column;gap:10px;max-width:360px;width:100%;">
-    <button class="share-btn" onclick="doShare(true)">📤 Share My Cast-Off Day!</button>
-    <button class="reset-btn" onclick="doReset()">Track another bone →</button>
-  </div>
-
-</div>
-
-<!-- FOOTER -->
-<div class="footer" id="mainFooter">
-  🦴 CastCountdown ·
-  <a href="https://castcountdown.me">castcountdown.me</a>
-  · Free forever
-</div>
-
-<canvas id="shareCanvas" width="600" height="400"></canvas>
+  <button class="reset-btn" onclick="resetApp()">← Start Over</button>
+</section>
 
 <script>
-// ═══════════════════════════════════════════
-//  DATA
-// ═══════════════════════════════════════════
-const PHASES = [
+/* ════════════════════════════════════════
+   DATA
+════════════════════════════════════════ */
+const FACTS = [
   {
-    min:0,   max:25,
-    e:'🔴',  t:'Inflammation Phase',
-    d:'Blood clot forming, repair cells rushing to the site',
-    col:'var(--red)',   pcol:'#ef4444'
+    emoji: "🔬",
+    title: "How Bones Heal",
+    text: "Bone healing happens in 4 stages: inflammation (days 1–5), soft callus formation (week 1–3), hard callus formation (week 3–12), and bone remodelling which can take up to 2 years after that!"
   },
   {
-    min:25,  max:50,
-    e:'🟠',  t:'Soft Callus Phase',
-    d:'Soft rubbery tissue bridges the break — visible on X-ray',
-    col:'var(--orange)',pcol:'#f97316'
+    emoji: "🩸",
+    title: "Nature's First Responder",
+    text: "Within minutes of a fracture, your body forms a blood clot called a fracture haematoma around the break — this is the very first step of healing and is totally normal."
   },
   {
-    min:50,  max:75,
-    e:'🟡',  t:'Hard Callus Phase',
-    d:'Calcium deposits harden the soft callus into real bone',
-    col:'var(--yellow)',pcol:'#eab308'
+    emoji: "💪",
+    title: "Bone is Living Tissue",
+    text: "Your bones are alive! They contain osteoblasts (bone builders) and osteoclasts (bone removers) that constantly remodel bone tissue — especially active right now during your recovery."
   },
   {
-    min:75,  max:101,
-    e:'🟢',  t:'Remodeling Phase',
-    d:'Bone reshapes and strengthens — stronger than before',
-    col:'var(--green)', pcol:'#22c55e'
-  }
+    emoji: "🧲",
+    title: "Electrical Signals Speed Healing",
+    text: "Bone generates small electrical signals when under mechanical stress — a property called piezoelectricity. This is one reason gentle movement (once approved) can actually speed up bone healing."
+  },
+  {
+    emoji: "🥛",
+    title: "Calcium is Your Best Friend",
+    text: "Your body needs extra calcium and Vitamin D right now. Dairy, leafy greens, almonds, and sunlight all help. Bones that heal with adequate calcium are denser and stronger."
+  },
+  {
+    emoji: "🚫",
+    title: "Smoking Slows Healing",
+    text: "Studies show smokers take up to 30% longer to heal fractures. Nicotine restricts blood flow to the healing site, slowing down the delivery of nutrients and oxygen your bone needs."
+  },
+  {
+    emoji: "🦕",
+    title: "Dinosaur Fact",
+    text: "Healed fractures have been found in dinosaur fossils — meaning broken bones and recovery is as old as life on land! A T-Rex fibula healed fracture was documented in the fossil record."
+  },
+  {
+    emoji: "⚡",
+    title: "Bones Can Become STRONGER",
+    text: "Wolff's Law states that bone remodels in response to stress. A properly healed fracture site can become denser and harder than the original bone — you might come out stronger!"
+  },
+  {
+    emoji: "🏥",
+    title: "Cast History",
+    text: "Plaster of Paris casts were first used medically in the 1800s. Modern fibreglass casts weren't introduced until the 1970s — lighter, waterproof, and much cooler (literally, they don't heat up as much)."
+  },
+  {
+    emoji: "🧬",
+    title: "Your Stem Cells Are Working",
+    text: "A special type of stem cell called a mesenchymal stem cell is activated by your fracture. These incredible cells can transform into bone, cartilage, or fat depending on what your body needs."
+  },
+  {
+    emoji: "🌡️",
+    title: "The Healing Site Gets Hot",
+    text: "It's completely normal for the area around a fracture to feel warm. Your immune system ramps up blood flow to deliver healing materials — this metabolic activity generates heat."
+  },
+  {
+    emoji: "🎯",
+    title: "Protein Matters Too",
+    text: "About 35% of bone mass is protein (mainly collagen). Eating adequate protein — eggs, chicken, beans, fish — helps your body build the collagen scaffold that new bone forms around."
+  },
 ];
 
-const BONE_FACTS = [
-  "Your bone creates about 1 million new cells every single second during healing",
-  "Bone is the only tissue in your body that heals without leaving a scar",
-  "The calcium in your bones is the same element used in chalk",
-  "Your skeleton replaces itself completely every 10 years",
-  "Bones are 4x stronger than concrete when it comes to compression",
-  "The human body has 206 bones — you were born with 270",
-  "Bone marrow produces 2 million red blood cells every second",
-  "Astronauts lose bone mass in space because bones need gravity to stay strong"
-];
+/* ════════════════════════════════════════
+   STATE
+════════════════════════════════════════ */
+let timerInterval = null;
+let userData = {};
 
-const BONE_HARDNESS = {
-  Finger:     {rank:'#8 hardest',info:'among hand bones'},
-  Wrist:      {rank:'Moderate',  info:'multiple small bones'},
-  Forearm:    {rank:'Strong',    info:'radius & ulna pair'},
-  Elbow:      {rank:'Very hard', info:'joint bone complex'},
-  Collarbone: {rank:'Moderate',  info:'most commonly broken'},
-  Ankle:      {rank:'Strong',    info:'weight-bearing bone'},
-  Shin:       {rank:'Very hard', info:'2nd strongest leg bone'},
-  Foot:       {rank:'Moderate',  info:'26 bones total'},
-  Thigh:      {rank:'#1 hardest',info:'strongest bone in body'}
-};
+/* ════════════════════════════════════════
+   START
+════════════════════════════════════════ */
+function startStats() {
+  const startVal = document.getElementById('cast-start').value;
+  const endVal   = document.getElementById('cast-end').value;
+  const bone     = document.getElementById('bone-type').value;
+  const fracture = document.getElementById('fracture-type').value;
+  const name     = document.getElementById('user-name').value.trim();
 
-// ═══════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════
-const today = new Date();
-document.getElementById('castOn').value  = today.toISOString().split('T')[0];
-
-// Set default removal date 6 weeks from today
-const sixWeeks = new Date(today);
-sixWeeks.setDate(sixWeeks.getDate() + 42);
-document.getElementById('castOff').value = sixWeeks.toISOString().split('T')[0];
-
-// Load saved data
-const saved = localStorage.getItem('cc_stats');
-if (saved) {
-  try { renderStats(JSON.parse(saved)); }
-  catch(e) { localStorage.removeItem('cc_stats'); }
-}
-
-// ═══════════════════════════════════════════
-//  BUILD STATS
-// ═══════════════════════════════════════════
-function buildStats() {
-  const on  = document.getElementById('castOn').value;
-  const off = document.getElementById('castOff').value;
-  const err = document.getElementById('errBox');
-
-  if (!on || !off) {
-    err.style.display = 'block';
+  if (!startVal || !endVal) {
+    alert('Please fill in both the cast start and removal dates! 📅');
     return;
   }
 
-  if (new Date(off) <= new Date(on)) {
-    err.style.display = 'block';
-    err.textContent   = '⚠️ Removal date must be after cast date!';
+  const startDate = new Date(startVal);
+  const endDate   = new Date(endVal);
+  endDate.setHours(23, 59, 59);
+
+  if (endDate <= startDate) {
+    alert('Cast removal date must be after the application date!');
     return;
   }
 
-  err.style.display = 'none';
+  userData = { startDate, endDate, bone, fracture, name };
 
-  const data = {
-    on,
-    off,
-    bone: document.getElementById('boneSel').value || 'Bone',
-    how:  document.getElementById('howSel').value  || ''
-  };
+  // Check if today is cast-off day or past
+  const now = new Date();
+  const removeDay = new Date(endVal);
+  removeDay.setHours(0,0,0,0);
+  const today = new Date(); today.setHours(0,0,0,0);
 
-  localStorage.setItem('cc_stats', JSON.stringify(data));
-  renderStats(data);
-}
+  // Switch screens
+  document.getElementById('screen-input').style.display = 'none';
+  const statsEl = document.getElementById('screen-stats');
+  statsEl.style.display = 'flex';
 
-// ═══════════════════════════════════════════
-//  RENDER STATS
-// ═══════════════════════════════════════════
-function renderStats(d) {
-  const castOn  = new Date(d.on);
-  const castOff = new Date(d.off);
-  const now     = new Date();
+  // Set hero title
+  const displayName = name ? `${name}'s` : 'Your';
+  document.getElementById('hero-title').innerHTML =
+    `${displayName} <span>Cast Countdown</span>`;
 
-  const totalDays  = Math.round((castOff - castOn)  / 864e5);
-  const daysDone   = Math.max(Math.floor((now - castOn) / 864e5), 0);
-  const daysLeft   = Math.max(Math.round((castOff - now) / 864e5), 0);
-  const pct        = Math.min(Math.round(daysDone / totalDays * 100), 100);
-  const pctLeft    = 100 - pct;
-  const speedPerDay= (100 / totalDays).toFixed(2);
+  // Build scrolling cards
+  buildCards();
 
-  // Celebration check
-  if (daysLeft === 0 && daysDone >= totalDays) {
-    renderCelebration(d, totalDays, daysDone);
-    return;
+  // Start live countdown
+  updateCountdown();
+  timerInterval = setInterval(updateCountdown, 1000);
+
+  // Celebration?
+  if (today >= removeDay) {
+    setTimeout(() => document.getElementById('celebration').classList.add('show'), 600);
   }
 
-  // Helpers
-  const fmt   = dt => dt.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
-  const fmts  = dt => dt.toLocaleDateString('en-US', {month:'short', day:'numeric'});
-  const fmtBig= n  => {
-    if (n >= 1e9)  return (n/1e9).toFixed(1)+'B';
-    if (n >= 1e6)  return (n/1e6).toFixed(1)+'M';
-    if (n >= 1e3)  return (n/1e3).toFixed(0)+'K';
-    return n.toString();
-  };
-
-  // Body stats
-  const secsDone    = daysDone * 86400;
-  const heartbeats  = Math.round(secsDone * 70 / 60);
-  const breaths     = Math.round(secsDone * 15 / 60);
-  const boneCells   = Math.round(daysDone * 86400 * 1000000);  // ~1M per sec
-  const calories    = daysDone * 50; // ~50 extra cals/day for healing
-
-  // Halfway date
-  const halfwayD = new Date(castOn);
-  halfwayD.setDate(halfwayD.getDate() + Math.round(totalDays / 2));
-
-  // Next milestone
-  const milestones  = [25, 50, 75, 90];
-  const nextMilePct = milestones.find(m => m > pct) || 100;
-  const nextMileDay = Math.round((nextMilePct / 100) * totalDays);
-  const nextMileD   = new Date(castOn);
-  nextMileD.setDate(nextMileD.getDate() + nextMileDay);
-
-  // Phase
-  const phase = PHASES.find(p => pct >= p.min && pct < p.max) || PHASES[3];
-
-  // Bone fact (rotate daily)
-  const factIdx = daysDone % BONE_FACTS.length;
-
-  // Bone hardness
-  const boneInfo = BONE_HARDNESS[d.bone] || {rank:'—', info:'select a bone above'};
-
-  // ── HERO ──
-  document.getElementById('hName').textContent =
-    (d.bone && d.bone !== 'Bone' ? d.bone : '') +
-    (d.how ? (' · Caused by: ' + d.how) : '');
-
-  // Animated counter
-  animCount('liveCounter', daysLeft, 1400);
-
-  // Progress
-  setTimeout(() => {
-    document.getElementById('progFill').style.width = pct + '%';
-  }, 300);
-  document.getElementById('progText').textContent = pct + '% healed · ' + pctLeft + '% to go';
-
-  // Milestone badges
-  renderBadges(pct);
-
-  // ── STATS ──
-  g('sDaysLeft',    daysLeft);
-  g('sDaysDone',    daysDone);
-  g('sTotalDays',   totalDays);
-  g('sTotalWeeks',  Math.round(totalDays/7) + ' weeks total');
-  g('sSpeed',       speedPerDay);
-  g('sSpeedSub',    '% healed per day (your pace)');
-  g('sPct',         pct + '%');
-  g('sPctLeft',     pctLeft + '%');
-  g('sHeartbeats',  fmtBig(heartbeats));
-  g('sBreaths',     fmtBig(breaths));
-  g('sBoneCells',   fmtBig(boneCells));
-  g('sCalories',    fmtBig(calories));
-  g('sCastOn',      fmts(castOn));
-  g('sCastOff',     fmts(castOff));
-  g('sCastOffSub',  'set by your doctor · ' + daysLeft + ' days away');
-  g('sHalfway',     fmts(halfwayD));
-  g('sHalfwaySub',  pct >= 50 ? '✅ Already passed!' : 'coming in ' + Math.max(0, Math.round((halfwayD-now)/864e5)) + ' days');
-  g('sMilestone',   nextMilePct + '% mark');
-  g('sMilestoneSub',fmts(nextMileD) + ' · ' + Math.max(0,Math.round((nextMileD-now)/864e5)) + ' days away');
-  g('sBoneFact',    BONE_FACTS[factIdx]);
-  g('sBoneHard',    boneInfo.rank);
-  g('sBoneHardSub', boneInfo.info);
-
-  // Phase
-  document.getElementById('phaseEmoji').textContent  = phase.e;
-  document.getElementById('phaseTitle').textContent  = phase.t;
-  document.getElementById('phaseDesc').textContent   = phase.d;
-
-  // Mini bars
-  setTimeout(() => {
-    // Phase bar: how far into THIS phase
-    const phaseRange = phase.max - phase.min;
-    const phaseProgress = Math.min(((pct - phase.min) / phaseRange) * 100, 100);
-    setBar('phaseMini', phaseProgress, phase.pcol);
-    setBar('pctMini',   pct,           '#22c55e');
-    setBar('pctLeftMini', pctLeft,     '#ef4444');
-  }, 400);
-
-  // SHOW
-  showScreen('stats');
+  // Animate cards on scroll
+  setupScrollObserver();
 }
 
-// ═══════════════════════════════════════════
-//  MILESTONE BADGES
-// ═══════════════════════════════════════════
-function renderBadges(pct) {
-  const badges = [
-    {pct:10,  label:'10% done'},
-    {pct:25,  label:'Quarter way'},
-    {pct:50,  label:'Halfway! 🎉'},
-    {pct:75,  label:'Almost there'},
-    {pct:90,  label:'Final stretch'},
-    {pct:100, label:'Cast free! 🏆'}
+/* ════════════════════════════════════════
+   BUILD CARDS
+════════════════════════════════════════ */
+function buildCards() {
+  const container = document.getElementById('scroll-content');
+  container.innerHTML = '';
+
+  const { startDate, endDate, bone, fracture, name } = userData;
+  const totalMs  = endDate - startDate;
+  const totalDays = Math.ceil(totalMs / 86400000);
+  const now       = new Date();
+  const elapsed   = Math.max(0, now - startDate);
+  const elapsedDays = Math.floor(elapsed / 86400000);
+  const remaining   = Math.max(0, endDate - now);
+  const remainDays  = Math.ceil(remaining / 86400000);
+
+  const boneName     = bone     || 'your bone';
+  const fractureType = fracture || 'your fracture';
+
+  // ── Healing progress stats ──────────────────
+  const pct = Math.min(100, Math.round((elapsed / totalMs) * 100));
+
+  const stats = [
+    {
+      accent: 'accent-purple',
+      icon: '📆',
+      label: 'Total Recovery Time',
+      valueId: null,
+      value: `${totalDays} days`,
+      desc: `That's ${Math.round(totalDays/7)} weeks of your body doing incredible repair work on your ${boneName}.`
+    },
+    {
+      accent: 'accent-green',
+      icon: '⏳',
+      label: 'Days in the Cast So Far',
+      valueId: null,
+      value: `${elapsedDays} days`,
+      desc: `You've already powered through ${elapsedDays} of ${totalDays} days — that's ${pct}% of your journey done!`
+    },
+    {
+      accent: 'accent-orange',
+      icon: '🔥',
+      label: 'Hours of Active Healing',
+      valueId: 'stat-hours',
+      value: '',
+      desc: `Your osteoblasts have been working non-stop, 24 hours a day, since day one. They never clock out!`,
+      live: () => {
+        const h = Math.floor((new Date() - startDate) / 3600000);
+        return h.toLocaleString() + ' hrs';
+      }
+    },
+    {
+      accent: 'accent-red',
+      icon: '💓',
+      label: 'Heartbeats Since Cast Applied',
+      valueId: 'stat-heartbeats',
+      value: '',
+      desc: `Your heart pumps nutrient-rich blood to your healing fracture with every single beat.`,
+      live: () => {
+        const secs = (new Date() - startDate) / 1000;
+        return Math.round(secs * 1.1667).toLocaleString(); // ~70 bpm
+      }
+    },
+    {
+      accent: 'accent-blue',
+      icon: '🫁',
+      label: 'Breaths Since Cast Applied',
+      valueId: 'stat-breaths',
+      value: '',
+      desc: `Every breath brings oxygen to your bloodstream — which gets delivered to your healing bone.`,
+      live: () => {
+        const secs = (new Date() - startDate) / 1000;
+        return Math.round(secs * 0.267).toLocaleString(); // ~16 breaths/min
+      }
+    },
+    {
+      accent: 'accent-pink',
+      icon: '🧱',
+      label: 'New Bone Cells Created (est.)',
+      valueId: 'stat-cells',
+      value: '',
+      desc: `Your body generates roughly 2 million blood/bone cells per second — many are dedicated to your ${boneName} repair right now.`,
+      live: () => {
+        const secs = Math.max(0, (new Date() - startDate) / 1000);
+        return (Math.round(secs * 2000000)).toLocaleString();
+      }
+    },
+    {
+      accent: 'accent-purple',
+      icon: '😴',
+      label: 'Hours of Sleep for Recovery',
+      valueId: null,
+      value: `~${Math.round(elapsedDays * 8)} hrs`,
+      desc: `Sleep is when most bone repair happens — growth hormone peaks during deep sleep and drives osteoblast activity.`
+    },
+    {
+      accent: 'accent-green',
+      icon: '🎯',
+      label: 'Healing Stage Right Now',
+      valueId: null,
+      value: getHealingStage(elapsedDays),
+      desc: getHealingStageDesc(elapsedDays)
+    },
+    {
+      accent: 'accent-orange',
+      icon: '📏',
+      label: 'Fracture Type',
+      valueId: null,
+      value: fractureType,
+      desc: getFractureDesc(fracture)
+    },
   ];
 
-  const tr = document.getElementById('milestones');
-  tr.innerHTML = '';
-
-  badges.forEach(b => {
-    const div  = document.createElement('div');
-    div.className = 'badge';
-    div.textContent = b.label;
-    if      (pct >= b.pct) div.classList.add('unlocked');
-    else if (pct >= b.pct - 15) div.classList.add('next');
-    tr.appendChild(div);
+  // Inject stat cards
+  addSectionHeader(container, '📊 Your Healing Stats');
+  stats.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = `stat-card ${s.accent}`;
+    div.style.transitionDelay = `${i * 0.05}s`;
+    div.innerHTML = `
+      <div class="stat-icon">${s.icon}</div>
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-value" ${s.valueId ? `id="${s.valueId}"` : ''}>${s.value}</div>
+      <p class="stat-desc">${s.desc}</p>`;
+    container.appendChild(div);
   });
+
+  // Inject fact cards
+  addSectionHeader(container, '🧠 Did You Know?');
+  FACTS.forEach((f, i) => {
+    const div = document.createElement('div');
+    div.className = 'fact-card';
+    div.style.transitionDelay = `${i * 0.05}s`;
+    div.innerHTML = `
+      <div class="fact-emoji">${f.emoji}</div>
+      <div class="fact-content">
+        <h3>${f.title}</h3>
+        <p>${f.text}</p>
+      </div>`;
+    container.appendChild(div);
+  });
+
+  // Store live updaters
+  window._liveStats = stats.filter(s => s.live && s.valueId);
 }
 
-// ═══════════════════════════════════════════
-//  CELEBRATION
-// ═══════════════════════════════════════════
-function renderCelebration(d, total, done) {
-  const fmtBig = n => {
-    if (n >= 1e9) return (n/1e9).toFixed(1)+'B';
-    if (n >= 1e6) return (n/1e6).toFixed(1)+'M';
-    if (n >= 1e3) return (n/1e3).toFixed(0)+'K';
-    return n.toString();
+function addSectionHeader(container, title) {
+  const div = document.createElement('div');
+  div.className = 'section-header';
+  div.innerHTML = `<h2>${title}</h2><div class="line"></div>`;
+  container.appendChild(div);
+}
+
+/* ════════════════════════════════════════
+   HEALING STAGE LOGIC
+════════════════════════════════════════ */
+function getHealingStage(days) {
+  if (days <= 5)  return 'Stage 1 — Inflammation';
+  if (days <= 21) return 'Stage 2 — Soft Callus';
+  if (days <= 84) return 'Stage 3 — Hard Callus';
+  return 'Stage 4 — Bone Remodelling';
+}
+
+function getHealingStageDesc(days) {
+  if (days <= 5)  return 'Your immune system is flooding the area with healing cells. Some pain and swelling is normal — it means it\'s working!';
+  if (days <= 21) return 'A soft, cartilage-like material is bridging the fracture gap. The ends are becoming more stable every day.';
+  if (days <= 84) return 'The soft callus is being replaced with hard, mineralised bone tissue. You\'re building real bone right now!';
+  return 'The fracture is healed but your bone is still fine-tuning its structure — remodelling can continue for up to 2 years.';
+}
+
+function getFractureDesc(type) {
+  const map = {
+    'Hairline':               'A tiny crack in the bone — often from overuse or stress. Heals well with rest.',
+    'Stress':                 'A small crack caused by repetitive force. Common in athletes and very responsive to rest.',
+    'Simple (Clean Break)':   'The bone broke in one clean line with no displacement. One of the most straightforward to heal.',
+    'Comminuted (Multiple Pieces)': 'The bone shattered into several pieces. Requires careful immobilisation — you\'re doing great!',
+    'Compound (Open)':        'The bone broke through the skin. Healed under expert medical care — your resilience is remarkable.',
+    'Greenstick':             'A partial fracture where the bone bends and cracks — common in children due to softer bones.',
+    'Avulsion':               'A fragment of bone was pulled away by a tendon or ligament. A unique but fully healable fracture.'
   };
-  const secs = done * 86400;
-  g('celTotal',   total);
-  g('celBone',    d.bone !== 'Bone' ? d.bone : '🦴');
-  g('celHearts',  fmtBig(Math.round(secs*70/60)));
-  g('celBreaths', fmtBig(Math.round(secs*15/60)));
-  showScreen('cel');
-  launchConfetti();
+  return map[type] || 'Every fracture is unique, and yours is healing in its own amazing way.';
 }
 
-// ═══════════════════════════════════════════
-//  HELPERS
-// ═══════════════════════════════════════════
-const g = (id, val) => {
-  const el = document.getElementById(id);
-  if (el) el.textContent = val;
-};
-
-function setBar(id, pct, color) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.style.background = color;
-  el.style.width      = Math.min(pct, 100) + '%';
-}
-
-function animCount(id, target, dur) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const start = performance.now();
-  (function step(now) {
-    const t    = Math.min((now-start)/dur, 1);
-    const ease = 1 - Math.pow(1-t, 4);
-    el.textContent = Math.round(ease * target);
-    if (t < 1) requestAnimationFrame(step);
-  })(performance.now());
-}
-
-function showScreen(which) {
-  document.getElementById('introScreen').style.display = which==='intro' ? '' : 'none';
-  document.getElementById('statsScreen').style.display = which==='stats' ? 'block' : 'none';
-  document.getElementById('celScreen').style.display   = which==='cel'   ? 'flex' : 'none';
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-
-function doReset() {
-  localStorage.removeItem('cc_stats');
-  showScreen('intro');
-}
-
-// ═══════════════════════════════════════════
-//  SHARE CARD
-// ═══════════════════════════════════════════
-function doShare(cel) {
-  const raw = localStorage.getItem('cc_stats');
-  if (!raw) return;
-  const d    = JSON.parse(raw);
-  const on   = new Date(d.on);
-  const off  = new Date(d.off);
+/* ════════════════════════════════════════
+   LIVE COUNTDOWN
+════════════════════════════════════════ */
+function updateCountdown() {
   const now  = new Date();
-  const total= Math.round((off-on)/864e5);
-  const done = Math.max(Math.floor((now-on)/864e5),0);
-  const left = Math.max(Math.round((off-now)/864e5),0);
-  const pct  = Math.min(Math.round(done/total*100),100);
+  const diff = userData.endDate - now;
 
-  const cv = document.getElementById('shareCanvas');
-  const cx = cv.getContext('2d');
-  cv.width = 600; cv.height = 400;
+  // Update progress bar
+  const total   = userData.endDate - userData.startDate;
+  const elapsed = now - userData.startDate;
+  const pct     = Math.min(100, Math.max(0, (elapsed / total) * 100));
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('pct-label').textContent = Math.round(pct) + '% healed';
 
-  // BG
-  cx.fillStyle = cel ? '#f7f3eb' : '#111111';
-  cx.fillRect(0,0,600,400);
-
-  // Watermark
-  cx.font = '14rem serif';
-  cx.globalAlpha = 0.04;
-  cx.textAlign = 'center';
-  cx.fillStyle = cel ? '#000' : '#fff';
-  cx.fillText('🦴', 480, 340);
-  cx.globalAlpha = 1;
-
-  // Card
-  cx.fillStyle = cel ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.05)';
-  rrect(cx, 36,30,528,340,18);
-
-  cx.textAlign = 'center';
-
-  // App label
-  cx.fillStyle = cel ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.3)';
-  cx.font = '700 11px Inter,sans-serif';
-  cx.fillText('🦴  C A S T C O U N T D O W N', 300, 72);
-
-  // Bone
-  if (d.bone && d.bone !== 'Bone') {
-    cx.font = '600 13px Inter,sans-serif';
-    cx.fillText(d.bone + (d.how ? '  ·  ' + d.how : ''), 300, 98);
-  }
-
-  if (cel) {
-    cx.fillStyle = '#111';
-    cx.font = '900 40px Inter,sans-serif';
-    cx.fillText("🎉 I'M CAST FREE!", 300, 200);
-    cx.font = '600 16px Inter,sans-serif';
-    cx.fillStyle = '#888';
-    cx.fillText(total + ' days of healing — complete!', 300, 240);
+  if (diff <= 0) {
+    // Past removal date
+    document.getElementById('cd-days').textContent  = '0';
+    document.getElementById('cd-hours').textContent = '0';
+    document.getElementById('cd-mins').textContent  = '0';
+    document.getElementById('cd-secs').textContent  = '0';
+    clearInterval(timerInterval);
   } else {
-    // Days number
-    cx.font = '900 100px Inter,sans-serif';
-    cx.fillStyle = '#fff';
-    cx.fillText(left, 300, 228);
-
-    cx.font = '700 11px Inter,sans-serif';
-    cx.fillStyle = 'rgba(255,255,255,0.3)';
-    cx.fillText('D A Y S   L E F T', 300, 256);
-
-    // Bar bg
-    cx.fillStyle = 'rgba(255,255,255,0.08)';
-    rrect(cx, 80,272,440,10,5);
-
-    // Bar fill
-    const fw = Math.round(440*(pct/100));
-    if (fw>0) {
-      cx.fillStyle = pct<25?'#ef4444':pct<50?'#f97316':pct<75?'#eab308':'#22c55e';
-      rrect(cx,80,272,fw,10,5);
-    }
-
-    cx.fillStyle='rgba(255,255,255,0.4)';
-    cx.font='600 12px Inter,sans-serif';
-    cx.fillText(pct+'% healed  ·  '+done+' days in  ·  '+left+' to go',300,305);
+    const days  = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const mins  = Math.floor((diff % 3600000)  / 60000);
+    const secs  = Math.floor((diff % 60000)    / 1000);
+    document.getElementById('cd-days').textContent  = days;
+    document.getElementById('cd-hours').textContent = String(hours).padStart(2,'0');
+    document.getElementById('cd-mins').textContent  = String(mins).padStart(2,'0');
+    document.getElementById('cd-secs').textContent  = String(secs).padStart(2,'0');
   }
 
-  // URL
-  cx.fillStyle = cel ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.15)';
-  cx.font = '500 11px Inter,sans-serif';
-  cx.fillText('castcountdown.me', 300, 348);
-
-  cv.toBlob(async blob => {
-    const f   = new File([blob],'castcountdown.png',{type:'image/png'});
-    const txt = cel
-      ? `🎉 Finally CAST FREE! ${total} days of healing done! Track yours at castcountdown.me`
-      : `🦴 ${left} days left in my cast! ${pct}% healed. See my stats → castcountdown.me`;
-    if (navigator.canShare && navigator.canShare({files:[f]})) {
-      try { await navigator.share({title:'CastCountdown',text:txt,files:[f]}); return; }
-      catch(e){}
-    }
-    const a = document.createElement('a');
-    a.href = cv.toDataURL('image/png');
-    a.download = 'castcountdown.png';
-    a.click();
-  },'image/png');
-}
-
-// ═══════════════════════════════════════════
-//  CONFETTI
-// ═══════════════════════════════════════════
-function launchConfetti() {
-  const cv = document.getElementById('confetti');
-  const cx = cv.getContext('2d');
-  cv.width  = window.innerWidth;
-  cv.height = window.innerHeight;
-  const C = ['#6c63ff','#e63946','#f4a261','#2a9d8f','#457b9d','#e9c46a','#ff6b81'];
-  const P = Array.from({length:180},()=>({
-    x: Math.random()*cv.width,
-    y: Math.random()*cv.height - cv.height,
-    w: Math.random()*14+4,
-    h: Math.random()*7+4,
-    c: C[Math.floor(Math.random()*C.length)],
-    s: Math.random()*5+2,
-    a: Math.random()*360,
-    sp:Math.random()*8-4
-  }));
-  let fr=0;
-  (function draw(){
-    cx.clearRect(0,0,cv.width,cv.height);
-    fr++;
-    P.forEach(p=>{
-      cx.save();
-      cx.globalAlpha=Math.max(0,1-fr/200);
-      cx.translate(p.x+p.w/2,p.y+p.h/2);
-      cx.rotate(p.a*Math.PI/180);
-      cx.fillStyle=p.c;
-      cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
-      cx.restore();
-      p.y+=p.s; p.a+=p.sp; p.x+=Math.sin(p.a*.1)*2;
+  // Update live stat cards
+  if (window._liveStats) {
+    window._liveStats.forEach(s => {
+      const el = document.getElementById(s.valueId);
+      if (el) el.textContent = s.live();
     });
-    if(fr<220) requestAnimationFrame(draw);
-    else cx.clearRect(0,0,cv.width,cv.height);
-  })();
+  }
 }
 
-// ═══════════════════════════════════════════
-//  ROUND RECT HELPER
-// ═══════════════════════════════════════════
-function rrect(cx,x,y,w,h,r){
-  cx.beginPath();
-  cx.moveTo(x+r,y);
-  cx.lineTo(x+w-r,y);
-  cx.quadraticCurveTo(x+w,y,x+w,y+r);
-  cx.lineTo(x+w,y+h-r);
-  cx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-  cx.lineTo(x+r,y+h);
-  cx.quadraticCurveTo(x,y+h,x,y+h-r);
-  cx.lineTo(x,y+r);
-  cx.quadraticCurveTo(x,y,x+r,y);
-  cx.closePath();
-  cx.fill();
+/* ════════════════════════════════════════
+   SCROLL OBSERVER (animate cards in)
+════════════════════════════════════════ */
+function setupScrollObserver() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.stat-card, .fact-card, .section-header')
+          .forEach(el => observer.observe(el));
+}
+
+/* ════════════════════════════════════════
+   RESET
+════════════════════════════════════════ */
+function resetApp() {
+  clearInterval(timerInterval);
+  document.getElementById('screen-stats').style.display = 'none';
+  document.getElementById('screen-input').style.display = 'flex';
+  document.getElementById('scroll-content').innerHTML = '';
 }
 </script>
 </body>
