@@ -3,1327 +3,1412 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CastCountdown</title>
-<meta name="description" content="How many days left in your cast? Find out instantly."/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<title>CastCountdown — Your Healing Stats</title>
+<meta name="description" content="Enter your cast dates and see your healing journey as live stats."/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <style>
 
-/* ═══════════════════════════════
-   NEAL.FUN INSPIRED DESIGN
-   Clean · Bold · Interactive · Fun
-═══════════════════════════════ */
-
-:root {
-  --bg:      #f5f0e8;
-  --card:    #ffffff;
-  --ink:     #111111;
-  --dim:     #888888;
-  --border:  #e5e5e5;
-  --red:     #ff4757;
-  --yellow:  #ffa502;
-  --green:   #2ed573;
-  --purple:  #6c63ff;
-  --blue:    #1e90ff;
-}
-
-* { margin:0; padding:0; box-sizing:border-box; }
-
-html { scroll-behavior:smooth; }
-
-body {
-  font-family: 'Inter', system-ui, sans-serif;
-  background: var(--bg);
-  color: var(--ink);
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ── TOP BAR ── */
-.topbar {
-  padding: 20px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 2px solid var(--ink);
-  background: var(--bg);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.topbar-logo {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: var(--ink);
-  letter-spacing: -0.5px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.topbar-logo span {
-  font-size: 1.2rem;
-  animation: wiggle 3s ease-in-out infinite;
-  display: inline-block;
-}
-
-@keyframes wiggle {
-  0%,90%,100% { transform: rotate(0deg); }
-  92% { transform: rotate(-15deg); }
-  96% { transform: rotate(15deg); }
-}
-
-.topbar-right {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--dim);
-}
-
-/* ── HERO ── */
-.hero {
-  padding: 60px 24px 40px;
-  max-width: 640px;
-  margin: 0 auto;
-}
-
-.hero-eyebrow {
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  color: var(--dim);
-  margin-bottom: 16px;
-}
-
-.hero-title {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(2.8rem, 8vw, 5rem);
-  font-weight: 800;
-  line-height: 0.95;
-  letter-spacing: -3px;
-  color: var(--ink);
-  margin-bottom: 20px;
-}
-
-.hero-title em {
-  font-style: normal;
-  color: var(--purple);
-  position: relative;
-  display: inline-block;
-}
-
-.hero-title em::after {
-  content: '';
-  position: absolute;
-  bottom: 4px;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: var(--purple);
-  border-radius: 2px;
-}
-
-.hero-sub {
-  font-size: 1rem;
-  color: var(--dim);
-  font-weight: 500;
-  line-height: 1.5;
-  max-width: 400px;
-}
-
-/* ── MAIN WRAPPER ── */
-.wrap {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 0 24px 80px;
-}
-
-/* ── STEP ── */
-.step {
-  margin-bottom: 48px;
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fadeUp 0.5s ease forwards;
-}
-
-.step:nth-child(1) { animation-delay: 0.1s; }
-.step:nth-child(2) { animation-delay: 0.2s; }
-.step:nth-child(3) { animation-delay: 0.3s; }
-.step:nth-child(4) { animation-delay: 0.4s; }
-.step:nth-child(5) { animation-delay: 0.5s; }
-.step:nth-child(6) { animation-delay: 0.6s; }
-
-@keyframes fadeUp {
-  to { opacity:1; transform:translateY(0); }
-}
-
-.step-label {
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 2.5px;
-  color: var(--dim);
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.step-num {
-  width: 20px;
-  height: 20px;
-  background: var(--ink);
-  color: #fff;
-  border-radius: 50%;
-  font-size: 0.6rem;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-/* ── BONE GRID ── */
-.bone-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.bone-tile {
-  background: var(--card);
-  border: 2px solid var(--border);
-  border-radius: 12px;
-  padding: 16px 8px 12px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.15s cubic-bezier(.34,1.56,.64,1);
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-}
-
-.bone-tile:hover {
-  border-color: var(--ink);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 0 var(--ink);
-}
-
-.bone-tile:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 0 var(--ink);
-}
-
-.bone-tile.picked {
-  background: var(--ink);
-  border-color: var(--ink);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 0 rgba(0,0,0,0.3);
-}
-
-.bone-tile.picked .tile-name {
-  color: rgba(255,255,255,0.8);
-}
-
-.tile-emoji { font-size: 1.8rem; display: block; margin-bottom: 6px; }
-.tile-name  { font-size: 0.68rem; font-weight: 700; color: var(--dim); }
-
-/* ── FRACTURE CARDS ── */
-.frac-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.frac-tile {
-  background: var(--card);
-  border: 2px solid var(--border);
-  border-radius: 12px;
-  padding: 16px 8px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.15s cubic-bezier(.34,1.56,.64,1);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.frac-tile:hover { transform: translateY(-3px); box-shadow: 0 6px 0 var(--border); }
-.frac-tile:active { transform: translateY(0); }
-
-.frac-tile.picked-simple   { border-color: var(--green);  background: #f0fff4; box-shadow: 0 4px 0 var(--green);  transform: translateY(-3px); }
-.frac-tile.picked-displaced{ border-color: var(--yellow); background: #fffbf0; box-shadow: 0 4px 0 var(--yellow); transform: translateY(-3px); }
-.frac-tile.picked-complex  { border-color: var(--red);    background: #fff5f5; box-shadow: 0 4px 0 var(--red);    transform: translateY(-3px); }
-
-.frac-emoji { font-size: 1.6rem; display: block; margin-bottom: 6px; }
-.frac-name  { font-size: 0.7rem; font-weight: 800; color: var(--ink); display: block; }
-.frac-desc  { font-size: 0.6rem; color: var(--dim); display: block; margin-top: 2px; }
-
-/* ── INPUT ROW ── */
-.input-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.input-wrap { display: flex; flex-direction: column; gap: 6px; }
-.input-wrap label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--dim); }
-
-.inp {
-  padding: 14px 16px;
-  border: 2px solid var(--border);
-  border-radius: 12px;
-  font-size: 1rem;
-  font-family: inherit;
-  font-weight: 600;
-  color: var(--ink);
-  background: var(--card);
-  outline: none;
-  transition: border-color 0.15s;
-  -webkit-appearance: none;
-  width: 100%;
-}
-
-.inp:focus { border-color: var(--ink); }
-.inp::placeholder { color: #ccc; }
-
-/* ── TOGGLE PILLS ── */
-.toggle-row { display: flex; gap: 8px; }
-
-.toggle {
-  flex: 1;
-  padding: 12px;
-  border: 2px solid var(--border);
-  border-radius: 10px;
-  text-align: center;
-  font-size: 0.85rem;
-  font-weight: 700;
-  font-family: inherit;
-  cursor: pointer;
-  background: var(--card);
-  color: var(--dim);
-  transition: all 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.toggle.on-yes { border-color: var(--red);   background: #fff5f5; color: var(--red);   }
-.toggle.on-no  { border-color: var(--green); background: #f0fff4; color: #16a34a; }
-
-/* ── GO BUTTON ── */
-.go-btn {
-  width: 100%;
-  padding: 20px;
-  background: var(--ink);
-  color: #fff;
-  border: none;
-  border-radius: 14px;
-  font-size: 1.05rem;
-  font-weight: 800;
-  font-family: inherit;
-  cursor: pointer;
-  box-shadow: 0 6px 0 rgba(0,0,0,0.25);
-  transition: all 0.15s;
-  letter-spacing: 0.3px;
-}
-
-.go-btn:hover { background: #222; transform: translateY(-2px); box-shadow: 0 8px 0 rgba(0,0,0,0.25); }
-.go-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
-
-/* ── ERROR ── */
-.err-box {
-  padding: 12px 16px;
-  background: #fff5f5;
-  border: 2px solid var(--red);
-  border-radius: 12px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--red);
-  display: none;
-  margin-bottom: 12px;
-}
-
-/* ═══════════════════════════════
-   RESULT SCREEN
-═══════════════════════════════ */
-.result-screen {
-  display: none;
-  padding: 0 0 80px;
-}
-
-/* Big countdown display */
-.countdown-hero {
-  background: var(--ink);
-  color: #fff;
-  padding: 60px 24px 50px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.countdown-hero::before {
-  content: '🦴';
-  position: absolute;
-  font-size: 20rem;
-  opacity: 0.04;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  animation: spin-slow 30s linear infinite;
-}
-
-@keyframes spin-slow { to { transform: translate(-50%,-50%) rotate(360deg); } }
-
-.c-meta {
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  color: rgba(255,255,255,0.4);
-  margin-bottom: 16px;
-}
-
-.c-number {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(5rem, 20vw, 10rem);
-  font-weight: 800;
-  line-height: 0.9;
-  letter-spacing: -5px;
-  color: #fff;
-  margin-bottom: 8px;
-}
-
-.c-unit {
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 6px;
-  color: rgba(255,255,255,0.4);
-  margin-bottom: 28px;
-}
-
-/* Heal bar */
-.heal-bar-wrap {
-  width: 100%;
-  max-width: 360px;
-  margin: 0 auto 12px;
-}
-
-.heal-track {
-  height: 8px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-.heal-fill {
-  height: 100%;
-  border-radius: 99px;
-  width: 0;
-  transition: width 1.5s cubic-bezier(.4,0,.2,1);
-  background: #fff;
-}
-
-.heal-pct {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: rgba(255,255,255,0.5);
-  text-align: center;
-  margin-top: 8px;
-}
-
-/* Info cards row */
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  padding: 24px 24px 0;
-  max-width: 640px;
-  margin: 0 auto;
-}
-
-.info-card {
-  background: var(--card);
-  border: 2px solid var(--border);
-  border-radius: 14px;
-  padding: 18px;
-  transition: transform 0.2s;
-}
-
-.info-card:hover { transform: translateY(-2px); }
-
-.info-card-label {
-  font-size: 0.62rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: var(--dim);
-  margin-bottom: 8px;
-}
-
-.info-card-value {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.3rem;
-  font-weight: 800;
-  color: var(--ink);
-  line-height: 1.1;
-}
-
-.info-card-sub {
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: var(--dim);
-  margin-top: 4px;
-}
-
-/* Phase card */
-.phase-card {
-  max-width: 640px;
-  margin: 10px auto 0;
-  padding: 0 24px;
-}
-
-.phase-inner {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 18px;
-  border-radius: 14px;
-  border: 2px solid;
-  transition: all 0.4s;
-}
-
-.phase-inner.ph-red    { border-color: #fecaca; background: #fff5f5; }
-.phase-inner.ph-yellow { border-color: #fde68a; background: #fffbf0; }
-.phase-inner.ph-green  { border-color: #a7f3d0; background: #f0fff4; }
-
-.phase-icon { font-size: 2.2rem; flex-shrink: 0; }
-.phase-title { font-size: 0.9rem; font-weight: 800; color: var(--ink); }
-.phase-desc  { font-size: 0.75rem; color: var(--dim); margin-top: 3px; line-height: 1.4; }
-
-/* Modifiers */
-.mods-card {
-  max-width: 640px;
-  margin: 10px auto 0;
-  padding: 0 24px;
-}
-
-.mods-inner {
-  padding: 16px;
-  background: #fffbf0;
-  border: 2px solid #fde68a;
-  border-radius: 14px;
-  display: none;
-}
-
-.mods-title { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: #d97706; margin-bottom: 10px; }
-.mods-list  { list-style: none; }
-.mods-list li { font-size: 0.78rem; font-weight: 600; color: #92400e; padding: 3px 0; }
-.mods-list li::before { content: '→ '; opacity: 0.5; }
-
-/* Share section */
-.share-section {
-  max-width: 640px;
-  margin: 16px auto 0;
-  padding: 0 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.share-btn-big {
-  width: 100%;
-  padding: 18px;
-  background: var(--purple);
-  color: #fff;
-  border: none;
-  border-radius: 14px;
-  font-size: 1rem;
-  font-weight: 800;
-  font-family: inherit;
-  cursor: pointer;
-  box-shadow: 0 5px 0 #4a42cc;
-  transition: all 0.15s;
-  letter-spacing: 0.3px;
-}
-
-.share-btn-big:hover { background: #5a52ef; transform: translateY(-2px); box-shadow: 0 7px 0 #4a42cc; }
-.share-btn-big:active { transform: translateY(3px); box-shadow: 0 2px 0 #4a42cc; }
-
-.reset-btn {
-  width: 100%;
-  padding: 15px;
-  background: transparent;
-  border: 2px solid var(--border);
-  border-radius: 14px;
-  font-size: 0.88rem;
-  font-weight: 700;
-  font-family: inherit;
-  cursor: pointer;
-  color: var(--dim);
-  transition: all 0.15s;
-}
-
-.reset-btn:hover { border-color: var(--ink); color: var(--ink); }
-
-/* Disclaimer */
-.disclaimer-bar {
-  max-width: 640px;
-  margin: 16px auto 0;
-  padding: 0 24px;
-}
-
-.disclaimer-inner {
-  padding: 14px 16px;
-  background: #fff5f5;
-  border-left: 4px solid var(--red);
-  border-radius: 0 10px 10px 0;
-  font-size: 0.72rem;
-  color: #7f1d1d;
-  line-height: 1.6;
-  font-weight: 500;
-}
-
-/* ═══════════════════════════════
-   CELEBRATION SCREEN
-═══════════════════════════════ */
-.cel-screen {
-  display: none;
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 60px 24px 80px;
-  text-align: center;
-}
-
-.cel-big-emoji {
-  font-size: 5rem;
-  display: block;
-  margin-bottom: 24px;
-  animation: bounce 1s ease infinite alternate;
-}
-
-@keyframes bounce {
-  from { transform: translateY(0); }
-  to   { transform: translateY(-16px); }
-}
-
-.cel-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 3.5rem;
-  font-weight: 800;
-  letter-spacing: -2px;
-  color: var(--ink);
-  margin-bottom: 12px;
-}
-
-.cel-sub {
-  font-size: 1rem;
-  color: var(--dim);
-  font-weight: 500;
-  margin-bottom: 40px;
-}
-
-.cel-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 32px;
-}
-
-.cel-stat-card {
-  background: var(--card);
-  border: 2px solid var(--border);
-  border-radius: 14px;
-  padding: 24px;
-}
-
-.cel-stat-num {
-  font-family: 'Syne', sans-serif;
-  font-size: 3rem;
-  font-weight: 800;
-  color: var(--ink);
-  letter-spacing: -2px;
-}
-
-.cel-stat-lab {
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: var(--dim);
-  margin-top: 6px;
-}
-
-/* ═══════════════════════════════
-   CONFETTI
-═══════════════════════════════ */
-#confetti {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9999;
-}
-
-/* ═══════════════════════════════
-   FACT TICKER (neal.fun flavour!)
-═══════════════════════════════ */
-.fact-bar {
-  background: var(--ink);
-  color: rgba(255,255,255,0.6);
-  padding: 12px 24px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.fact-inner {
-  display: inline-block;
-  animation: ticker 25s linear infinite;
-}
-
-@keyframes ticker {
-  from { transform: translateX(100vw); }
-  to   { transform: translateX(-100%); }
-}
-
-/* ═══════════════════════════════
-   FOOTER
-═══════════════════════════════ */
-.footer-bar {
-  border-top: 2px solid var(--border);
-  padding: 24px;
-  text-align: center;
-  font-size: 0.75rem;
-  color: var(--dim);
-  font-weight: 600;
-  max-width: 640px;
-  margin: 0 auto;
-}
-
-.footer-bar a { color: var(--ink); font-weight: 800; text-decoration: none; }
-
-/* ═══════════════════════════════
-   PROGRESS TICKER (above result)
-═══════════════════════════════ */
-.progress-ticker {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-}
-
-.tick-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.15);
-  transition: all 0.3s;
-}
-
-.tick-dot.lit { background: rgba(255,255,255,0.8); }
-
-/* Mobile */
-@media(max-width:380px){
-  .bone-grid { grid-template-columns: repeat(3,1fr); }
-  .hero-title { font-size: 2.5rem; }
-  .c-number { font-size: 5rem; }
-  .info-grid { grid-template-columns: 1fr; }
-  .cel-stats { grid-template-columns: 1fr; }
-}
+/* ═══════════════════════════════════════
+   CASTCOUNTDOWN — NEAL.FUN LIFE STATS
+   Inspired by neal.fun/life-stats
+═══════════════════════════════════════ */
+
+:root{
+  --bg:     #f7f3eb;
+  --ink:    #111111;
+  --dim:    #999999;
+  --soft:   #eeebe3;
+  --card:   #ffffff;
+  --border: #e8e4dc;
+  --red:    #e63946;
+  --orange: #f4a261;
+  --green:  #2a9d8f;
+  --blue:   #457b9d;
+  --purple: #6c63ff;
+  --yellow: #e9c46a;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── TOPBAR ── */
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:18px 28px;
+  border-bottom:2px solid var(--ink);
+  background:var(--bg);
+  position:sticky;
+  top:0;
+  z-index:200;
+}
+.tb-logo{
+  font-size:1rem;
+  font-weight:900;
+  letter-spacing:-0.5px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.tb-logo-bone{
+  animation:wobble 4s ease-in-out infinite;
+  display:inline-block;
+}
+@keyframes wobble{
+  0%,85%,100%{transform:rotate(0deg);}
+  88%{transform:rotate(-20deg);}
+  92%{transform:rotate(20deg);}
+  96%{transform:rotate(-10deg);}
+}
+.tb-right{
+  font-size:0.72rem;
+  font-weight:600;
+  color:var(--dim);
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+/* ── INTRO SCREEN ── */
+#introScreen{
+  min-height:calc(100vh - 62px);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:40px 24px;
+  text-align:center;
+}
+
+.intro-tag{
+  font-size:0.7rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:3px;
+  color:var(--dim);
+  margin-bottom:20px;
+}
+
+.intro-title{
+  font-size:clamp(3rem,10vw,6.5rem);
+  font-weight:900;
+  letter-spacing:-4px;
+  line-height:0.9;
+  color:var(--ink);
+  margin-bottom:24px;
+}
+
+.intro-title .accent{
+  color:var(--purple);
+  display:inline-block;
+  position:relative;
+}
+
+.intro-title .accent::after{
+  content:'';
+  position:absolute;
+  bottom:6px;left:0;
+  width:100%;height:5px;
+  background:var(--purple);
+  border-radius:3px;
+}
+
+.intro-desc{
+  font-size:1.05rem;
+  color:var(--dim);
+  font-weight:500;
+  max-width:420px;
+  line-height:1.6;
+  margin-bottom:48px;
+}
+
+/* ── INPUT CARD ── */
+.input-card{
+  background:var(--card);
+  border:2px solid var(--ink);
+  border-radius:20px;
+  padding:32px 28px;
+  width:100%;
+  max-width:420px;
+  box-shadow:6px 6px 0 var(--ink);
+  text-align:left;
+}
+
+.input-card h2{
+  font-size:1rem;
+  font-weight:800;
+  margin-bottom:6px;
+}
+
+.input-card p{
+  font-size:0.78rem;
+  color:var(--dim);
+  font-weight:500;
+  margin-bottom:24px;
+  line-height:1.5;
+}
+
+/* The "ask your doctor" highlight */
+.doc-tip{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:12px 14px;
+  background:#fff9ec;
+  border:2px solid var(--yellow);
+  border-radius:12px;
+  margin-bottom:20px;
+  font-size:0.78rem;
+  font-weight:600;
+  color:#7c5c00;
+  line-height:1.5;
+}
+
+.doc-tip-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px;}
+
+/* Date inputs */
+.date-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.date-group{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.date-group label{
+  font-size:0.68rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  color:var(--dim);
+}
+
+.date-inp{
+  padding:13px 14px;
+  border:2px solid var(--border);
+  border-radius:12px;
+  font-size:0.9rem;
+  font-family:inherit;
+  font-weight:700;
+  color:var(--ink);
+  background:var(--bg);
+  outline:none;
+  transition:border-color 0.15s;
+  -webkit-appearance:none;
+  width:100%;
+}
+.date-inp:focus{border-color:var(--ink);}
+
+/* Optional fields */
+.optional-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.opt-group label{
+  font-size:0.65rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  color:var(--dim);
+  display:block;
+  margin-bottom:6px;
+}
+
+.sel{
+  width:100%;
+  padding:11px 12px;
+  border:2px solid var(--border);
+  border-radius:10px;
+  font-size:0.85rem;
+  font-family:inherit;
+  font-weight:600;
+  color:var(--ink);
+  background:var(--bg);
+  outline:none;
+  -webkit-appearance:none;
+  cursor:pointer;
+}
+
+/* Error */
+.err{
+  padding:10px 14px;
+  background:#fff0f0;
+  border:2px solid var(--red);
+  border-radius:10px;
+  font-size:0.78rem;
+  font-weight:700;
+  color:var(--red);
+  margin-bottom:14px;
+  display:none;
+}
+
+/* Go button */
+.go{
+  width:100%;
+  padding:17px;
+  background:var(--ink);
+  color:#fff;
+  border:2px solid var(--ink);
+  border-radius:14px;
+  font-size:1rem;
+  font-weight:900;
+  font-family:inherit;
+  cursor:pointer;
+  box-shadow:4px 4px 0 rgba(0,0,0,0.2);
+  transition:all 0.12s;
+  letter-spacing:0.3px;
+}
+.go:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 rgba(0,0,0,0.2);}
+.go:active{transform:translate(2px,2px);box-shadow:2px 2px 0 rgba(0,0,0,0.2);}
+
+/* ── STATS SCREEN ── */
+#statsScreen{display:none;}
+
+/* Big countdown hero (black bar like Life Stats) */
+.hero-bar{
+  background:var(--ink);
+  color:#fff;
+  padding:60px 24px 50px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+
+.hero-bar::before{
+  content:'🦴';
+  position:absolute;
+  font-size:24rem;
+  opacity:0.03;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%) rotate(-20deg);
+  pointer-events:none;
+}
+
+.hero-eyebrow{
+  font-size:0.68rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:4px;
+  color:rgba(255,255,255,0.35);
+  margin-bottom:16px;
+}
+
+.hero-name{
+  font-size:1.1rem;
+  font-weight:800;
+  color:rgba(255,255,255,0.6);
+  margin-bottom:8px;
+}
+
+/* Live counter */
+.live-counter{
+  font-size:clamp(5rem,18vw,9rem);
+  font-weight:900;
+  line-height:1;
+  letter-spacing:-4px;
+  color:#fff;
+  margin-bottom:4px;
+  transition:all 0.3s;
+}
+
+.live-unit{
+  font-size:0.72rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:6px;
+  color:rgba(255,255,255,0.3);
+  margin-bottom:32px;
+}
+
+/* Progress strip */
+.progress-strip{
+  width:100%;
+  max-width:440px;
+  margin:0 auto 10px;
+  height:6px;
+  background:rgba(255,255,255,0.1);
+  border-radius:99px;
+  overflow:hidden;
+}
+.progress-fill{
+  height:100%;
+  border-radius:99px;
+  width:0;
+  transition:width 1.4s cubic-bezier(.4,0,.2,1);
+  background:#fff;
+}
+.progress-text{
+  font-size:0.7rem;
+  font-weight:700;
+  color:rgba(255,255,255,0.35);
+  letter-spacing:2px;
+  text-transform:uppercase;
+  margin-top:6px;
+}
+
+/* Milestone badges */
+.milestones{
+  display:flex;
+  gap:8px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-top:24px;
+}
+.badge{
+  padding:5px 14px;
+  border-radius:99px;
+  font-size:0.7rem;
+  font-weight:700;
+  border:1.5px solid rgba(255,255,255,0.15);
+  color:rgba(255,255,255,0.45);
+  transition:all 0.3s;
+}
+.badge.unlocked{
+  border-color:rgba(255,255,255,0.6);
+  color:#fff;
+  background:rgba(255,255,255,0.1);
+}
+.badge.next{
+  border-color:rgba(255,255,255,0.3);
+  color:rgba(255,255,255,0.3);
+  border-style:dashed;
+}
+
+/* ── STATS GRID (Life Stats style) ── */
+.stats-wrap{
+  max-width:640px;
+  margin:0 auto;
+  padding:32px 20px 60px;
+}
+
+.stats-section-title{
+  font-size:0.65rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:3px;
+  color:var(--dim);
+  margin-bottom:16px;
+  padding-bottom:8px;
+  border-bottom:1px solid var(--border);
+}
+
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin-bottom:32px;
+}
+
+/* Individual stat cell — exact Life Stats feel */
+.stat-cell{
+  background:var(--card);
+  border:2px solid var(--border);
+  border-radius:14px;
+  padding:18px 16px;
+  position:relative;
+  overflow:hidden;
+  transition:transform 0.2s, box-shadow 0.2s;
+}
+.stat-cell:hover{
+  transform:translateY(-3px);
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);
+}
+.stat-cell.wide{
+  grid-column:span 2;
+}
+.stat-cell.color-red   {border-left:4px solid var(--red);   background:#fff8f8;}
+.stat-cell.color-green {border-left:4px solid var(--green); background:#f5fbfb;}
+.stat-cell.color-blue  {border-left:4px solid var(--blue);  background:#f5f9fc;}
+.stat-cell.color-orange{border-left:4px solid var(--orange);background:#fff9f4;}
+.stat-cell.color-purple{border-left:4px solid var(--purple);background:#f8f7ff;}
+.stat-cell.color-yellow{border-left:4px solid var(--yellow);background:#fdfbf0;}
+
+.stat-label{
+  font-size:0.65rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  color:var(--dim);
+  margin-bottom:10px;
+}
+.stat-number{
+  font-size:2.4rem;
+  font-weight:900;
+  letter-spacing:-2px;
+  line-height:1;
+  color:var(--ink);
+  margin-bottom:4px;
+}
+.stat-number.big{font-size:3.2rem;}
+.stat-number.med{font-size:1.8rem;}
+.stat-sub{
+  font-size:0.72rem;
+  font-weight:500;
+  color:var(--dim);
+  line-height:1.4;
+}
+
+/* Inline bar inside stat cell */
+.mini-bar{
+  width:100%;
+  height:4px;
+  background:#eee;
+  border-radius:99px;
+  margin-top:10px;
+  overflow:hidden;
+}
+.mini-fill{
+  height:100%;
+  border-radius:99px;
+  transition:width 1.5s cubic-bezier(.4,0,.2,1);
+}
+
+/* Phase display (big cell) */
+.phase-display{
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+.phase-emoji-big{font-size:2.8rem;}
+.phase-info-title{font-size:1rem;font-weight:900;color:var(--ink);margin-bottom:4px;}
+.phase-info-desc{font-size:0.75rem;color:var(--dim);line-height:1.5;}
+
+/* Fact cells */
+.fact-cell{
+  background:var(--ink);
+  color:#fff;
+  border:2px solid var(--ink);
+}
+.fact-cell .stat-label{color:rgba(255,255,255,0.4);}
+.fact-cell .stat-number{color:#fff;}
+.fact-cell .stat-sub{color:rgba(255,255,255,0.5);}
+
+/* ── BUTTONS ── */
+.btn-row{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  max-width:640px;
+  margin:0 auto;
+  padding:0 20px 40px;
+}
+
+.share-btn{
+  width:100%;
+  padding:18px;
+  background:var(--purple);
+  color:#fff;
+  border:2px solid var(--purple);
+  border-radius:14px;
+  font-size:1rem;
+  font-weight:900;
+  font-family:inherit;
+  cursor:pointer;
+  box-shadow:4px 4px 0 #4a42cc;
+  transition:all 0.12s;
+}
+.share-btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #4a42cc;}
+.share-btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #4a42cc;}
+
+.reset-btn{
+  width:100%;
+  padding:15px;
+  background:transparent;
+  border:2px solid var(--border);
+  border-radius:14px;
+  font-size:0.88rem;
+  font-weight:700;
+  font-family:inherit;
+  cursor:pointer;
+  color:var(--dim);
+  transition:all 0.15s;
+}
+.reset-btn:hover{border-color:var(--ink);color:var(--ink);}
+
+/* ── DISCLAIMER ── */
+.disc{
+  max-width:640px;
+  margin:0 auto;
+  padding:0 20px 60px;
+}
+.disc-inner{
+  padding:14px 16px;
+  background:#fff8f8;
+  border-left:4px solid var(--red);
+  border-radius:0 10px 10px 0;
+  font-size:0.72rem;
+  color:#7f1d1d;
+  line-height:1.6;
+  font-weight:500;
+}
+
+/* ── CELEBRATION ── */
+#celScreen{
+  display:none;
+  min-height:calc(100vh - 62px);
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:40px 24px;
+  text-align:center;
+}
+
+.cel-emoji{
+  font-size:5rem;
+  display:block;
+  margin-bottom:20px;
+  animation:bounce 0.8s ease-in-out infinite alternate;
+}
+@keyframes bounce{from{transform:translateY(0);}to{transform:translateY(-16px);}}
+
+.cel-title{
+  font-size:clamp(2.5rem,8vw,5rem);
+  font-weight:900;
+  letter-spacing:-3px;
+  color:var(--ink);
+  margin-bottom:10px;
+}
+.cel-sub{font-size:1rem;color:var(--dim);font-weight:500;margin-bottom:40px;}
+
+.cel-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  max-width:420px;
+  width:100%;
+  margin-bottom:32px;
+}
+.cel-card{
+  background:var(--card);
+  border:2px solid var(--border);
+  border-radius:14px;
+  padding:20px;
+  text-align:center;
+}
+.cel-num{
+  font-size:2.5rem;
+  font-weight:900;
+  letter-spacing:-2px;
+  color:var(--ink);
+}
+.cel-lab{
+  font-size:0.65rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  color:var(--dim);
+  margin-top:6px;
+}
+
+/* Confetti */
+#confetti{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:9999;
+}
+
+/* Share canvas */
+#shareCanvas{display:none;}
+
+/* ── FOOTER ── */
+.footer{
+  border-top:2px solid var(--border);
+  padding:20px 24px;
+  text-align:center;
+  font-size:0.72rem;
+  color:var(--dim);
+  font-weight:600;
+}
+.footer a{color:var(--ink);font-weight:900;text-decoration:none;}
 
 /* ── HIDDEN ── */
-.hidden { display:none !important; }
+.hidden{display:none!important;}
 
-/* Pulse animation for interactive elements */
-@keyframes pop {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(0.93); }
-  70%  { transform: scale(1.06); }
-  100% { transform: scale(1); }
+/* Pop animation */
+@keyframes pop{
+  0%{transform:scale(1);}
+  40%{transform:scale(0.94);}
+  70%{transform:scale(1.06);}
+  100%{transform:scale(1);}
 }
+.pop{animation:pop 0.3s cubic-bezier(.34,1.56,.64,1);}
 
-.pop { animation: pop 0.3s cubic-bezier(.34,1.56,.64,1); }
+/* Slide up animation */
+@keyframes slideUp{
+  from{opacity:0;transform:translateY(16px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.slide-up{animation:slideUp 0.5s ease forwards;}
+
+/* ── MOBILE ── */
+@media(max-width:420px){
+  .intro-title{font-size:3rem;letter-spacing:-2px;}
+  .live-counter{font-size:5rem;}
+  .date-row,.optional-row,.stats-grid,.cel-grid{grid-template-columns:1fr;}
+  .stat-cell.wide{grid-column:span 1;}
+  .stat-number.big{font-size:2.5rem;}
+}
 
 </style>
 </head>
-
 <body>
 
-<!-- CONFETTI -->
 <canvas id="confetti"></canvas>
 
-<!-- TOP BAR -->
+<!-- ════════════════ TOPBAR ════════════════ -->
 <div class="topbar">
-  <div class="topbar-logo">
-    <span>🦴</span> CastCountdown
+  <div class="tb-logo">
+    <span class="tb-logo-bone">🦴</span>
+    CastCountdown
   </div>
-  <div class="topbar-right">Free forever</div>
+  <div class="tb-right">Free · No login</div>
 </div>
 
-<!-- FACT TICKER -->
-<div class="fact-bar">
-  <span class="fact-inner">
-    🦴 178 million new fractures happen globally every year &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
-    ⚡ Bones heal in 4 phases: hematoma, inflammation, repair, remodeling &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
-    🧒 Kids heal 2× faster than adults because their periosteum is thicker &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
-    🚬 Smoking makes bones heal 30% slower &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
-    💊 Calcium + Vitamin D speeds up bone healing &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
-    🦴 The femur is the hardest bone to break &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
-    🌍 6.8 million Americans fracture a bone every year &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
-  </span>
+<!-- ════════════════ INTRO / FORM SCREEN ════════════════ -->
+<div id="introScreen">
+
+  <div class="intro-tag">Your cast healing stats</div>
+
+  <h1 class="intro-title">
+    Cast<br/><span class="accent">Stats</span>
+  </h1>
+
+  <p class="intro-desc">
+    Enter your cast dates and see your entire
+    healing journey turned into live stats —
+    just like a game.
+  </p>
+
+  <div class="input-card">
+
+    <h2>Two dates. That's it.</h2>
+    <p>Ask your doctor for your removal date — they always have a target date. Enter both dates below for your personal healing stats.</p>
+
+    <!-- THE KEY: Ask doctor box -->
+    <div class="doc-tip">
+      <span class="doc-tip-icon">💡</span>
+      <span>
+        <strong>Ask your doctor:</strong>
+        "What is my estimated cast removal date?"
+        Write it down and enter it below.
+        Only your doctor knows the real date!
+      </span>
+    </div>
+
+    <!-- DATES -->
+    <div class="date-row">
+      <div class="date-group">
+        <label for="castOn">Cast put on</label>
+        <input type="date" id="castOn" class="date-inp"/>
+      </div>
+      <div class="date-group">
+        <label for="castOff">Doctor's removal date</label>
+        <input type="date" id="castOff" class="date-inp"/>
+      </div>
+    </div>
+
+    <!-- OPTIONAL -->
+    <div class="optional-row">
+      <div class="opt-group">
+        <label>Bone broken</label>
+        <select id="boneSel" class="sel">
+          <option value="">— Optional —</option>
+          <option value="Finger">☝️ Finger</option>
+          <option value="Wrist">🤚 Wrist</option>
+          <option value="Forearm">💪 Forearm</option>
+          <option value="Elbow">🦾 Elbow</option>
+          <option value="Collarbone">🎽 Collarbone</option>
+          <option value="Ankle">🦶 Ankle</option>
+          <option value="Shin">🦵 Shin</option>
+          <option value="Foot">👟 Foot</option>
+          <option value="Thigh">🦿 Thigh</option>
+        </select>
+      </div>
+      <div class="opt-group">
+        <label>How you broke it</label>
+        <select id="howSel" class="sel">
+          <option value="">— Optional —</option>
+          <option value="Playing sports">⚽ Sports</option>
+          <option value="A fall">🤸 A fall</option>
+          <option value="A car accident">🚗 Car accident</option>
+          <option value="Work injury">🔧 Work injury</option>
+          <option value="Skateboarding">🛹 Skateboarding</option>
+          <option value="Cycling">🚴 Cycling</option>
+          <option value="Random bad luck">🤦 Bad luck</option>
+          <option value="Other">💫 Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="err" id="errBox">
+      ⚠️ Please fill in both dates!
+    </div>
+
+    <button class="go" onclick="buildStats()">
+      See My Healing Stats →
+    </button>
+
+  </div>
 </div>
 
-<!-- ══════════════════════════
-     FORM SCREEN
-══════════════════════════ -->
-<div id="formScreen">
+<!-- ════════════════ STATS SCREEN ════════════════ -->
+<div id="statsScreen">
 
-  <div class="hero">
-    <div class="hero-eyebrow">Cast countdown calculator</div>
-    <h1 class="hero-title">How many days<br/><em>left?</em></h1>
-    <p class="hero-sub">Enter your fracture details and we'll calculate your healing timeline — backed by orthopedic science.</p>
+  <!-- BIG LIVE HERO -->
+  <div class="hero-bar">
+    <div class="hero-eyebrow">Your healing journey</div>
+    <div class="hero-name" id="hName">Broken Wrist</div>
+
+    <!-- Live countdown -->
+    <div class="live-counter" id="liveCounter">0</div>
+    <div class="live-unit">days left</div>
+
+    <!-- Progress strip -->
+    <div class="progress-strip">
+      <div class="progress-fill" id="progFill"></div>
+    </div>
+    <div class="progress-text" id="progText">0% healed</div>
+
+    <!-- Milestone badges -->
+    <div class="milestones" id="milestones"></div>
   </div>
 
-  <div class="wrap">
+  <!-- STATS SECTIONS -->
+  <div class="stats-wrap">
 
-    <!-- STEP 1: BONE -->
-    <div class="step">
-      <div class="step-label">
-        <span class="step-num">1</span>
-        Which bone did you break?
+    <!-- ─ TIME ─ -->
+    <div class="stats-section-title">⏱ Time</div>
+    <div class="stats-grid">
+
+      <div class="stat-cell color-purple">
+        <div class="stat-label">Days remaining</div>
+        <div class="stat-number big" id="sDaysLeft">--</div>
+        <div class="stat-sub">until cast removal</div>
       </div>
-      <div class="bone-grid" id="boneGrid">
-        <div class="bone-tile" data-bone="finger"   onclick="pickBone(this)"><span class="tile-emoji">☝️</span><span class="tile-name">Finger</span></div>
-        <div class="bone-tile" data-bone="wrist"    onclick="pickBone(this)"><span class="tile-emoji">🤚</span><span class="tile-name">Wrist</span></div>
-        <div class="bone-tile" data-bone="forearm"  onclick="pickBone(this)"><span class="tile-emoji">💪</span><span class="tile-name">Forearm</span></div>
-        <div class="bone-tile" data-bone="elbow"    onclick="pickBone(this)"><span class="tile-emoji">🦾</span><span class="tile-name">Elbow</span></div>
-        <div class="bone-tile" data-bone="clavicle" onclick="pickBone(this)"><span class="tile-emoji">🎽</span><span class="tile-name">Collarbone</span></div>
-        <div class="bone-tile" data-bone="ankle"    onclick="pickBone(this)"><span class="tile-emoji">🦶</span><span class="tile-name">Ankle</span></div>
-        <div class="bone-tile" data-bone="tibia"    onclick="pickBone(this)"><span class="tile-emoji">🦵</span><span class="tile-name">Shin</span></div>
-        <div class="bone-tile" data-bone="foot"     onclick="pickBone(this)"><span class="tile-emoji">👟</span><span class="tile-name">Foot</span></div>
-        <div class="bone-tile" data-bone="femur"    onclick="pickBone(this)"><span class="tile-emoji">🦿</span><span class="tile-name">Thigh</span></div>
+
+      <div class="stat-cell color-blue">
+        <div class="stat-label">Days completed</div>
+        <div class="stat-number big" id="sDaysDone">--</div>
+        <div class="stat-sub">days in cast so far</div>
       </div>
-      <input type="hidden" id="bone"/>
+
+      <div class="stat-cell color-green">
+        <div class="stat-label">Total cast time</div>
+        <div class="stat-number" id="sTotalDays">--</div>
+        <div class="stat-sub" id="sTotalWeeks">-- weeks</div>
+      </div>
+
+      <div class="stat-cell color-orange">
+        <div class="stat-label">Healing speed</div>
+        <div class="stat-number" id="sSpeed">--</div>
+        <div class="stat-sub" id="sSpeedSub">% per day</div>
+      </div>
+
     </div>
 
-    <!-- STEP 2: FRACTURE -->
-    <div class="step">
-      <div class="step-label">
-        <span class="step-num">2</span>
-        How bad is the fracture?
-      </div>
-      <div class="frac-grid">
-        <div class="frac-tile" data-frac="simple"    onclick="pickFrac(this)"><span class="frac-emoji">😌</span><span class="frac-name">Simple</span><span class="frac-desc">Clean break</span></div>
-        <div class="frac-tile" data-frac="displaced" onclick="pickFrac(this)"><span class="frac-emoji">😬</span><span class="frac-name">Displaced</span><span class="frac-desc">Bone moved</span></div>
-        <div class="frac-tile" data-frac="complex"   onclick="pickFrac(this)"><span class="frac-emoji">😱</span><span class="frac-name">Complex</span><span class="frac-desc">Many pieces</span></div>
-      </div>
-      <input type="hidden" id="frac"/>
-    </div>
+    <!-- ─ PROGRESS ─ -->
+    <div class="stats-section-title">📊 Progress</div>
+    <div class="stats-grid">
 
-    <!-- STEP 3: AGE + DATE -->
-    <div class="step">
-      <div class="step-label">
-        <span class="step-num">3</span>
-        About you
-      </div>
-      <div class="input-row">
-        <div class="input-wrap">
-          <label for="age">Your age</label>
-          <input type="number" id="age" class="inp" placeholder="e.g. 24" min="1" max="120"/>
-        </div>
-        <div class="input-wrap">
-          <label for="castDate">Cast date</label>
-          <input type="date" id="castDate" class="inp"/>
-        </div>
-      </div>
-    </div>
-
-    <!-- STEP 4: HEALTH -->
-    <div class="step">
-      <div class="step-label">
-        <span class="step-num">4</span>
-        Health factors
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div>
-          <div class="step-label" style="margin-bottom:8px;">🚬 Do you smoke?</div>
-          <div class="toggle-row">
-            <div class="toggle on-no" id="smokeNo"  onclick="setToggle('smoke','no')">No</div>
-            <div class="toggle"       id="smokeYes" onclick="setToggle('smoke','yes')">Yes</div>
+      <div class="stat-cell wide">
+        <div class="stat-label">Healing phase</div>
+        <div class="phase-display">
+          <div class="phase-emoji-big" id="phaseEmoji">🔴</div>
+          <div>
+            <div class="phase-info-title" id="phaseTitle">Inflammation</div>
+            <div class="phase-info-desc" id="phaseDesc">Blood clot forming, repair cells arriving</div>
           </div>
         </div>
-        <div>
-          <div class="step-label" style="margin-bottom:8px;">🩸 Diabetes?</div>
-          <div class="toggle-row">
-            <div class="toggle on-no" id="diabNo"  onclick="setToggle('diab','no')">No</div>
-            <div class="toggle"       id="diabYes" onclick="setToggle('diab','yes')">Yes</div>
-          </div>
+        <div class="mini-bar" style="margin-top:14px;">
+          <div class="mini-fill" id="phaseMini" style="background:var(--red);"></div>
         </div>
       </div>
+
+      <div class="stat-cell color-green">
+        <div class="stat-label">% Healed</div>
+        <div class="stat-number big" id="sPct">--</div>
+        <div class="stat-sub">out of 100%</div>
+        <div class="mini-bar">
+          <div class="mini-fill" id="pctMini" style="background:var(--green);"></div>
+        </div>
+      </div>
+
+      <div class="stat-cell color-red">
+        <div class="stat-label">% Remaining</div>
+        <div class="stat-number big" id="sPctLeft">--</div>
+        <div class="stat-sub">still to go</div>
+        <div class="mini-bar">
+          <div class="mini-fill" id="pctLeftMini" style="background:var(--red);"></div>
+        </div>
+      </div>
+
     </div>
 
-    <!-- ERROR + GO -->
-    <div class="step">
-      <div class="err-box" id="errBox">⚠️ Fill in all fields — bone, fracture type, age, and date!</div>
-      <button class="go-btn" onclick="calc()">Calculate My Countdown →</button>
+    <!-- ─ BODY STATS (Life Stats flavour!) ─ -->
+    <div class="stats-section-title">🔬 What your body has done</div>
+    <div class="stats-grid">
+
+      <div class="stat-cell color-red fact-cell">
+        <div class="stat-label">Heartbeats since cast</div>
+        <div class="stat-number med" id="sHeartbeats">--</div>
+        <div class="stat-sub">at 70 bpm average</div>
+      </div>
+
+      <div class="stat-cell color-blue fact-cell">
+        <div class="stat-label">Breaths taken</div>
+        <div class="stat-number med" id="sBreaths">--</div>
+        <div class="stat-sub">at 15 per minute</div>
+      </div>
+
+      <div class="stat-cell color-purple fact-cell">
+        <div class="stat-label">Bone cells created</div>
+        <div class="stat-number med" id="sBoneCells">--</div>
+        <div class="stat-sub">osteoblasts at work</div>
+      </div>
+
+      <div class="stat-cell fact-cell">
+        <div class="stat-label">Calories healing burns</div>
+        <div class="stat-number med" id="sCalories">--</div>
+        <div class="stat-sub">fracture healing uses ~50 extra/day</div>
+      </div>
+
+    </div>
+
+    <!-- ─ DATES ─ -->
+    <div class="stats-section-title">📅 Key dates</div>
+    <div class="stats-grid">
+
+      <div class="stat-cell">
+        <div class="stat-label">Cast put on</div>
+        <div class="stat-number med" id="sCastOn">--</div>
+        <div class="stat-sub">day this all started</div>
+      </div>
+
+      <div class="stat-cell color-green">
+        <div class="stat-label">Doctor's removal date</div>
+        <div class="stat-number med" id="sCastOff">--</div>
+        <div class="stat-sub" id="sCastOffSub">estimated by doctor</div>
+      </div>
+
+      <div class="stat-cell color-orange">
+        <div class="stat-label">Halfway point</div>
+        <div class="stat-number med" id="sHalfway">--</div>
+        <div class="stat-sub" id="sHalfwaySub">50% healed milestone</div>
+      </div>
+
+      <div class="stat-cell color-blue">
+        <div class="stat-label">Nearest milestone</div>
+        <div class="stat-number med" id="sMilestone">--</div>
+        <div class="stat-sub" id="sMilestoneSub">next big achievement</div>
+      </div>
+
+    </div>
+
+    <!-- ─ FUN FACTS ─ -->
+    <div class="stats-section-title">💡 Bone science</div>
+    <div class="stats-grid">
+
+      <div class="stat-cell wide color-yellow">
+        <div class="stat-label">Did you know</div>
+        <div class="stat-number med" id="sBoneFact" style="font-size:1rem;letter-spacing:-0.5px;line-height:1.4;">Loading...</div>
+        <div class="stat-sub" style="margin-top:8px;">Bone science fact</div>
+      </div>
+
+      <div class="stat-cell color-green">
+        <div class="stat-label">Bone hardness rank</div>
+        <div class="stat-number" id="sBoneHard">--</div>
+        <div class="stat-sub" id="sBoneHardSub">out of all bones</div>
+      </div>
+
+      <div class="stat-cell color-purple">
+        <div class="stat-label">Global cast wearers</div>
+        <div class="stat-number med">~18,600</div>
+        <div class="stat-sub">people in a cast right now (est.)</div>
+      </div>
+
     </div>
 
   </div>
+
+  <!-- SHARE + RESET -->
+  <div class="btn-row">
+    <button class="share-btn" onclick="doShare()">📤 Share My Cast Stats</button>
+    <button class="reset-btn" onclick="doReset()">← Enter new dates</button>
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div class="disc">
+    <div class="disc-inner">
+      ⚠️ <strong>Medical disclaimer:</strong>
+      This tool uses your doctor's date — it does not predict healing times.
+      Only your treating physician decides when to remove your cast.
+      <strong>Never remove your cast yourself.</strong>
+      Stats are estimates for fun/educational purposes.
+    </div>
+  </div>
+
 </div>
 
-<!-- ══════════════════════════
-     RESULT SCREEN
-══════════════════════════ -->
-<div id="resultScreen" class="result-screen">
+<!-- ════════════════ CELEBRATION SCREEN ════════════════ -->
+<div id="celScreen">
 
-  <!-- Big counter -->
-  <div class="countdown-hero">
-    <div class="c-meta" id="rMeta">Broken Wrist · Simple Fracture</div>
+  <span class="cel-emoji">🎉</span>
+  <h1 class="cel-title">Cast-Off Day!</h1>
+  <p class="cel-sub">You made it. Healing complete!</p>
 
-    <!-- Tick dots -->
-    <div class="progress-ticker" id="tickRow"></div>
-
-    <div class="c-number" id="cNum">0</div>
-    <div class="c-unit">days left</div>
-
-    <div class="heal-bar-wrap">
-      <div class="heal-track">
-        <div class="heal-fill" id="healFill"></div>
-      </div>
-      <div class="heal-pct" id="healPct">0% healed</div>
+  <div class="cel-grid">
+    <div class="cel-card">
+      <div class="cel-num" id="celTotal">--</div>
+      <div class="cel-lab">Total days</div>
+    </div>
+    <div class="cel-card">
+      <div class="cel-num" id="celBone">--</div>
+      <div class="cel-lab">Bone healed</div>
+    </div>
+    <div class="cel-card">
+      <div class="cel-num" id="celHearts">--</div>
+      <div class="cel-lab">Heartbeats</div>
+    </div>
+    <div class="cel-card">
+      <div class="cel-num" id="celBreaths">--</div>
+      <div class="cel-lab">Breaths</div>
     </div>
   </div>
 
-  <!-- Info cards -->
-  <div class="info-grid">
-    <div class="info-card">
-      <div class="info-card-label">📅 Cast on</div>
-      <div class="info-card-value" id="iCastOn">--</div>
-      <div class="info-card-sub">Start of journey</div>
-    </div>
-    <div class="info-card">
-      <div class="info-card-label">🎯 Estimated off</div>
-      <div class="info-card-value" id="iCastOff">--</div>
-      <div class="info-card-sub">Estimated removal</div>
-    </div>
-    <div class="info-card">
-      <div class="info-card-label">⏱️ Days since cast</div>
-      <div class="info-card-value" id="iDaysSince">--</div>
-      <div class="info-card-sub">Days elapsed</div>
-    </div>
-    <div class="info-card">
-      <div class="info-card-label">📊 Total heal time</div>
-      <div class="info-card-value" id="iTotalDays">--</div>
-      <div class="info-card-sub">Estimated total</div>
-    </div>
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:360px;width:100%;">
+    <button class="share-btn" onclick="doShare(true)">📤 Share My Cast-Off Day!</button>
+    <button class="reset-btn" onclick="doReset()">Track another bone →</button>
   </div>
 
-  <!-- Phase -->
-  <div class="phase-card">
-    <div class="phase-inner" id="phaseInner">
-      <div class="phase-icon" id="phaseIcon">🔴</div>
-      <div>
-        <div class="phase-title" id="phaseTitle">Inflammation Phase</div>
-        <div class="phase-desc"  id="phaseDesc">Your body is forming a blood clot and beginning repair.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modifiers -->
-  <div class="mods-card">
-    <div class="mods-inner" id="modsInner">
-      <div class="mods-title">Healing adjustments applied</div>
-      <ul class="mods-list" id="modsList"></ul>
-    </div>
-  </div>
-
-  <!-- Buttons -->
-  <div class="share-section">
-    <button class="share-btn-big" onclick="doShare()">📤 Share My Countdown</button>
-    <button class="reset-btn" onclick="doReset()">← Start over</button>
-  </div>
-
-  <!-- Disclaimer -->
-  <div class="disclaimer-bar">
-    <div class="disclaimer-inner">
-      ⚠️ <strong>Medical disclaimer:</strong> These are general estimates based on published orthopedic research. This is <strong>not medical advice</strong>. Only your doctor decides when your cast comes off. <strong>Never remove your cast yourself.</strong>
-    </div>
-  </div>
-
-  <!-- Hidden share canvas -->
-  <canvas id="shareCanvas" width="600" height="400" style="display:none"></canvas>
-
-</div>
-
-<!-- ══════════════════════════
-     CELEBRATION SCREEN
-══════════════════════════ -->
-<div id="celScreen" class="cel-screen">
-  <span class="cel-big-emoji">🎉</span>
-  <div class="cel-title">Cast-Off Day!</div>
-  <div class="cel-sub">You made it through the whole thing. Healing complete!</div>
-  <div class="cel-stats">
-    <div class="cel-stat-card">
-      <div class="cel-stat-num" id="celDays">--</div>
-      <div class="cel-stat-lab">Days in cast</div>
-    </div>
-    <div class="cel-stat-card">
-      <div class="cel-stat-num" id="celBone">--</div>
-      <div class="cel-stat-lab">Bone healed</div>
-    </div>
-  </div>
-  <button class="share-btn-big" style="max-width:400px;margin:0 auto 12px;" onclick="doShare(true)">📤 Share Cast-Off Day!</button>
-  <button class="reset-btn" style="max-width:400px;margin:0 auto;" onclick="doReset()">Track another bone →</button>
 </div>
 
 <!-- FOOTER -->
-<div class="footer-bar">
-  🦴 CastCountdown · <a href="https://castcountdown.me">castcountdown.me</a> · Free forever
+<div class="footer" id="mainFooter">
+  🦴 CastCountdown ·
+  <a href="https://castcountdown.me">castcountdown.me</a>
+  · Free forever
 </div>
 
+<canvas id="shareCanvas" width="600" height="400"></canvas>
+
 <script>
-// ════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  DATA
-// ════════════════════════════════════════
-const BONES = {
-  finger:   { n:'Finger',      d:[28,35,42]   },
-  wrist:    { n:'Wrist',       d:[35,49,63]   },
-  forearm:  { n:'Forearm',     d:[49,63,84]   },
-  elbow:    { n:'Elbow',       d:[35,49,63]   },
-  clavicle: { n:'Collarbone',  d:[35,49,56]   },
-  ankle:    { n:'Ankle',       d:[49,63,84]   },
-  tibia:    { n:'Shin',        d:[84,112,140] },
-  foot:     { n:'Foot',        d:[28,42,56]   },
-  femur:    { n:'Thigh',       d:[112,140,168]}
-};
-
-const FRAC_NAMES = { simple:'Simple', displaced:'Displaced', complex:'Complex' };
-
+// ═══════════════════════════════════════════
 const PHASES = [
   {
-    min:0, max:33,
-    icon:'🔴', title:'Inflammation Phase',
-    desc:'Your body is forming a blood clot and sending repair cells to the fracture site.',
-    cls:'ph-red'
+    min:0,   max:25,
+    e:'🔴',  t:'Inflammation Phase',
+    d:'Blood clot forming, repair cells rushing to the site',
+    col:'var(--red)',   pcol:'#ef4444'
   },
   {
-    min:33, max:66,
-    icon:'🟡', title:'Repair Phase',
-    desc:'New soft bone tissue (callus) is bridging the break. Calcium is depositing.',
-    cls:'ph-yellow'
+    min:25,  max:50,
+    e:'🟠',  t:'Soft Callus Phase',
+    d:'Soft rubbery tissue bridges the break — visible on X-ray',
+    col:'var(--orange)',pcol:'#f97316'
   },
   {
-    min:66, max:101,
-    icon:'🟢', title:'Remodeling Phase',
-    desc:'Hard bone is replacing soft callus. Your bone reshapes and strengthens daily.',
-    cls:'ph-green'
+    min:50,  max:75,
+    e:'🟡',  t:'Hard Callus Phase',
+    d:'Calcium deposits harden the soft callus into real bone',
+    col:'var(--yellow)',pcol:'#eab308'
+  },
+  {
+    min:75,  max:101,
+    e:'🟢',  t:'Remodeling Phase',
+    d:'Bone reshapes and strengthens — stronger than before',
+    col:'var(--green)', pcol:'#22c55e'
   }
 ];
 
-// ════════════════════════════════════════
-//  STATE
-// ════════════════════════════════════════
-let S = { bone:'', frac:'', smoke:'no', diab:'no' };
+const BONE_FACTS = [
+  "Your bone creates about 1 million new cells every single second during healing",
+  "Bone is the only tissue in your body that heals without leaving a scar",
+  "The calcium in your bones is the same element used in chalk",
+  "Your skeleton replaces itself completely every 10 years",
+  "Bones are 4x stronger than concrete when it comes to compression",
+  "The human body has 206 bones — you were born with 270",
+  "Bone marrow produces 2 million red blood cells every second",
+  "Astronauts lose bone mass in space because bones need gravity to stay strong"
+];
 
-// ════════════════════════════════════════
+const BONE_HARDNESS = {
+  Finger:     {rank:'#8 hardest',info:'among hand bones'},
+  Wrist:      {rank:'Moderate',  info:'multiple small bones'},
+  Forearm:    {rank:'Strong',    info:'radius & ulna pair'},
+  Elbow:      {rank:'Very hard', info:'joint bone complex'},
+  Collarbone: {rank:'Moderate',  info:'most commonly broken'},
+  Ankle:      {rank:'Strong',    info:'weight-bearing bone'},
+  Shin:       {rank:'Very hard', info:'2nd strongest leg bone'},
+  Foot:       {rank:'Moderate',  info:'26 bones total'},
+  Thigh:      {rank:'#1 hardest',info:'strongest bone in body'}
+};
+
+// ═══════════════════════════════════════════
 //  INIT
-// ════════════════════════════════════════
-document.getElementById('castDate').value = new Date().toISOString().split('T')[0];
+// ═══════════════════════════════════════════
+const today = new Date();
+document.getElementById('castOn').value  = today.toISOString().split('T')[0];
+
+// Set default removal date 6 weeks from today
+const sixWeeks = new Date(today);
+sixWeeks.setDate(sixWeeks.getDate() + 42);
+document.getElementById('castOff').value = sixWeeks.toISOString().split('T')[0];
 
 // Load saved data
-const raw = localStorage.getItem('cc_v2');
-if (raw) {
-  try { renderResult(JSON.parse(raw)); } catch(e) { localStorage.removeItem('cc_v2'); }
+const saved = localStorage.getItem('cc_stats');
+if (saved) {
+  try { renderStats(JSON.parse(saved)); }
+  catch(e) { localStorage.removeItem('cc_stats'); }
 }
 
-// ════════════════════════════════════════
-//  PICK BONE
-// ════════════════════════════════════════
-function pickBone(el) {
-  document.querySelectorAll('.bone-tile').forEach(t => t.classList.remove('picked'));
-  el.classList.add('picked');
-  el.classList.add('pop');
-  el.addEventListener('animationend', () => el.classList.remove('pop'), {once:true});
-  S.bone = el.dataset.bone;
-  document.getElementById('bone').value = S.bone;
-}
+// ═══════════════════════════════════════════
+//  BUILD STATS
+// ═══════════════════════════════════════════
+function buildStats() {
+  const on  = document.getElementById('castOn').value;
+  const off = document.getElementById('castOff').value;
+  const err = document.getElementById('errBox');
 
-// ════════════════════════════════════════
-//  PICK FRACTURE
-// ════════════════════════════════════════
-function pickFrac(el) {
-  document.querySelectorAll('.frac-tile').forEach(t =>
-    t.classList.remove('picked-simple','picked-displaced','picked-complex')
-  );
-  const cls = {simple:'picked-simple',displaced:'picked-displaced',complex:'picked-complex'};
-  el.classList.add(cls[el.dataset.frac]);
-  el.classList.add('pop');
-  el.addEventListener('animationend', () => el.classList.remove('pop'), {once:true});
-  S.frac = el.dataset.frac;
-  document.getElementById('frac').value = S.frac;
-}
-
-// ════════════════════════════════════════
-//  TOGGLE YES/NO
-// ════════════════════════════════════════
-function setToggle(type, val) {
-  const no  = document.getElementById(type+'No');
-  const yes = document.getElementById(type+'Yes');
-  no.classList.remove('on-no','on-yes');
-  yes.classList.remove('on-no','on-yes');
-  val === 'no' ? no.classList.add('on-no') : yes.classList.add('on-yes');
-  if (type === 'smoke') S.smoke = val;
-  else S.diab = val;
-}
-
-// ════════════════════════════════════════
-//  CALCULATE
-// ════════════════════════════════════════
-function calc() {
-  const age  = parseInt(document.getElementById('age').value);
-  const date = document.getElementById('castDate').value;
-  const err  = document.getElementById('errBox');
-
-  if (!S.bone || !S.frac || !age || !date) {
+  if (!on || !off) {
     err.style.display = 'block';
-    err.classList.add('pop');
-    err.addEventListener('animationend', () => err.classList.remove('pop'), {once:true});
     return;
   }
+
+  if (new Date(off) <= new Date(on)) {
+    err.style.display = 'block';
+    err.textContent   = '⚠️ Removal date must be after cast date!';
+    return;
+  }
+
   err.style.display = 'none';
 
-  const b    = BONES[S.bone];
-  const fi   = {simple:0,displaced:1,complex:2}[S.frac];
-  let   days = b.d[fi];
-  const mods = [];
-
-  if      (age < 10)  { days = Math.round(days*0.55); mods.push('👶 Child under 10: heals ~45% faster'); }
-  else if (age <= 17) { days = Math.round(days*0.75); mods.push('🧒 Teenager: heals ~25% faster'); }
-  else if (age >= 65) { days = Math.round(days*1.35); mods.push('👴 Age 65+: heals ~35% slower'); }
-  if (S.smoke==='yes'){ days = Math.round(days*1.30); mods.push('🚬 Smoking: heals ~30% slower'); }
-  if (S.diab==='yes') { days = Math.round(days*1.25); mods.push('🩸 Diabetes: heals ~25% slower'); }
-
   const data = {
-    bone:S.bone, bn:b.n,
-    frac:S.frac, fn:FRAC_NAMES[S.frac],
-    age, date, days, mods
+    on,
+    off,
+    bone: document.getElementById('boneSel').value || 'Bone',
+    how:  document.getElementById('howSel').value  || ''
   };
 
-  localStorage.setItem('cc_v2', JSON.stringify(data));
-  renderResult(data);
+  localStorage.setItem('cc_stats', JSON.stringify(data));
+  renderStats(data);
 }
 
-// ════════════════════════════════════════
-//  RENDER RESULT
-// ════════════════════════════════════════
-function renderResult(d) {
-  const cast   = new Date(d.date);
-  const today  = new Date();
-  const since  = Math.floor((today - cast) / 864e5);
-  const left   = Math.max(d.days - since, 0);
-  const pct    = Math.min(Math.round(since / d.days * 100), 100);
-  const offD   = new Date(cast);
-  offD.setDate(offD.getDate() + d.days);
-  const fmt    = dt => dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  const fmts   = dt => dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+// ═══════════════════════════════════════════
+//  RENDER STATS
+// ═══════════════════════════════════════════
+function renderStats(d) {
+  const castOn  = new Date(d.on);
+  const castOff = new Date(d.off);
+  const now     = new Date();
 
-  // Celebration?
-  if (left === 0) {
-    document.getElementById('celDays').textContent = d.days;
-    document.getElementById('celBone').textContent = d.bn;
-    show('cel');
-    launchConfetti();
+  const totalDays  = Math.round((castOff - castOn)  / 864e5);
+  const daysDone   = Math.max(Math.floor((now - castOn) / 864e5), 0);
+  const daysLeft   = Math.max(Math.round((castOff - now) / 864e5), 0);
+  const pct        = Math.min(Math.round(daysDone / totalDays * 100), 100);
+  const pctLeft    = 100 - pct;
+  const speedPerDay= (100 / totalDays).toFixed(2);
+
+  // Celebration check
+  if (daysLeft === 0 && daysDone >= totalDays) {
+    renderCelebration(d, totalDays, daysDone);
     return;
   }
 
-  // Meta
-  document.getElementById('rMeta').textContent = d.bn + ' · ' + d.fn;
+  // Helpers
+  const fmt   = dt => dt.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+  const fmts  = dt => dt.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+  const fmtBig= n  => {
+    if (n >= 1e9)  return (n/1e9).toFixed(1)+'B';
+    if (n >= 1e6)  return (n/1e6).toFixed(1)+'M';
+    if (n >= 1e3)  return (n/1e3).toFixed(0)+'K';
+    return n.toString();
+  };
 
-  // Animated counter
-  animCount('cNum', left, 1200);
+  // Body stats
+  const secsDone    = daysDone * 86400;
+  const heartbeats  = Math.round(secsDone * 70 / 60);
+  const breaths     = Math.round(secsDone * 15 / 60);
+  const boneCells   = Math.round(daysDone * 86400 * 1000000);  // ~1M per sec
+  const calories    = daysDone * 50; // ~50 extra cals/day for healing
 
-  // Heal bar
-  setTimeout(() => {
-    document.getElementById('healFill').style.width = pct + '%';
-  }, 200);
-  document.getElementById('healPct').textContent = pct + '% healed';
+  // Halfway date
+  const halfwayD = new Date(castOn);
+  halfwayD.setDate(halfwayD.getDate() + Math.round(totalDays / 2));
 
-  // Tick dots (10 dots = 10% each)
-  const tr = document.getElementById('tickRow');
-  tr.innerHTML = '';
-  for (let i = 0; i < 10; i++) {
-    const dot = document.createElement('div');
-    dot.className = 'tick-dot' + (i < Math.round(pct/10) ? ' lit' : '');
-    tr.appendChild(dot);
-  }
-
-  // Info cards
-  document.getElementById('iCastOn').textContent    = fmts(cast);
-  document.getElementById('iCastOff').textContent   = fmts(offD);
-  document.getElementById('iDaysSince').textContent = since + ' days';
-  document.getElementById('iTotalDays').textContent = d.days + ' days';
+  // Next milestone
+  const milestones  = [25, 50, 75, 90];
+  const nextMilePct = milestones.find(m => m > pct) || 100;
+  const nextMileDay = Math.round((nextMilePct / 100) * totalDays);
+  const nextMileD   = new Date(castOn);
+  nextMileD.setDate(nextMileD.getDate() + nextMileDay);
 
   // Phase
-  const ph = PHASES.find(p => pct >= p.min && pct < p.max) || PHASES[2];
-  document.getElementById('phaseIcon').textContent  = ph.icon;
-  document.getElementById('phaseTitle').textContent = ph.title;
-  document.getElementById('phaseDesc').textContent  = ph.desc;
-  const pi = document.getElementById('phaseInner');
-  pi.className = 'phase-inner ' + ph.cls;
+  const phase = PHASES.find(p => pct >= p.min && pct < p.max) || PHASES[3];
 
-  // Mods
-  const mi = document.getElementById('modsInner');
-  const ml = document.getElementById('modsList');
-  if (d.mods && d.mods.length) {
-    ml.innerHTML = d.mods.map(m => '<li>'+m+'</li>').join('');
-    mi.style.display = 'block';
-  } else {
-    mi.style.display = 'none';
-  }
+  // Bone fact (rotate daily)
+  const factIdx = daysDone % BONE_FACTS.length;
 
-  show('result');
+  // Bone hardness
+  const boneInfo = BONE_HARDNESS[d.bone] || {rank:'—', info:'select a bone above'};
+
+  // ── HERO ──
+  document.getElementById('hName').textContent =
+    (d.bone && d.bone !== 'Bone' ? d.bone : '') +
+    (d.how ? (' · Caused by: ' + d.how) : '');
+
+  // Animated counter
+  animCount('liveCounter', daysLeft, 1400);
+
+  // Progress
+  setTimeout(() => {
+    document.getElementById('progFill').style.width = pct + '%';
+  }, 300);
+  document.getElementById('progText').textContent = pct + '% healed · ' + pctLeft + '% to go';
+
+  // Milestone badges
+  renderBadges(pct);
+
+  // ── STATS ──
+  g('sDaysLeft',    daysLeft);
+  g('sDaysDone',    daysDone);
+  g('sTotalDays',   totalDays);
+  g('sTotalWeeks',  Math.round(totalDays/7) + ' weeks total');
+  g('sSpeed',       speedPerDay);
+  g('sSpeedSub',    '% healed per day (your pace)');
+  g('sPct',         pct + '%');
+  g('sPctLeft',     pctLeft + '%');
+  g('sHeartbeats',  fmtBig(heartbeats));
+  g('sBreaths',     fmtBig(breaths));
+  g('sBoneCells',   fmtBig(boneCells));
+  g('sCalories',    fmtBig(calories));
+  g('sCastOn',      fmts(castOn));
+  g('sCastOff',     fmts(castOff));
+  g('sCastOffSub',  'set by your doctor · ' + daysLeft + ' days away');
+  g('sHalfway',     fmts(halfwayD));
+  g('sHalfwaySub',  pct >= 50 ? '✅ Already passed!' : 'coming in ' + Math.max(0, Math.round((halfwayD-now)/864e5)) + ' days');
+  g('sMilestone',   nextMilePct + '% mark');
+  g('sMilestoneSub',fmts(nextMileD) + ' · ' + Math.max(0,Math.round((nextMileD-now)/864e5)) + ' days away');
+  g('sBoneFact',    BONE_FACTS[factIdx]);
+  g('sBoneHard',    boneInfo.rank);
+  g('sBoneHardSub', boneInfo.info);
+
+  // Phase
+  document.getElementById('phaseEmoji').textContent  = phase.e;
+  document.getElementById('phaseTitle').textContent  = phase.t;
+  document.getElementById('phaseDesc').textContent   = phase.d;
+
+  // Mini bars
+  setTimeout(() => {
+    // Phase bar: how far into THIS phase
+    const phaseRange = phase.max - phase.min;
+    const phaseProgress = Math.min(((pct - phase.min) / phaseRange) * 100, 100);
+    setBar('phaseMini', phaseProgress, phase.pcol);
+    setBar('pctMini',   pct,           '#22c55e');
+    setBar('pctLeftMini', pctLeft,     '#ef4444');
+  }, 400);
+
+  // SHOW
+  showScreen('stats');
 }
 
-// ════════════════════════════════════════
-//  SHOW SCREEN
-// ════════════════════════════════════════
-function show(which) {
-  document.getElementById('formScreen').style.display   = which==='form'   ? '' : 'none';
-  document.getElementById('resultScreen').style.display = which==='result' ? 'block' : 'none';
-  document.getElementById('celScreen').style.display    = which==='cel'    ? 'block' : 'none';
-  window.scrollTo({top:0,behavior:'smooth'});
+// ═══════════════════════════════════════════
+//  MILESTONE BADGES
+// ═══════════════════════════════════════════
+function renderBadges(pct) {
+  const badges = [
+    {pct:10,  label:'10% done'},
+    {pct:25,  label:'Quarter way'},
+    {pct:50,  label:'Halfway! 🎉'},
+    {pct:75,  label:'Almost there'},
+    {pct:90,  label:'Final stretch'},
+    {pct:100, label:'Cast free! 🏆'}
+  ];
+
+  const tr = document.getElementById('milestones');
+  tr.innerHTML = '';
+
+  badges.forEach(b => {
+    const div  = document.createElement('div');
+    div.className = 'badge';
+    div.textContent = b.label;
+    if      (pct >= b.pct) div.classList.add('unlocked');
+    else if (pct >= b.pct - 15) div.classList.add('next');
+    tr.appendChild(div);
+  });
 }
 
-// ════════════════════════════════════════
-//  RESET
-// ════════════════════════════════════════
-function doReset() {
-  localStorage.removeItem('cc_v2');
-  S = { bone:'', frac:'', smoke:'no', diab:'no' };
-  document.querySelectorAll('.bone-tile').forEach(t => t.classList.remove('picked'));
-  document.querySelectorAll('.frac-tile').forEach(t =>
-    t.classList.remove('picked-simple','picked-displaced','picked-complex')
-  );
-  document.getElementById('bone').value = '';
-  document.getElementById('frac').value = '';
-  document.getElementById('age').value  = '';
-  document.getElementById('castDate').value = new Date().toISOString().split('T')[0];
-  setToggle('smoke','no');
-  setToggle('diab','no');
-  show('form');
+// ═══════════════════════════════════════════
+//  CELEBRATION
+// ═══════════════════════════════════════════
+function renderCelebration(d, total, done) {
+  const fmtBig = n => {
+    if (n >= 1e9) return (n/1e9).toFixed(1)+'B';
+    if (n >= 1e6) return (n/1e6).toFixed(1)+'M';
+    if (n >= 1e3) return (n/1e3).toFixed(0)+'K';
+    return n.toString();
+  };
+  const secs = done * 86400;
+  g('celTotal',   total);
+  g('celBone',    d.bone !== 'Bone' ? d.bone : '🦴');
+  g('celHearts',  fmtBig(Math.round(secs*70/60)));
+  g('celBreaths', fmtBig(Math.round(secs*15/60)));
+  showScreen('cel');
+  launchConfetti();
 }
 
-// ════════════════════════════════════════
-//  ANIMATE NUMBER COUNT-UP
-// ════════════════════════════════════════
+// ═══════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════
+const g = (id, val) => {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+};
+
+function setBar(id, pct, color) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.background = color;
+  el.style.width      = Math.min(pct, 100) + '%';
+}
+
 function animCount(id, target, dur) {
   const el = document.getElementById(id);
+  if (!el) return;
   const start = performance.now();
-  function step(now) {
-    const t = Math.min((now-start)/dur,1);
-    const ease = 1-Math.pow(1-t,4);
-    el.textContent = Math.round(ease*target);
-    if (t<1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
+  (function step(now) {
+    const t    = Math.min((now-start)/dur, 1);
+    const ease = 1 - Math.pow(1-t, 4);
+    el.textContent = Math.round(ease * target);
+    if (t < 1) requestAnimationFrame(step);
+  })(performance.now());
 }
 
-// ════════════════════════════════════════
-//  SHARE
-// ════════════════════════════════════════
+function showScreen(which) {
+  document.getElementById('introScreen').style.display = which==='intro' ? '' : 'none';
+  document.getElementById('statsScreen').style.display = which==='stats' ? 'block' : 'none';
+  document.getElementById('celScreen').style.display   = which==='cel'   ? 'flex' : 'none';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function doReset() {
+  localStorage.removeItem('cc_stats');
+  showScreen('intro');
+}
+
+// ═══════════════════════════════════════════
+//  SHARE CARD
+// ═══════════════════════════════════════════
 function doShare(cel) {
-  const raw = localStorage.getItem('cc_v2');
+  const raw = localStorage.getItem('cc_stats');
   if (!raw) return;
   const d    = JSON.parse(raw);
-  const cast = new Date(d.date);
-  const since= Math.floor((new Date()-cast)/864e5);
-  const left = Math.max(d.days-since,0);
-  const pct  = Math.min(Math.round(since/d.days*100),100);
+  const on   = new Date(d.on);
+  const off  = new Date(d.off);
+  const now  = new Date();
+  const total= Math.round((off-on)/864e5);
+  const done = Math.max(Math.floor((now-on)/864e5),0);
+  const left = Math.max(Math.round((off-now)/864e5),0);
+  const pct  = Math.min(Math.round(done/total*100),100);
 
   const cv = document.getElementById('shareCanvas');
   const cx = cv.getContext('2d');
   cv.width = 600; cv.height = 400;
 
-  // Background
-  if (cel) {
-    const g = cx.createLinearGradient(0,0,600,400);
-    g.addColorStop(0,'#ffd200');
-    g.addColorStop(1,'#f7971e');
-    cx.fillStyle = g;
-  } else {
-    cx.fillStyle = '#111111';
-  }
+  // BG
+  cx.fillStyle = cel ? '#f7f3eb' : '#111111';
   cx.fillRect(0,0,600,400);
 
-  // Decorative bone watermark
-  cx.font = '180px serif';
-  cx.globalAlpha = 0.05;
+  // Watermark
+  cx.font = '14rem serif';
+  cx.globalAlpha = 0.04;
   cx.textAlign = 'center';
-  cx.fillStyle = '#fff';
-  cx.fillText('🦴', 480, 320);
+  cx.fillStyle = cel ? '#000' : '#fff';
+  cx.fillText('🦴', 480, 340);
   cx.globalAlpha = 1;
 
   // Card
-  cx.fillStyle = cel ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.06)';
-  rrect(cx, 40,35,520,330,18);
+  cx.fillStyle = cel ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.05)';
+  rrect(cx, 36,30,528,340,18);
 
   cx.textAlign = 'center';
 
-  // Logo
-  cx.fillStyle = cel ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
-  cx.font = '600 13px Inter,sans-serif';
-  cx.fillText('🦴 CASTCOUNTDOWN', 300, 78);
+  // App label
+  cx.fillStyle = cel ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.3)';
+  cx.font = '700 11px Inter,sans-serif';
+  cx.fillText('🦴  C A S T C O U N T D O W N', 300, 72);
 
-  // Bone info
-  cx.fillStyle = cel ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.35)';
-  cx.font = '500 13px Inter,sans-serif';
-  cx.fillText(d.bn + '  ·  ' + d.fn, 300, 105);
+  // Bone
+  if (d.bone && d.bone !== 'Bone') {
+    cx.font = '600 13px Inter,sans-serif';
+    cx.fillText(d.bone + (d.how ? '  ·  ' + d.how : ''), 300, 98);
+  }
 
   if (cel) {
     cx.fillStyle = '#111';
-    cx.font = '900 42px Inter,sans-serif';
-    cx.fillText("🎉 I'M CAST FREE!", 300, 210);
-    cx.fillStyle = 'rgba(0,0,0,0.45)';
-    cx.font = '600 17px Inter,sans-serif';
-    cx.fillText(d.days + ' days of healing. Done!', 300, 252);
+    cx.font = '900 40px Inter,sans-serif';
+    cx.fillText("🎉 I'M CAST FREE!", 300, 200);
+    cx.font = '600 16px Inter,sans-serif';
+    cx.fillStyle = '#888';
+    cx.fillText(total + ' days of healing — complete!', 300, 240);
   } else {
-    // Big number
-    cx.fillStyle = '#ffffff';
-    cx.font = '900 96px Inter,sans-serif';
+    // Days number
+    cx.font = '900 100px Inter,sans-serif';
+    cx.fillStyle = '#fff';
     cx.fillText(left, 300, 228);
-    cx.fillStyle = 'rgba(255,255,255,0.3)';
-    cx.font = '700 11px Inter,sans-serif';
-    cx.letterSpacing = '6px';
-    cx.fillText('D A Y S  L E F T', 300, 255);
 
-    // Progress bar
+    cx.font = '700 11px Inter,sans-serif';
+    cx.fillStyle = 'rgba(255,255,255,0.3)';
+    cx.fillText('D A Y S   L E F T', 300, 256);
+
+    // Bar bg
     cx.fillStyle = 'rgba(255,255,255,0.08)';
-    rrect(cx, 100,274,400,10,5);
-    const fw = Math.round(400*(pct/100));
+    rrect(cx, 80,272,440,10,5);
+
+    // Bar fill
+    const fw = Math.round(440*(pct/100));
     if (fw>0) {
-      cx.fillStyle = pct<33?'#ff4757':pct<66?'#ffa502':'#2ed573';
-      rrect(cx, 100,274,fw,10,5);
+      cx.fillStyle = pct<25?'#ef4444':pct<50?'#f97316':pct<75?'#eab308':'#22c55e';
+      rrect(cx,80,272,fw,10,5);
     }
-    cx.fillStyle = 'rgba(255,255,255,0.35)';
-    cx.font = '600 12px Inter,sans-serif';
-    cx.fillText(pct+'% healed', 300, 305);
+
+    cx.fillStyle='rgba(255,255,255,0.4)';
+    cx.font='600 12px Inter,sans-serif';
+    cx.fillText(pct+'% healed  ·  '+done+' days in  ·  '+left+' to go',300,305);
   }
 
   // URL
-  cx.fillStyle = cel ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.18)';
+  cx.fillStyle = cel ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.15)';
   cx.font = '500 11px Inter,sans-serif';
-  cx.fillText('castcountdown.me', 300, 345);
+  cx.fillText('castcountdown.me', 300, 348);
 
   cv.toBlob(async blob => {
-    const f = new File([blob],'castcountdown.png',{type:'image/png'});
+    const f   = new File([blob],'castcountdown.png',{type:'image/png'});
     const txt = cel
-      ? `🎉 Finally CAST FREE after ${d.days} days! Track your broken bone at castcountdown.me`
-      : `🦴 Only ${left} days until my cast comes off! ${pct}% healed. Track yours → castcountdown.me`;
-
+      ? `🎉 Finally CAST FREE! ${total} days of healing done! Track yours at castcountdown.me`
+      : `🦴 ${left} days left in my cast! ${pct}% healed. See my stats → castcountdown.me`;
     if (navigator.canShare && navigator.canShare({files:[f]})) {
       try { await navigator.share({title:'CastCountdown',text:txt,files:[f]}); return; }
-      catch(e) {}
+      catch(e){}
     }
-    // Fallback: download
     const a = document.createElement('a');
     a.href = cv.toDataURL('image/png');
     a.download = 'castcountdown.png';
@@ -1331,49 +1416,47 @@ function doShare(cel) {
   },'image/png');
 }
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  CONFETTI
-// ════════════════════════════════════════
+// ═══════════════════════════════════════════
 function launchConfetti() {
   const cv = document.getElementById('confetti');
   const cx = cv.getContext('2d');
   cv.width  = window.innerWidth;
   cv.height = window.innerHeight;
-
-  const COLS = ['#6c63ff','#ff4757','#ffa502','#2ed573','#1e90ff','#ffd200','#ff6b81'];
-  const pieces = Array.from({length:200}, () => ({
+  const C = ['#6c63ff','#e63946','#f4a261','#2a9d8f','#457b9d','#e9c46a','#ff6b81'];
+  const P = Array.from({length:180},()=>({
     x: Math.random()*cv.width,
     y: Math.random()*cv.height - cv.height,
     w: Math.random()*14+4,
     h: Math.random()*7+4,
-    c: COLS[Math.floor(Math.random()*COLS.length)],
-    sp: Math.random()*5+2,
-    an: Math.random()*360,
-    sp2: Math.random()*8-4
+    c: C[Math.floor(Math.random()*C.length)],
+    s: Math.random()*5+2,
+    a: Math.random()*360,
+    sp:Math.random()*8-4
   }));
-
   let fr=0;
   (function draw(){
     cx.clearRect(0,0,cv.width,cv.height);
     fr++;
-    pieces.forEach(p=>{
+    P.forEach(p=>{
       cx.save();
-      cx.globalAlpha = Math.max(0,1-fr/200);
+      cx.globalAlpha=Math.max(0,1-fr/200);
       cx.translate(p.x+p.w/2,p.y+p.h/2);
-      cx.rotate(p.an*Math.PI/180);
+      cx.rotate(p.a*Math.PI/180);
       cx.fillStyle=p.c;
       cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
       cx.restore();
-      p.y+=p.sp; p.an+=p.sp2; p.x+=Math.sin(p.an*.1)*2;
+      p.y+=p.s; p.a+=p.sp; p.x+=Math.sin(p.a*.1)*2;
     });
     if(fr<220) requestAnimationFrame(draw);
     else cx.clearRect(0,0,cv.width,cv.height);
   })();
 }
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  ROUND RECT HELPER
-// ════════════════════════════════════════
+// ═══════════════════════════════════════════
 function rrect(cx,x,y,w,h,r){
   cx.beginPath();
   cx.moveTo(x+r,y);
