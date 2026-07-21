@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cast Countdown — Track Your Recovery</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  
+  <!-- AOS (Animate on Scroll) -->
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+  
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep: #08080c;
+      --bg: #0c0c14;
+      --bg-card: #13131f;
+      --bg-card-hover: #1a1a2e;
+      --bg-elevated: #191930;
+      --accent: #6c5ce7;
+      --accent-light: #a29bfe;
+      --accent-glow: #6c5ce740;
+      --success: #00b894;
+      --success-light: #55efc4;
+      --warning: #fdcb6e;
+      --danger: #ff6b6b;
+      --info: #74b9ff;
+      --pink: #fd79a8;
+      --orange: #e17055;
+      --text: #e8e8f0;
+      --text-secondary: #9494b8;
+      --text-muted: #5a5a7a;
+      --border: #1e1e35;
+      --border-light: #2d2d50;
+      --radius: 16px;
+      --radius-lg: 24px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.3);
+      --shadow-glow: 0 0 40px var(--accent-glow);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Selection */
+    ::selection {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-light);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* ──────────────────────────────────────
+       AMBIENT BACKGROUND
+    ────────────────────────────────────── */
+    .ambient-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .ambient-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.12;
+      animation: orbFloat 20s ease-in-out infinite;
+    }
+
+    .ambient-orb:nth-child(1) {
+      width: 400px; height: 400px;
+      background: var(--accent);
+      top: -10%; left: -5%;
+      animation-delay: 0s;
+    }
+    .ambient-orb:nth-child(2) {
+      width: 350px; height: 350px;
+      background: var(--success);
+      bottom: -10%; right: -5%;
+      animation-delay: -7s;
+    }
+    .ambient-orb:nth-child(3) {
+      width: 300px; height: 300px;
+      background: var(--pink);
+      top: 40%; left: 50%;
+      animation-delay: -14s;
+    }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(50px, -30px) scale(1.1); }
+      50% { transform: translate(-20px, 40px) scale(0.9); }
+      75% { transform: translate(30px, 20px) scale(1.05); }
+    }
+
+    /* Grid pattern overlay */
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.15;
+      mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
+      -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
+    }
+
+    /* ──────────────────────────────────────
+       SCREEN 1 — INPUT
+    ────────────────────────────────────── */
+    #screen-input {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .input-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 3rem 2.5rem;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+    }
+
+    .input-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), var(--success), var(--accent), transparent);
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    .logo-section {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .logo-icon {
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--success) 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 2rem;
+      box-shadow: 0 8px 24px var(--accent-glow);
+      animation: logoPulse 3s ease-in-out infinite;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .logo-icon:hover { transform: scale(1.05); }
+
+    @keyframes logoPulse {
+      0%, 100% { box-shadow: 0 8px 24px var(--accent-glow); }
+      50% { box-shadow: 0 8px 40px var(--accent-glow), 0 0 60px var(--accent-glow); }
+    }
+
+    .logo-title {
+      font-size: 1.65rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+
+    .logo-title span {
+      background: linear-gradient(135deg, var(--accent-light), var(--success-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .logo-subtitle {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      margin-top: 0.35rem;
+      font-weight: 400;
+    }
+
+    /* Form Fields */
+    .field {
+      margin-bottom: 1.25rem;
+    }
+
+    .field label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+    }
+
+    .field label .label-icon {
+      font-size: 0.9rem;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
+      padding: 0.8rem 1rem;
+      outline: none;
+      transition: all 0.25s ease;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239494b8' viewBox='0 0 16 16'%3E%3Cpath d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      padding-right: 2.5rem;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .field input::placeholder { color: var(--text-muted); }
+    .field select option { background: var(--bg-card); color: var(--text); }
+
+    .field input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.7);
+      cursor: pointer;
+    }
+
+    /* Row of two fields */
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    /* Submit Button */
+    .btn-primary {
+      width: 100%;
+      padding: 0.95rem;
+      background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      margin-top: 0.75rem;
+      letter-spacing: 0.01em;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px var(--accent-glow);
+    }
+
+    .btn-primary:hover::before { left: 100%; }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-text {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-arrow {
+      transition: transform 0.2s;
+    }
+
+    .btn-primary:hover .btn-arrow {
+      transform: translateX(3px);
+    }
+
+    /* ──────────────────────────────────────
+       SCREEN 2 — STATS DASHBOARD
+    ────────────────────────────────────── */
+    #screen-stats {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* HERO / STICKY TOP */
+    .hero {
+      width: 100%;
+      background: linear-gradient(180deg, var(--bg-deep) 0%, var(--bg) 100%);
+      text-align: center;
+      padding: 2rem 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--accent-glow);
+      border: 1px solid var(--accent);
+      border-radius: 99px;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.6rem;
+    }
+
+    .hero-badge .pulse-dot {
+      width: 6px; height: 6px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulseDot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.4); }
+    }
+
+    .hero-title {
+      font-size: clamp(1.3rem, 3.5vw, 2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+    }
+
+    .hero-title .gradient-text {
+      background: linear-gradient(135deg, var(--accent-light), var(--success-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* PREMIUM COUNTDOWN */
+    .countdown-container {
+      display: flex;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .cd-unit {
+      position: relative;
+      width: clamp(68px, 15vw, 90px);
+    }
+
+    .cd-flip {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.6rem 0.4rem 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cd-flip::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 0; right: 0;
+      height: 1px;
+      background: var(--border);
+      z-index: 2;
+    }
+
+    .cd-flip::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      padding: 1px;
+      background: linear-gradient(180deg, transparent, var(--accent-glow));
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude;
+      -webkit-mask-composite: xor;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .cd-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(1.6rem, 4.5vw, 2.4rem);
+      font-weight: 700;
+      color: #fff;
+      display: block;
+      text-align: center;
+      line-height: 1.2;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cd-number.flip-animate {
+      animation: flipDigit 0.3s ease-out;
+    }
+
+    @keyframes flipDigit {
+      0% { transform: perspective(200px) rotateX(-30deg); opacity: 0.5; }
+      100% { transform: perspective(200px) rotateX(0); opacity: 1; }
+    }
+
+    .cd-unit-label {
+      font-size: 0.62rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      text-align: center;
+      margin-top: 0.45rem;
+    }
+
+    .cd-separator {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      padding-bottom: 1.2rem;
+    }
+
+    .cd-separator span {
+      width: 5px; height: 5px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: separatorPulse 1s ease-in-out infinite;
+    }
+
+    .cd-separator span:nth-child(2) { animation-delay: 0.5s; }
+
+    @keyframes separatorPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    /* PROGRESS */
+    .progress-section {
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-label-left {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .progress-pct {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--success);
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--success));
+      border-radius: 99px;
+      transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+      position: relative;
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 30px; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+      border-radius: 99px;
+      animation: progressShine 2s ease-in-out infinite;
+    }
+
+    @keyframes progressShine {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
+    }
+
+    .progress-dates {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.4rem;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* CONTENT */
+    .dashboard {
+      width: 100%;
+      max-width: 720px;
+      padding: 2rem 1.2rem 4rem;
+    }
+
+    /* Quick Stats Row */
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .quick-stat {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.2rem 1rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: default;
+    }
+
+    .quick-stat:hover {
+      border-color: var(--border-light);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .quick-stat .qs-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .quick-stat .qs-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .quick-stat .qs-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 0.25rem;
+    }
+
+    /* Section Headers */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0 1rem;
+    }
+
+    .section-divider .divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .section-divider h2 {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* Stat Cards */
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      margin-bottom: 0.75rem;
+      cursor: default;
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-light);
+      background: var(--bg-card-hover);
+      transform: translateY(-1px);
+    }
+
+    .stat-card .card-accent {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 2px;
+    }
+
+    .stat-card .card-glow {
+      position: absolute;
+      top: 0; left: 0;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.06;
+      pointer-events: none;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .card-icon {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .card-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+    }
+
+    .card-value {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 0.4rem;
+    }
+
+    .card-value.mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Color variants */
+    .theme-purple .card-accent { background: linear-gradient(90deg, var(--accent), transparent); }
+    .theme-purple .card-glow { background: var(--accent); }
+    .theme-purple .card-icon { background: #6c5ce720; }
+
+    .theme-green .card-accent { background: linear-gradient(90deg, var(--success), transparent); }
+    .theme-green .card-glow { background: var(--success); }
+    .theme-green .card-icon { background: #00b89420; }
+
+    .theme-orange .card-accent { background: linear-gradient(90deg, var(--orange), transparent); }
+    .theme-orange .card-glow { background: var(--orange); }
+    .theme-orange .card-icon { background: #e1705520; }
+
+    .theme-red .card-accent { background: linear-gradient(90deg, var(--danger), transparent); }
+    .theme-red .card-glow { background: var(--danger); }
+    .theme-red .card-icon { background: #ff6b6b20; }
+
+    .theme-blue .card-accent { background: linear-gradient(90deg, var(--info), transparent); }
+    .theme-blue .card-glow { background: var(--info); }
+    .theme-blue .card-icon { background: #74b9ff20; }
+
+    .theme-pink .card-accent { background: linear-gradient(90deg, var(--pink), transparent); }
+    .theme-pink .card-glow { background: var(--pink); }
+    .theme-pink .card-icon { background: #fd79a820; }
+
+    .theme-yellow .card-accent { background: linear-gradient(90deg, var(--warning), transparent); }
+    .theme-yellow .card-glow { background: var(--warning); }
+    .theme-yellow .card-icon { background: #fdcb6e20; }
+
+    /* Fact Cards */
+    .fact-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.3rem 1.5rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+      transition: all 0.3s ease;
+      cursor: default;
+    }
+
+    .fact-card:hover {
+      border-color: var(--accent);
+      background: var(--bg-card-hover);
+    }
+
+    .fact-icon-wrap {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: var(--bg-elevated);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .fact-body h3 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.3rem;
+    }
+
+    .fact-body p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Milestone Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 8px; top: 0; bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .timeline-item {
+      position: relative;
+      padding: 0.8rem 0;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -2rem;
+      top: 1rem;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .timeline-dot.completed {
+      border-color: var(--success);
+      background: var(--success);
+    }
+
+    .timeline-dot.completed::after {
+      content: '✓';
+      font-size: 0.6rem;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .timeline-dot.current {
+      border-color: var(--accent);
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+      animation: pulseDot 2s ease-in-out infinite;
+    }
+
+    .timeline-dot.current::after {
+      content: '';
+      width: 6px; height: 6px;
+      background: #fff;
+      border-radius: 50%;
+    }
+
+    .timeline-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .timeline-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    .timeline-item.dimmed .timeline-title { color: var(--text-muted); }
+
+    /* Reset button */
+    .reset-section {
+      text-align: center;
+      padding: 2rem 0 3rem;
+    }
+
+    .btn-ghost {
+      padding: 0.7rem 1.8rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* CELEBRATION OVERLAY */
+    .celebration {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: rgba(8,8,12,0.95);
+      backdrop-filter: blur(20px);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .celebration.show { display: flex; }
+
+    .celebration-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      animation: celebBounce 0.6s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    @keyframes celebBounce {
+      from { transform: scale(0) rotate(-10deg); }
+      to { transform: scale(1) rotate(0deg); }
+    }
+
+    .celebration h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--success-light), var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: celebTitle 0.5s 0.2s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+
+    @keyframes celebTitle {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .celebration p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1.6;
+      max-width: 400px;
+      animation: celebTitle 0.5s 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+
+    .celebration .btn-primary {
+      max-width: 240px;
+      margin-top: 2rem;
+      animation: celebTitle 0.5s 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+
+    /* Sound toggle */
+    .sound-toggle {
+      position: fixed;
+      bottom: 1.2rem;
+      right: 1.2rem;
+      z-index: 200;
+      width: 40px; height: 40px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+      color: var(--text-muted);
+    }
+
+    .sound-toggle:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Particle canvas */
+    #particle-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .input-card { padding: 2rem 1.5rem; }
+      .field-row { grid-template-columns: 1fr; }
+      .countdown-container { gap: 0.4rem; }
+      .quick-stats { grid-template-columns: repeat(2, 1fr); }
+      .dashboard { padding: 1.5rem 0.8rem 3rem; }
+    }
+
+    /* Loading animation */
+    .page-transition {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: var(--bg-deep);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .page-transition.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loader-ring {
+      width: 48px; height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Tooltip */
+    .tooltip {
+      position: relative;
+    }
+
+    .tooltip::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%) scale(0.9);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.72rem;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s;
+    }
+
+    .tooltip:hover::after {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Ambient Background -->
+<div class="ambient-bg">
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+</div>
+<div class="grid-overlay"></div>
+
+<!-- Particle Canvas -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- Page Transition -->
+<div class="page-transition" id="page-transition">
+  <div class="loader-ring"></div>
+</div>
+
+<!-- Sound Toggle -->
+<button class="sound-toggle" id="sound-toggle" title="Toggle sounds">🔊</button>
+
+<!-- ════════════════════════════════════════
+     SCREEN 1 — INPUT
+════════════════════════════════════════ -->
+<section id="screen-input">
+  <div class="input-card animate__animated animate__fadeInUp">
+    <div class="logo-section">
+      <div class="logo-icon" id="logo-icon-btn">🦴</div>
+      <h1 class="logo-title">Cast <span>Countdown</span></h1>
+      <p class="logo-subtitle">Track your fracture recovery in real time</p>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label><span class="label-icon">📅</span> Cast Applied</label>
+        <input type="date" id="cast-start" />
+      </div>
+      <div class="field">
+        <label><span class="label-icon">🎯</span> Cast Removal</label>
+        <input type="date" id="cast-end" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label><span class="label-icon">🦴</span> Broken Bone</label>
+      <select id="bone-type">
+        <option value="">Select bone...</option>
+        <option value="Radius (Wrist)">Radius (Wrist)</option>
+        <option value="Ulna (Forearm)">Ulna (Forearm)</option>
+        <option value="Humerus (Upper Arm)">Humerus (Upper Arm)</option>
+        <option value="Tibia (Shin)">Tibia (Shin)</option>
+        <option value="Fibula (Lower Leg)">Fibula (Lower Leg)</option>
+        <option value="Femur (Thigh)">Femur (Thigh)</option>
+        <option value="Clavicle (Collarbone)">Clavicle (Collarbone)</option>
+        <option value="Metatarsal (Foot)">Metatarsal (Foot)</option>
+        <option value="Phalanx (Finger/Toe)">Phalanx (Finger/Toe)</option>
+        <option value="Scaphoid (Wrist)">Scaphoid (Wrist)</option>
+        <option value="Ankle">Ankle</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label><span class="label-icon">⚡</span> Fracture Type</label>
+      <select id="fracture-type">
+        <option value="">Select type...</option>
+        <option value="Hairline">Hairline</option>
+        <option value="Stress">Stress</option>
+        <option value="Simple (Clean Break)">Simple (Clean Break)</option>
+        <option value="Comminuted (Multiple Pieces)">Comminuted (Multiple Pieces)</option>
+        <option value="Compound (Open)">Compound (Open)</option>
+        <option value="Greenstick">Greenstick</option>
+        <option value="Avulsion">Avulsion</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label><span class="label-icon">👤</span> Your Name <span style="color:var(--text-muted);text-transform:none;font-weight:400">(optional)</span></label>
+      <input type="text" id="user-name" placeholder="e.g. Alex" maxlength="30" />
+    </div>
+
+    <button class="btn-primary" id="btn-start" onclick="startStats()">
+      <span class="btn-text">Start Tracking <span class="btn-arrow">→</span></span>
+    </button>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     CELEBRATION OVERLAY
+════════════════════════════════════════ -->
+<div class="celebration" id="celebration">
+  <div class="celebration-icon">🎉</div>
+  <h1>You Did It!</h1>
+  <p>Your cast is coming off! After all those days, your bone has healed. Time to celebrate your incredible recovery.</p>
+  <button class="btn-primary" onclick="closeCelebration()">
+    <span class="btn-text">View My Journey <span class="btn-arrow">→</span></span>
+  </button>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN 2 — STATS
+════════════════════════════════════════ -->
+<section id="screen-stats">
+  <div class="hero">
+    <div class="hero-badge"><div class="pulse-dot"></div> Live Tracking</div>
+    <h1 class="hero-title" id="hero-title">Cast <span class="gradient-text">Countdown</span></h1>
+
+    <!-- Premium Countdown -->
+    <div class="countdown-container" id="countdown-container">
+      <div class="cd-unit">
+        <div class="cd-flip">
+          <span class="cd-number" id="cd-days">--</span>
+        </div>
+        <div class="cd-unit-label">Days</div>
+      </div>
+      <div class="cd-separator"><span></span><span></span></div>
+      <div class="cd-unit">
+        <div class="cd-flip">
+          <span class="cd-number" id="cd-hours">--</span>
+        </div>
+        <div class="cd-unit-label">Hours</div>
+      </div>
+      <div class="cd-separator"><span></span><span></span></div>
+      <div class="cd-unit">
+        <div class="cd-flip">
+          <span class="cd-number" id="cd-mins">--</span>
+        </div>
+        <div class="cd-unit-label">Minutes</div>
+      </div>
+      <div class="cd-separator"><span></span><span></span></div>
+      <div class="cd-unit">
+        <div class="cd-flip">
+          <span class="cd-number" id="cd-secs">--</span>
+        </div>
+        <div class="cd-unit-label">Seconds</div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-section">
+      <div class="progress-meta">
+        <span class="progress-label-left">Recovery Progress</span>
+        <span class="progress-pct" id="pct-label">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="progress-dates">
+        <span id="date-start-label">Start</span>
+        <span id="date-end-label">End</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard" id="dashboard">
+    <!-- Injected by JS -->
+  </div>
+
+  <div class="reset-section">
+    <button class="btn-ghost" onclick="resetApp()">← Start Over</button>
+  </div>
+</section>
+
+<!-- Libraries -->
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+<script>
+/* ════════════════════════════════════════
+   AUDIO ENGINE
+════════════════════════════════════════ */
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+let soundEnabled = true;
+
+function initAudio() {
+  if (!audioCtx) audioCtx = new AudioCtx();
+}
+
+function playTone(freq, duration, type = 'sine', volume = 0.08) {
+  if (!soundEnabled || !audioCtx) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch(e) {}
+}
+
+function sfxClick() {
+  playTone(800, 0.08, 'sine', 0.06);
+  setTimeout(() => playTone(1200, 0.06, 'sine', 0.04), 40);
+}
+
+function sfxSuccess() {
+  playTone(523, 0.15, 'sine', 0.07);
+  setTimeout(() => playTone(659, 0.15, 'sine', 0.07), 100);
+  setTimeout(() => playTone(784, 0.2, 'sine', 0.07), 200);
+  setTimeout(() => playTone(1047, 0.3, 'sine', 0.06), 300);
+}
+
+function sfxTick() {
+  playTone(1800, 0.02, 'square', 0.015);
+}
+
+function sfxCelebration() {
+  const notes = [523, 659, 784, 1047, 784, 1047, 1318];
+  notes.forEach((n, i) => {
+    setTimeout(() => playTone(n, 0.2, 'sine', 0.06), i * 120);
+  });
+}
+
+function sfxHover() {
+  playTone(600, 0.03, 'sine', 0.02);
+}
+
+// Sound toggle
+const soundToggle = document.getElementById('sound-toggle');
+soundToggle.addEventListener('click', () => {
+  initAudio();
+  soundEnabled = !soundEnabled;
+  soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+  if (soundEnabled) sfxClick();
+});
+
+/* ════════════════════════════════════════
+   PARTICLES
+════════════════════════════════════════ */
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let animFrame;
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+class Particle {
+  constructor() {
+    this.reset();
+  }
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = Math.random() * 1.5 + 0.5;
+    this.speedX = (Math.random() - 0.5) * 0.3;
+    this.speedY = (Math.random() - 0.5) * 0.3;
+    this.opacity = Math.random() * 0.3 + 0.05;
+    this.pulse = Math.random() * Math.PI * 2;
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    this.pulse += 0.01;
+    if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+      this.reset();
+    }
+  }
+  draw() {
+    const o = this.opacity + Math.sin(this.pulse) * 0.05;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(108, 92, 231, ${o})`;
+    ctx.fill();
+  }
+}
+
+for (let i = 0; i < 60; i++) particles.push(new Particle());
+
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => { p.update(); p.draw(); });
+  animFrame = requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+/* ════════════════════════════════════════
+   PAGE LOAD
+════════════════════════════════════════ */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('page-transition').classList.add('hidden');
+  }, 600);
+});
+
+// Add hover sound to interactive elements
+document.addEventListener('mouseover', (e) => {
+  if (e.target.closest('.btn-primary, .btn-ghost, .sound-toggle, .quick-stat')) {
+    sfxHover();
+  }
+});
+
+/* ════════════════════════════════════════
+   DATA
+════════════════════════════════════════ */
+const FACTS = [
+  { emoji:"🔬", title:"How Bones Heal", text:"Bone healing happens in 4 stages: inflammation (days 1–5), soft callus (weeks 1–3), hard callus (weeks 3–12), and remodelling that can take up to 2 years." },
+  { emoji:"🩸", title:"Nature's First Responder", text:"Within minutes of a fracture, your body forms a blood clot called a fracture haematoma — the very first step of healing." },
+  { emoji:"💪", title:"Bone is Living Tissue", text:"Your bones contain osteoblasts (builders) and osteoclasts (removers) that constantly remodel bone tissue — especially active during recovery." },
+  { emoji:"🧲", title:"Electrical Healing Signals", text:"Bone generates small electrical signals under stress (piezoelectricity). This is why gentle movement, once approved, can speed up healing." },
+  { emoji:"🥛", title:"Calcium is Key", text:"Your body needs extra calcium and Vitamin D right now. Dairy, leafy greens, almonds, and sunlight all help build denser, stronger bones." },
+  { emoji:"🚫", title:"Smoking Slows Healing", text:"Smokers take up to 30% longer to heal fractures. Nicotine restricts blood flow to the healing site, starving it of nutrients." },
+  { emoji:"🦕", title:"Ancient Fractures", text:"Healed fractures have been found in dinosaur fossils — broken bones and recovery is as old as life on land!" },
+  { emoji:"⚡", title:"Bones Can Get Stronger", text:"Wolff's Law: bone remodels in response to stress. A properly healed fracture can become denser than the original bone." },
+  { emoji:"🏥", title:"Cast History", text:"Plaster casts were first used in the 1800s. Modern fibreglass casts weren't introduced until the 1970s — lighter and cooler." },
+  { emoji:"🧬", title:"Stem Cells at Work", text:"Mesenchymal stem cells activate at the fracture site and can transform into bone, cartilage, or fat depending on what's needed." },
+  { emoji:"🌡️", title:"The Heat is Normal", text:"It's completely normal for the fracture area to feel warm. Your immune system increases blood flow to deliver healing materials." },
+  { emoji:"🎯", title:"Protein Matters", text:"About 35% of bone mass is protein (mainly collagen). Eating adequate protein helps build the scaffold that new bone forms around." },
+];
+
+/* ════════════════════════════════════════
+   STATE
+════════════════════════════════════════ */
+let timerInterval = null;
+let userData = {};
+let prevSecs = null;
+
+/* ════════════════════════════════════════
+   START
+════════════════════════════════════════ */
+function startStats() {
+  initAudio();
+  sfxClick();
+
+  const startVal = document.getElementById('cast-start').value;
+  const endVal = document.getElementById('cast-end').value;
+  const bone = document.getElementById('bone-type').value;
+  const fracture = document.getElementById('fracture-type').value;
+  const name = document.getElementById('user-name').value.trim();
+
+  if (!startVal || !endVal) {
+    playTone(200, 0.3, 'sawtooth', 0.05);
+    shakeElement(document.getElementById('btn-start'));
+    return;
+  }
+
+  const startDate = new Date(startVal);
+  const endDate = new Date(endVal);
+  endDate.setHours(23, 59, 59);
+
+  if (endDate <= startDate) {
+    playTone(200, 0.3, 'sawtooth', 0.05);
+    shakeElement(document.getElementById('btn-start'));
+    return;
+  }
+
+  userData = { startDate, endDate, bone, fracture, name, startVal, endVal };
+
+  sfxSuccess();
+
+  // Transition
+  const transition = document.getElementById('page-transition');
+  transition.classList.remove('hidden');
+
+  setTimeout(() => {
+    document.getElementById('screen-input').style.display = 'none';
+    const statsEl = document.getElementById('screen-stats');
+    statsEl.style.display = 'flex';
+
+    const displayName = name || 'Your';
+    document.getElementById('hero-title').innerHTML =
+      `${displayName}${name ? "'s" : ''} <span class="gradient-text">Recovery</span>`;
+
+    // Date labels
+    document.getElementById('date-start-label').textContent = formatDateShort(startDate);
+    document.getElementById('date-end-label').textContent = formatDateShort(endDate);
+
+    buildDashboard();
+    updateCountdown();
+    timerInterval = setInterval(updateCountdown, 1000);
+
+    // Check celebration
+    const today = new Date(); today.setHours(0,0,0,0);
+    const removeDay = new Date(endVal); removeDay.setHours(0,0,0,0);
+    if (today >= removeDay) {
+      setTimeout(() => {
+        document.getElementById('celebration').classList.add('show');
+        sfxCelebration();
+        launchConfetti();
+      }, 800);
+    }
+
+    // Init AOS
+    setTimeout(() => {
+      AOS.init({
+        duration: 600,
+        easing: 'ease-out-cubic',
+        once: true,
+        offset: 60
+      });
+      transition.classList.add('hidden');
+    }, 300);
+  }, 700);
+}
+
+function shakeElement(el) {
+  el.style.animation = 'none';
+  el.offsetHeight;
+  el.style.animation = 'shake 0.4s ease';
+  setTimeout(() => el.style.animation = '', 500);
+}
+
+// Add shake keyframe
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = `@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }`;
+document.head.appendChild(shakeStyle);
+
+function formatDateShort(d) {
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+/* ════════════════════════════════════════
+   BUILD DASHBOARD
+════════════════════════════════════════ */
+function buildDashboard() {
+  const container = document.getElementById('dashboard');
+  container.innerHTML = '';
+
+  const { startDate, endDate, bone, fracture } = userData;
+  const totalMs = endDate - startDate;
+  const totalDays = Math.ceil(totalMs / 86400000);
+  const now = new Date();
+  const elapsed = Math.max(0, now - startDate);
+  const elapsedDays = Math.floor(elapsed / 86400000);
+  const pct = Math.min(100, Math.round((elapsed / totalMs) * 100));
+
+  const boneName = bone || 'your bone';
+  const fractureType = fracture || 'your fracture';
+  const totalWeeks = Math.round(totalDays / 7);
+
+  // ── Quick Stats ──
+  const quickHtml = `
+    <div class="quick-stats">
+      <div class="quick-stat" data-aos="fade-up" data-aos-delay="0">
+        <div class="qs-icon">📆</div>
+        <div class="qs-value">${totalDays}</div>
+        <div class="qs-label">Total Days</div>
+      </div>
+      <div class="quick-stat" data-aos="fade-up" data-aos-delay="50">
+        <div class="qs-icon">✅</div>
+        <div class="qs-value">${elapsedDays}</div>
+        <div class="qs-label">Days Done</div>
+      </div>
+      <div class="quick-stat" data-aos="fade-up" data-aos-delay="100">
+        <div class="qs-icon">📊</div>
+        <div class="qs-value">${pct}%</div>
+        <div class="qs-label">Complete</div>
+      </div>
+      <div class="quick-stat" data-aos="fade-up" data-aos-delay="150">
+        <div class="qs-icon">🗓️</div>
+        <div class="qs-value">${totalWeeks}</div>
+        <div class="qs-label">Total Weeks</div>
+      </div>
+    </div>`;
+  container.insertAdjacentHTML('beforeend', quickHtml);
+
+  // ── Healing Timeline ──
+  addDivider(container, '🗺️ Healing Timeline');
+
+  const stages = [
+    { name: 'Inflammation', range: 'Days 1–5', desc: 'Blood clot forms, immune response activates', maxDay: 5 },
+    { name: 'Soft Callus', range: 'Weeks 1–3', desc: 'Cartilage bridge forms across the fracture', maxDay: 21 },
+    { name: 'Hard Callus', range: 'Weeks 3–12', desc: 'Cartilage replaced with mineralised bone', maxDay: 84 },
+    { name: 'Remodelling', range: 'Months 3+', desc: 'Bone fine-tunes its structure and density', maxDay: 9999 },
+  ];
+
+  let timelineHtml = '<div class="timeline" data-aos="fade-up">';
+  stages.forEach((s, i) => {
+    const isDone = elapsedDays > s.maxDay;
+    const isCurrent = !isDone && (i === 0 || elapsedDays > stages[i-1].maxDay);
+    const dimmed = !isDone && !isCurrent;
+    const dotClass = isDone ? 'completed' : isCurrent ? 'current' : '';
+    timelineHtml += `
+      <div class="timeline-item ${dimmed ? 'dimmed' : ''}">
+        <div class="timeline-dot ${dotClass}"></div>
+        <div class="timeline-title">${s.name} ${isCurrent ? '← You are here' : ''}</div>
+        <div class="timeline-desc">${s.range} — ${s.desc}</div>
+      </div>`;
+  });
+  timelineHtml += '</div>';
+  container.insertAdjacentHTML('beforeend', timelineHtml);
+
+  // ── Live Stats ──
+  addDivider(container, '📊 Live Body Stats');
+
+  const cards = [
+    { theme:'purple', icon:'⏳', label:'Time in Cast', id:'stat-time', desc:`Your ${boneName} has been healing non-stop since day one.`, live:() => {
+      const ms = Math.max(0, new Date() - startDate);
+      const d = Math.floor(ms/86400000);
+      const h = Math.floor((ms%86400000)/3600000);
+      return `${d}d ${h}h`;
+    }},
+    { theme:'orange', icon:'🔥', label:'Hours of Active Healing', id:'stat-hours', desc:'Your osteoblasts work 24/7 — they never take a break.', live:() => {
+      return Math.floor((new Date()-startDate)/3600000).toLocaleString()+' hrs';
+    }},
+    { theme:'red', icon:'💓', label:'Heartbeats Delivering Nutrients', id:'stat-heartbeats', desc:'Every beat pumps nutrient-rich blood to your healing fracture.', live:() => {
+      const s = (new Date()-startDate)/1000;
+      return Math.round(s*1.1667).toLocaleString();
+    }},
+    { theme:'blue', icon:'🫁', label:'Breaths Supplying Oxygen', id:'stat-breaths', desc:'Every breath brings oxygen that gets delivered to your healing bone.', live:() => {
+      const s = (new Date()-startDate)/1000;
+      return Math.round(s*0.267).toLocaleString();
+    }},
+    { theme:'pink', icon:'🧱', label:'New Cells Created (est.)', id:'stat-cells', desc:`Your body generates ~2 million cells per second — many are dedicated to ${boneName} repair.`, live:() => {
+      const s = Math.max(0,(new Date()-startDate)/1000);
+      return Math.round(s*2000000).toLocaleString();
+    }},
+    { theme:'green', icon:'😴', label:'Recovery Sleep Hours', id:null, desc:'Growth hormone peaks during deep sleep, driving osteoblast activity.', value:`~${Math.round(elapsedDays*8)} hrs`},
+    { theme:'yellow', icon:'🎯', label:'Current Healing Stage', id:null, desc:getHealingStageDesc(elapsedDays), value:getHealingStage(elapsedDays)},
+  ];
+
+  if (fracture) {
+    cards.push({ theme:'red', icon:'⚡', label:'Fracture Type', id:null, desc:getFractureDesc(fracture), value:fractureType });
+  }
+
+  cards.forEach((c, i) => {
+    const val = c.live ? '' : (c.value || '');
+    const html = `
+      <div class="stat-card theme-${c.theme}" data-aos="fade-up" data-aos-delay="${i*40}">
+        <div class="card-accent"></div>
+        <div class="card-glow"></div>
+        <div class="card-header">
+          <div class="card-icon">${c.icon}</div>
+          <div class="card-label">${c.label}</div>
+        </div>
+        <div class="card-value ${c.live ? 'mono' : ''}" ${c.id ? `id="${c.id}"` : ''}>${val}</div>
+        <div class="card-desc">${c.desc}</div>
+      </div>`;
+    container.insertAdjacentHTML('beforeend', html);
+  });
+
+  window._liveCards = cards.filter(c => c.live && c.id);
+
+  // ── Fun Facts ──
+  addDivider(container, '🧠 Recovery Facts');
+
+  // Shuffle and pick 8
+  const shuffled = [...FACTS].sort(() => Math.random() - 0.5).slice(0, 8);
+  shuffled.forEach((f, i) => {
+    const html = `
+      <div class="fact-card" data-aos="fade-up" data-aos-delay="${i*30}">
+        <div class="fact-icon-wrap">${f.emoji}</div>
+        <div class="fact-body">
+          <h3>${f.title}</h3>
+          <p>${f.text}</p>
+        </div>
+      </div>`;
+    container.insertAdjacentHTML('beforeend', html);
+  });
+}
+
+function addDivider(container, title) {
+  container.insertAdjacentHTML('beforeend', `
+    <div class="section-divider" data-aos="fade">
+      <div class="divider-line"></div>
+      <h2>${title}</h2>
+      <div class="divider-line"></div>
+    </div>`);
+}
+
+/* ════════════════════════════════════════
+   HEALING STAGES
+════════════════════════════════════════ */
+function getHealingStage(days) {
+  if (days <= 5) return 'Inflammation';
+  if (days <= 21) return 'Soft Callus';
+  if (days <= 84) return 'Hard Callus';
+  return 'Remodelling';
+}
+
+function getHealingStageDesc(days) {
+  if (days <= 5) return 'Your immune system is flooding the area with healing cells. Swelling and pain are signs it\'s working.';
+  if (days <= 21) return 'A soft, cartilage-like material is bridging the fracture gap. The break is stabilising every day.';
+  if (days <= 84) return 'Soft callus is being replaced with hard, mineralised bone tissue. Real bone is forming right now.';
+  return 'The fracture has healed but your bone is still optimising its structure — this can continue for up to 2 years.';
+}
+
+function getFractureDesc(type) {
+  const map = {
+    'Hairline': 'A tiny crack — often from overuse. Heals well with rest and immobilisation.',
+    'Stress': 'A small crack from repetitive force. Very responsive to rest and proper nutrition.',
+    'Simple (Clean Break)': 'A clean break with no displacement. One of the most straightforward fractures to heal.',
+    'Comminuted (Multiple Pieces)': 'The bone fragmented into several pieces. Requires careful immobilisation — you\'re doing amazing.',
+    'Compound (Open)': 'The bone broke through the skin. Healed under expert care — your resilience is remarkable.',
+    'Greenstick': 'A partial fracture where the bone bends and cracks — common in younger bones.',
+    'Avulsion': 'A fragment pulled away by a tendon or ligament. A unique but fully healable injury.'
+  };
+  return map[type] || 'Every fracture heals in its own remarkable way.';
+}
+
+/* ════════════════════════════════════════
+   LIVE COUNTDOWN
+════════════════════════════════════════ */
+function updateCountdown() {
+  const now = new Date();
+  const diff = userData.endDate - now;
+  const total = userData.endDate - userData.startDate;
+  const elapsed = now - userData.startDate;
+  const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('pct-label').textContent = Math.round(pct) + '%';
+
+  if (diff <= 0) {
+    setCD('0', '00', '00', '00');
+    clearInterval(timerInterval);
+    return;
+  }
+
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  const secs = Math.floor((diff % 60000) / 1000);
+
+  const newSecs = String(secs).padStart(2, '0');
+
+  setCD(
+    String(days),
+    String(hours).padStart(2, '0'),
+    String(mins).padStart(2, '0'),
+    newSecs
+  );
+
+  // Tick sound on second change
+  if (prevSecs !== null && prevSecs !== newSecs) {
+    sfxTick();
+  }
+  prevSecs = newSecs;
+
+  // Flip animation on seconds
+  const secsEl = document.getElementById('cd-secs');
+  secsEl.classList.remove('flip-animate');
+  void secsEl.offsetHeight;
+  secsEl.classList.add('flip-animate');
+
+  // Update live stat values
+  if (window._liveCards) {
+    window._liveCards.forEach(c => {
+      const el = document.getElementById(c.id);
+      if (el) el.textContent = c.live();
+    });
+  }
+}
+
+function setCD(d, h, m, s) {
+  document.getElementById('cd-days').textContent = d;
+  document.getElementById('cd-hours').textContent = h;
+  document.getElementById('cd-mins').textContent = m;
+  document.getElementById('cd-secs').textContent = s;
+}
+
+/* ════════════════════════════════════════
+   CELEBRATION
+════════════════════════════════════════ */
+function closeCelebration() {
+  sfxClick();
+  document.getElementById('celebration').classList.remove('show');
+}
+
+function launchConfetti() {
+  if (typeof confetti === 'function') {
+    const end = Date.now() + 3000;
+    const interval = setInterval(() => {
+      if (Date.now() > end) return clearInterval(interval);
+      confetti({
+        particleCount: 3,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0, y: 0.7 },
+        colors: ['#6c5ce7', '#00b894', '#fd79a8', '#fdcb6e', '#74b9ff']
+      });
+      confetti({
+        particleCount: 3,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1, y: 0.7 },
+        colors: ['#6c5ce7', '#00b894', '#fd79a8', '#fdcb6e', '#74b9ff']
+      });
+    }, 50);
+  }
+}
+
+/* ════════════════════════════════════════
+   RESET
+════════════════════════════════════════ */
+function resetApp() {
+  sfxClick();
+  clearInterval(timerInterval);
+  prevSecs = null;
+
+  const transition = document.getElementById('page-transition');
+  transition.classList.remove('hidden');
+
+  setTimeout(() => {
+    document.getElementById('screen-stats').style.display = 'none';
+    document.getElementById('screen-input').style.display = 'flex';
+    document.getElementById('dashboard').innerHTML = '';
+    transition.classList.add('hidden');
+  }, 500);
+}
+
+/* ════════════════════════════════════════
+   LOGO CLICK EASTER EGG
+════════════════════════════════════════ */
+let logoClicks = 0;
+document.getElementById('logo-icon-btn').addEventListener('click', () => {
+  initAudio();
+  logoClicks++;
+  sfxClick();
+  const el = document.getElementById('logo-icon-btn');
+  el.style.transform = 'scale(0.9)';
+  setTimeout(() => el.style.transform = '', 150);
+
+  if (logoClicks >= 5) {
+    logoClicks = 0;
+    el.textContent = ['🦴','💀','🩻','🦷','🏥'][Math.floor(Math.random()*5)];
+    sfxSuccess();
+  }
+});
+
+/* ════════════════════════════════════════
+   FORM INPUT SOUNDS
+════════════════════════════════════════ */
+document.querySelectorAll('.field input, .field select').forEach(el => {
+  el.addEventListener('focus', () => {
+    initAudio();
+    playTone(440, 0.04, 'sine', 0.02);
+  });
+  el.addEventListener('change', () => {
+    initAudio();
+    sfxClick();
+  });
+});
+</script>
+</body>
+</html>
