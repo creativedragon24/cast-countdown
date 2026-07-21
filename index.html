@@ -1,745 +1,1393 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CastCountdown — How Many Days Left in Your Cast?</title>
-  <meta name="description" content="Track your broken bone healing and count down to cast removal day."/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CastCountdown</title>
+<meta name="description" content="How many days left in your cast? Find out instantly."/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
 
-  <style>
-    /* ── RESET ── */
-    *{margin:0;padding:0;box-sizing:border-box}
+/* ═══════════════════════════════
+   NEAL.FUN INSPIRED DESIGN
+   Clean · Bold · Interactive · Fun
+═══════════════════════════════ */
 
-    /* ── BASE ── */
-    body{
-      font-family:'Inter',system-ui,sans-serif;
-      background:#fafafa;
-      color:#111;
-      min-height:100vh;
-    }
+:root {
+  --bg:      #f5f0e8;
+  --card:    #ffffff;
+  --ink:     #111111;
+  --dim:     #888888;
+  --border:  #e5e5e5;
+  --red:     #ff4757;
+  --yellow:  #ffa502;
+  --green:   #2ed573;
+  --purple:  #6c63ff;
+  --blue:    #1e90ff;
+}
 
-    /* ── HEADER ── */
-    .header{
-      background:#fff;
-      border-bottom:1px solid #eee;
-      padding:20px;
-      text-align:center;
-    }
-    .header h1{
-      font-size:1.5rem;
-      font-weight:900;
-      color:#111;
-      letter-spacing:-0.5px;
-    }
-    .header h1 span{font-size:1.3rem;}
-    .header p{
-      font-size:0.85rem;
-      color:#888;
-      margin-top:4px;
-      font-weight:500;
-    }
+* { margin:0; padding:0; box-sizing:border-box; }
 
-    /* ── CONTAINER ── */
-    .container{
-      max-width:480px;
-      margin:0 auto;
-      padding:20px 16px 40px;
-    }
+html { scroll-behavior:smooth; }
 
-    /* ── CARD ── */
-    .card{
-      background:#fff;
-      border:1px solid #eee;
-      border-radius:16px;
-      padding:24px;
-      margin-bottom:16px;
-    }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
 
-    /* ── SECTION LABEL ── */
-    .section-label{
-      font-size:0.7rem;
-      font-weight:700;
-      text-transform:uppercase;
-      letter-spacing:1.5px;
-      color:#999;
-      margin-bottom:14px;
-    }
+/* ── TOP BAR ── */
+.topbar {
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--ink);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
 
-    /* ── BONE GRID ── */
-    .bone-grid{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:8px;
-    }
-    .bone-btn{
-      border:2px solid #eee;
-      border-radius:12px;
-      padding:12px 4px;
-      text-align:center;
-      cursor:pointer;
-      background:#fff;
-      transition:all 0.15s;
-      -webkit-tap-highlight-color:transparent;
-    }
-    .bone-btn:hover{border-color:#ccc;background:#f9f9f9;}
-    .bone-btn.active{
-      border-color:#111;
-      background:#f5f5f5;
-    }
-    .bone-btn .emoji{font-size:1.5rem;display:block;margin-bottom:4px;}
-    .bone-btn .name{font-size:0.65rem;font-weight:700;color:#444;}
+.topbar-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-    /* ── FRACTURE GRID ── */
-    .frac-grid{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:8px;
-    }
-    .frac-btn{
-      border:2px solid #eee;
-      border-radius:12px;
-      padding:14px 4px;
-      text-align:center;
-      cursor:pointer;
-      background:#fff;
-      transition:all 0.15s;
-    }
-    .frac-btn:hover{border-color:#ccc;}
-    .frac-btn.active-s{border-color:#22c55e;background:#f0fdf4;}
-    .frac-btn.active-d{border-color:#f59e0b;background:#fffbeb;}
-    .frac-btn.active-c{border-color:#ef4444;background:#fef2f2;}
-    .frac-btn .emoji{font-size:1.3rem;display:block;margin-bottom:3px;}
-    .frac-btn .name{font-size:0.68rem;font-weight:700;color:#333;display:block;}
-    .frac-btn .desc{font-size:0.58rem;color:#999;display:block;margin-top:1px;}
+.topbar-logo span {
+  font-size: 1.2rem;
+  animation: wiggle 3s ease-in-out infinite;
+  display: inline-block;
+}
 
-    /* ── INPUTS ── */
-    .form-row{margin-bottom:16px;}
-    .form-row label{
-      display:block;
-      font-size:0.75rem;
-      font-weight:700;
-      color:#555;
-      margin-bottom:6px;
-    }
-    .input{
-      width:100%;
-      padding:12px 14px;
-      border:2px solid #eee;
-      border-radius:12px;
-      font-size:0.95rem;
-      font-family:inherit;
-      font-weight:600;
-      color:#111;
-      background:#fff;
-      outline:none;
-      transition:border-color 0.15s;
-      -webkit-appearance:none;
-    }
-    .input:focus{border-color:#111;}
-    .input::placeholder{color:#ccc;}
+@keyframes wiggle {
+  0%,90%,100% { transform: rotate(0deg); }
+  92% { transform: rotate(-15deg); }
+  96% { transform: rotate(15deg); }
+}
 
-    /* ── YES/NO ── */
-    .yn-row{display:flex;gap:8px;}
-    .yn-btn{
-      flex:1;
-      padding:11px;
-      border:2px solid #eee;
-      border-radius:12px;
-      text-align:center;
-      font-size:0.85rem;
-      font-weight:700;
-      cursor:pointer;
-      background:#fff;
-      color:#888;
-      transition:all 0.15s;
-    }
-    .yn-btn.yes{border-color:#ef4444;background:#fef2f2;color:#dc2626;}
-    .yn-btn.no{border-color:#22c55e;background:#f0fdf4;color:#16a34a;}
+.topbar-right {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--dim);
+}
 
-    /* ── BUTTON ── */
-    .btn{
-      width:100%;
-      padding:16px;
-      border:none;
-      border-radius:14px;
-      font-size:1rem;
-      font-weight:800;
-      font-family:inherit;
-      cursor:pointer;
-      transition:all 0.2s;
-    }
-    .btn-primary{
-      background:#111;
-      color:#fff;
-    }
-    .btn-primary:hover{background:#333;transform:translateY(-1px);}
-    .btn-primary:active{transform:translateY(0);}
+/* ── HERO ── */
+.hero {
+  padding: 60px 24px 40px;
+  max-width: 640px;
+  margin: 0 auto;
+}
 
-    .btn-share{
-      background:#111;
-      color:#fff;
-      margin-bottom:10px;
-    }
-    .btn-share:hover{background:#333;}
+.hero-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--dim);
+  margin-bottom: 16px;
+}
 
-    .btn-ghost{
-      background:transparent;
-      border:2px solid #eee;
-      color:#888;
-    }
-    .btn-ghost:hover{border-color:#ccc;color:#555;}
+.hero-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2.8rem, 8vw, 5rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -3px;
+  color: var(--ink);
+  margin-bottom: 20px;
+}
 
-    /* ── ERROR ── */
-    .error{
-      padding:10px 14px;
-      border-radius:10px;
-      background:#fef2f2;
-      border:1px solid #fecaca;
-      color:#dc2626;
-      font-size:0.82rem;
-      font-weight:600;
-      margin-bottom:12px;
-      display:none;
-    }
+.hero-title em {
+  font-style: normal;
+  color: var(--purple);
+  position: relative;
+  display: inline-block;
+}
 
-    /* ── RESULT ── */
-    .result-header{
-      text-align:center;
-      font-size:0.72rem;
-      font-weight:700;
-      text-transform:uppercase;
-      letter-spacing:2px;
-      color:#aaa;
-      margin-bottom:8px;
-    }
+.hero-title em::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--purple);
+  border-radius: 2px;
+}
 
-    .big-number{
-      text-align:center;
-      font-size:6rem;
-      font-weight:900;
-      color:#111;
-      line-height:1;
-      margin:16px 0 4px;
-      letter-spacing:-3px;
-    }
+.hero-sub {
+  font-size: 1rem;
+  color: var(--dim);
+  font-weight: 500;
+  line-height: 1.5;
+  max-width: 400px;
+}
 
-    .big-label{
-      text-align:center;
-      font-size:0.7rem;
-      font-weight:700;
-      text-transform:uppercase;
-      letter-spacing:4px;
-      color:#bbb;
-      margin-bottom:24px;
-    }
+/* ── MAIN WRAPPER ── */
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
 
-    /* ── PROGRESS ── */
-    .progress-track{
-      width:100%;
-      height:10px;
-      background:#f0f0f0;
-      border-radius:99px;
-      overflow:hidden;
-      margin-bottom:6px;
-    }
-    .progress-fill{
-      height:100%;
-      border-radius:99px;
-      width:0%;
-      transition:width 1.2s cubic-bezier(.4,0,.2,1);
-    }
-    .fill-red{background:#ef4444;}
-    .fill-yellow{background:#f59e0b;}
-    .fill-green{background:#22c55e;}
+/* ── STEP ── */
+.step {
+  margin-bottom: 48px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.5s ease forwards;
+}
 
-    .progress-row{
-      display:flex;
-      justify-content:space-between;
-      font-size:0.68rem;
-      font-weight:600;
-      color:#bbb;
-      margin-bottom:20px;
-    }
-    .progress-pct{color:#111;font-weight:800;}
+.step:nth-child(1) { animation-delay: 0.1s; }
+.step:nth-child(2) { animation-delay: 0.2s; }
+.step:nth-child(3) { animation-delay: 0.3s; }
+.step:nth-child(4) { animation-delay: 0.4s; }
+.step:nth-child(5) { animation-delay: 0.5s; }
+.step:nth-child(6) { animation-delay: 0.6s; }
 
-    /* ── PHASE BOX ── */
-    .phase{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:14px;
-      border-radius:12px;
-      background:#f9f9f9;
-      border:1px solid #eee;
-      margin-bottom:16px;
-    }
-    .phase-emoji{font-size:1.8rem;}
-    .phase-title{font-size:0.85rem;font-weight:800;color:#111;}
-    .phase-desc{font-size:0.72rem;color:#888;margin-top:2px;}
+@keyframes fadeUp {
+  to { opacity:1; transform:translateY(0); }
+}
 
-    /* ── DATES ── */
-    .dates{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:14px;
-      background:#f9f9f9;
-      border-radius:12px;
-      border:1px solid #eee;
-      margin-bottom:20px;
-    }
-    .date-col{text-align:center;}
-    .date-sub{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#bbb;margin-bottom:3px;}
-    .date-val{font-size:0.82rem;font-weight:800;color:#111;}
-    .date-arrow{color:#ddd;font-size:1.2rem;}
+.step-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  color: var(--dim);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-    /* ── MODIFIERS ── */
-    .mods{
-      padding:12px 14px;
-      border-radius:12px;
-      background:#fffbeb;
-      border:1px solid #fde68a;
-      margin-bottom:16px;
-      display:none;
-    }
-    .mods-title{font-size:0.72rem;font-weight:800;color:#d97706;margin-bottom:6px;}
-    .mods ul{list-style:none;font-size:0.75rem;color:#92400e;font-weight:500;}
-    .mods li{margin:3px 0;}
+.step-num {
+  width: 20px;
+  height: 20px;
+  background: var(--ink);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.6rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
 
-    /* ── CELEBRATION ── */
-    .cel-emoji{font-size:3.5rem;text-align:center;display:block;margin-bottom:12px;}
-    .cel-title{
-      text-align:center;
-      font-size:1.8rem;
-      font-weight:900;
-      color:#111;
-      margin-bottom:4px;
-    }
-    .cel-sub{text-align:center;color:#888;font-size:0.88rem;margin-bottom:20px;}
-    .cel-stats{
-      display:flex;
-      justify-content:space-around;
-      background:#f9f9f9;
-      border:1px solid #eee;
-      border-radius:12px;
-      padding:18px;
-      margin-bottom:20px;
-    }
-    .cel-num{font-size:2.2rem;font-weight:900;color:#111;text-align:center;}
-    .cel-lab{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#aaa;text-align:center;margin-top:2px;}
+/* ── BONE GRID ── */
+.bone-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
 
-    /* ── DISCLAIMER ── */
-    .disclaimer{
-      padding:14px 16px;
-      border-radius:12px;
-      background:#fef2f2;
-      border:1px solid #fecaca;
-      font-size:0.72rem;
-      color:#991b1b;
-      line-height:1.6;
-    }
-    .disclaimer strong{color:#7f1d1d;}
+.bone-tile {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 8px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(.34,1.56,.64,1);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
 
-    /* ── FOOTER ── */
-    .footer{
-      text-align:center;
-      padding:24px;
-      font-size:0.75rem;
-      color:#ccc;
-    }
-    .footer a{color:#888;text-decoration:none;font-weight:700;}
+.bone-tile:hover {
+  border-color: var(--ink);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 0 var(--ink);
+}
 
-    /* ── HIDDEN ── */
-    .hidden{display:none !important;}
+.bone-tile:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 0 var(--ink);
+}
 
-    /* ── MOBILE ── */
-    @media(max-width:360px){
-      .big-number{font-size:4.5rem;}
-      .card{padding:18px;}
-    }
-  </style>
+.bone-tile.picked {
+  background: var(--ink);
+  border-color: var(--ink);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.3);
+}
+
+.bone-tile.picked .tile-name {
+  color: rgba(255,255,255,0.8);
+}
+
+.tile-emoji { font-size: 1.8rem; display: block; margin-bottom: 6px; }
+.tile-name  { font-size: 0.68rem; font-weight: 700; color: var(--dim); }
+
+/* ── FRACTURE CARDS ── */
+.frac-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.frac-tile {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(.34,1.56,.64,1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.frac-tile:hover { transform: translateY(-3px); box-shadow: 0 6px 0 var(--border); }
+.frac-tile:active { transform: translateY(0); }
+
+.frac-tile.picked-simple   { border-color: var(--green);  background: #f0fff4; box-shadow: 0 4px 0 var(--green);  transform: translateY(-3px); }
+.frac-tile.picked-displaced{ border-color: var(--yellow); background: #fffbf0; box-shadow: 0 4px 0 var(--yellow); transform: translateY(-3px); }
+.frac-tile.picked-complex  { border-color: var(--red);    background: #fff5f5; box-shadow: 0 4px 0 var(--red);    transform: translateY(-3px); }
+
+.frac-emoji { font-size: 1.6rem; display: block; margin-bottom: 6px; }
+.frac-name  { font-size: 0.7rem; font-weight: 800; color: var(--ink); display: block; }
+.frac-desc  { font-size: 0.6rem; color: var(--dim); display: block; margin-top: 2px; }
+
+/* ── INPUT ROW ── */
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.input-wrap { display: flex; flex-direction: column; gap: 6px; }
+.input-wrap label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--dim); }
+
+.inp {
+  padding: 14px 16px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--card);
+  outline: none;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+  width: 100%;
+}
+
+.inp:focus { border-color: var(--ink); }
+.inp::placeholder { color: #ccc; }
+
+/* ── TOGGLE PILLS ── */
+.toggle-row { display: flex; gap: 8px; }
+
+.toggle {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  background: var(--card);
+  color: var(--dim);
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.toggle.on-yes { border-color: var(--red);   background: #fff5f5; color: var(--red);   }
+.toggle.on-no  { border-color: var(--green); background: #f0fff4; color: #16a34a; }
+
+/* ── GO BUTTON ── */
+.go-btn {
+  width: 100%;
+  padding: 20px;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.25);
+  transition: all 0.15s;
+  letter-spacing: 0.3px;
+}
+
+.go-btn:hover { background: #222; transform: translateY(-2px); box-shadow: 0 8px 0 rgba(0,0,0,0.25); }
+.go-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
+
+/* ── ERROR ── */
+.err-box {
+  padding: 12px 16px;
+  background: #fff5f5;
+  border: 2px solid var(--red);
+  border-radius: 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--red);
+  display: none;
+  margin-bottom: 12px;
+}
+
+/* ═══════════════════════════════
+   RESULT SCREEN
+═══════════════════════════════ */
+.result-screen {
+  display: none;
+  padding: 0 0 80px;
+}
+
+/* Big countdown display */
+.countdown-hero {
+  background: var(--ink);
+  color: #fff;
+  padding: 60px 24px 50px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.countdown-hero::before {
+  content: '🦴';
+  position: absolute;
+  font-size: 20rem;
+  opacity: 0.04;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: spin-slow 30s linear infinite;
+}
+
+@keyframes spin-slow { to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+.c-meta {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 16px;
+}
+
+.c-number {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(5rem, 20vw, 10rem);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -5px;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.c-unit {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 6px;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 28px;
+}
+
+/* Heal bar */
+.heal-bar-wrap {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto 12px;
+}
+
+.heal-track {
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.heal-fill {
+  height: 100%;
+  border-radius: 99px;
+  width: 0;
+  transition: width 1.5s cubic-bezier(.4,0,.2,1);
+  background: #fff;
+}
+
+.heal-pct {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* Info cards row */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 24px 24px 0;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.info-card {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  transition: transform 0.2s;
+}
+
+.info-card:hover { transform: translateY(-2px); }
+
+.info-card-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--dim);
+  margin-bottom: 8px;
+}
+
+.info-card-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.1;
+}
+
+.info-card-sub {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--dim);
+  margin-top: 4px;
+}
+
+/* Phase card */
+.phase-card {
+  max-width: 640px;
+  margin: 10px auto 0;
+  padding: 0 24px;
+}
+
+.phase-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 14px;
+  border: 2px solid;
+  transition: all 0.4s;
+}
+
+.phase-inner.ph-red    { border-color: #fecaca; background: #fff5f5; }
+.phase-inner.ph-yellow { border-color: #fde68a; background: #fffbf0; }
+.phase-inner.ph-green  { border-color: #a7f3d0; background: #f0fff4; }
+
+.phase-icon { font-size: 2.2rem; flex-shrink: 0; }
+.phase-title { font-size: 0.9rem; font-weight: 800; color: var(--ink); }
+.phase-desc  { font-size: 0.75rem; color: var(--dim); margin-top: 3px; line-height: 1.4; }
+
+/* Modifiers */
+.mods-card {
+  max-width: 640px;
+  margin: 10px auto 0;
+  padding: 0 24px;
+}
+
+.mods-inner {
+  padding: 16px;
+  background: #fffbf0;
+  border: 2px solid #fde68a;
+  border-radius: 14px;
+  display: none;
+}
+
+.mods-title { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: #d97706; margin-bottom: 10px; }
+.mods-list  { list-style: none; }
+.mods-list li { font-size: 0.78rem; font-weight: 600; color: #92400e; padding: 3px 0; }
+.mods-list li::before { content: '→ '; opacity: 0.5; }
+
+/* Share section */
+.share-section {
+  max-width: 640px;
+  margin: 16px auto 0;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.share-btn-big {
+  width: 100%;
+  padding: 18px;
+  background: var(--purple);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #4a42cc;
+  transition: all 0.15s;
+  letter-spacing: 0.3px;
+}
+
+.share-btn-big:hover { background: #5a52ef; transform: translateY(-2px); box-shadow: 0 7px 0 #4a42cc; }
+.share-btn-big:active { transform: translateY(3px); box-shadow: 0 2px 0 #4a42cc; }
+
+.reset-btn {
+  width: 100%;
+  padding: 15px;
+  background: transparent;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--dim);
+  transition: all 0.15s;
+}
+
+.reset-btn:hover { border-color: var(--ink); color: var(--ink); }
+
+/* Disclaimer */
+.disclaimer-bar {
+  max-width: 640px;
+  margin: 16px auto 0;
+  padding: 0 24px;
+}
+
+.disclaimer-inner {
+  padding: 14px 16px;
+  background: #fff5f5;
+  border-left: 4px solid var(--red);
+  border-radius: 0 10px 10px 0;
+  font-size: 0.72rem;
+  color: #7f1d1d;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════
+   CELEBRATION SCREEN
+═══════════════════════════════ */
+.cel-screen {
+  display: none;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 60px 24px 80px;
+  text-align: center;
+}
+
+.cel-big-emoji {
+  font-size: 5rem;
+  display: block;
+  margin-bottom: 24px;
+  animation: bounce 1s ease infinite alternate;
+}
+
+@keyframes bounce {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-16px); }
+}
+
+.cel-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 3.5rem;
+  font-weight: 800;
+  letter-spacing: -2px;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+
+.cel-sub {
+  font-size: 1rem;
+  color: var(--dim);
+  font-weight: 500;
+  margin-bottom: 40px;
+}
+
+.cel-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.cel-stat-card {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+}
+
+.cel-stat-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -2px;
+}
+
+.cel-stat-lab {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--dim);
+  margin-top: 6px;
+}
+
+/* ═══════════════════════════════
+   CONFETTI
+═══════════════════════════════ */
+#confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ═══════════════════════════════
+   FACT TICKER (neal.fun flavour!)
+═══════════════════════════════ */
+.fact-bar {
+  background: var(--ink);
+  color: rgba(255,255,255,0.6);
+  padding: 12px 24px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.fact-inner {
+  display: inline-block;
+  animation: ticker 25s linear infinite;
+}
+
+@keyframes ticker {
+  from { transform: translateX(100vw); }
+  to   { transform: translateX(-100%); }
+}
+
+/* ═══════════════════════════════
+   FOOTER
+═══════════════════════════════ */
+.footer-bar {
+  border-top: 2px solid var(--border);
+  padding: 24px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--dim);
+  font-weight: 600;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.footer-bar a { color: var(--ink); font-weight: 800; text-decoration: none; }
+
+/* ═══════════════════════════════
+   PROGRESS TICKER (above result)
+═══════════════════════════════ */
+.progress-ticker {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.tick-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  transition: all 0.3s;
+}
+
+.tick-dot.lit { background: rgba(255,255,255,0.8); }
+
+/* Mobile */
+@media(max-width:380px){
+  .bone-grid { grid-template-columns: repeat(3,1fr); }
+  .hero-title { font-size: 2.5rem; }
+  .c-number { font-size: 5rem; }
+  .info-grid { grid-template-columns: 1fr; }
+  .cel-stats { grid-template-columns: 1fr; }
+}
+
+/* ── HIDDEN ── */
+.hidden { display:none !important; }
+
+/* Pulse animation for interactive elements */
+@keyframes pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.93); }
+  70%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+.pop { animation: pop 0.3s cubic-bezier(.34,1.56,.64,1); }
+
+</style>
 </head>
 
 <body>
 
-  <!-- HEADER -->
-  <div class="header">
-    <h1><span>🦴</span> CastCountdown</h1>
-    <p>Track your healing. Share your journey.</p>
+<!-- CONFETTI -->
+<canvas id="confetti"></canvas>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <span>🦴</span> CastCountdown
+  </div>
+  <div class="topbar-right">Free forever</div>
+</div>
+
+<!-- FACT TICKER -->
+<div class="fact-bar">
+  <span class="fact-inner">
+    🦴 178 million new fractures happen globally every year &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
+    ⚡ Bones heal in 4 phases: hematoma, inflammation, repair, remodeling &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
+    🧒 Kids heal 2× faster than adults because their periosteum is thicker &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
+    🚬 Smoking makes bones heal 30% slower &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
+    💊 Calcium + Vitamin D speeds up bone healing &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
+    🦴 The femur is the hardest bone to break &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
+    🌍 6.8 million Americans fracture a bone every year &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;
+  </span>
+</div>
+
+<!-- ══════════════════════════
+     FORM SCREEN
+══════════════════════════ -->
+<div id="formScreen">
+
+  <div class="hero">
+    <div class="hero-eyebrow">Cast countdown calculator</div>
+    <h1 class="hero-title">How many days<br/><em>left?</em></h1>
+    <p class="hero-sub">Enter your fracture details and we'll calculate your healing timeline — backed by orthopedic science.</p>
   </div>
 
-  <div class="container">
+  <div class="wrap">
 
-    <!-- ── FORM ── -->
-    <div id="formCard" class="card">
-
-      <div class="section-label">Which bone did you break?</div>
+    <!-- STEP 1: BONE -->
+    <div class="step">
+      <div class="step-label">
+        <span class="step-num">1</span>
+        Which bone did you break?
+      </div>
       <div class="bone-grid" id="boneGrid">
-        <div class="bone-btn" data-bone="finger"><span class="emoji">☝️</span><span class="name">Finger</span></div>
-        <div class="bone-btn" data-bone="wrist"><span class="emoji">🤚</span><span class="name">Wrist</span></div>
-        <div class="bone-btn" data-bone="forearm"><span class="emoji">💪</span><span class="name">Forearm</span></div>
-        <div class="bone-btn" data-bone="elbow"><span class="emoji">🦾</span><span class="name">Elbow</span></div>
-        <div class="bone-btn" data-bone="clavicle"><span class="emoji">🎽</span><span class="name">Collarbone</span></div>
-        <div class="bone-btn" data-bone="ankle"><span class="emoji">🦶</span><span class="name">Ankle</span></div>
-        <div class="bone-btn" data-bone="tibia"><span class="emoji">🦵</span><span class="name">Shin</span></div>
-        <div class="bone-btn" data-bone="foot"><span class="emoji">👟</span><span class="name">Foot</span></div>
-        <div class="bone-btn" data-bone="femur"><span class="emoji">🦿</span><span class="name">Thigh</span></div>
+        <div class="bone-tile" data-bone="finger"   onclick="pickBone(this)"><span class="tile-emoji">☝️</span><span class="tile-name">Finger</span></div>
+        <div class="bone-tile" data-bone="wrist"    onclick="pickBone(this)"><span class="tile-emoji">🤚</span><span class="tile-name">Wrist</span></div>
+        <div class="bone-tile" data-bone="forearm"  onclick="pickBone(this)"><span class="tile-emoji">💪</span><span class="tile-name">Forearm</span></div>
+        <div class="bone-tile" data-bone="elbow"    onclick="pickBone(this)"><span class="tile-emoji">🦾</span><span class="tile-name">Elbow</span></div>
+        <div class="bone-tile" data-bone="clavicle" onclick="pickBone(this)"><span class="tile-emoji">🎽</span><span class="tile-name">Collarbone</span></div>
+        <div class="bone-tile" data-bone="ankle"    onclick="pickBone(this)"><span class="tile-emoji">🦶</span><span class="tile-name">Ankle</span></div>
+        <div class="bone-tile" data-bone="tibia"    onclick="pickBone(this)"><span class="tile-emoji">🦵</span><span class="tile-name">Shin</span></div>
+        <div class="bone-tile" data-bone="foot"     onclick="pickBone(this)"><span class="tile-emoji">👟</span><span class="tile-name">Foot</span></div>
+        <div class="bone-tile" data-bone="femur"    onclick="pickBone(this)"><span class="tile-emoji">🦿</span><span class="tile-name">Thigh</span></div>
       </div>
-
-      <div style="height:20px"></div>
-
-      <div class="section-label">How bad is the fracture?</div>
-      <div class="frac-grid" id="fracGrid">
-        <div class="frac-btn" data-frac="simple"><span class="emoji">😌</span><span class="name">Simple</span><span class="desc">Clean break</span></div>
-        <div class="frac-btn" data-frac="displaced"><span class="emoji">😬</span><span class="name">Displaced</span><span class="desc">Bone moved</span></div>
-        <div class="frac-btn" data-frac="complex"><span class="emoji">😱</span><span class="name">Complex</span><span class="desc">Multiple pieces</span></div>
-      </div>
-
-      <div style="height:20px"></div>
-
-      <div class="form-row">
-        <label>🎂 Age</label>
-        <input type="number" class="input" id="age" placeholder="Your age" min="1" max="120"/>
-      </div>
-
-      <div class="form-row">
-        <label>📅 Cast date</label>
-        <input type="date" class="input" id="castDate"/>
-      </div>
-
-      <div class="form-row">
-        <label>🚬 Smoke?</label>
-        <div class="yn-row">
-          <div class="yn-btn no" id="smokeNo" onclick="setYN('smoke','no')">✅ No</div>
-          <div class="yn-btn" id="smokeYes" onclick="setYN('smoke','yes')">🚬 Yes</div>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <label>🩸 Diabetes?</label>
-        <div class="yn-row">
-          <div class="yn-btn no" id="diabNo" onclick="setYN('diab','no')">✅ No</div>
-          <div class="yn-btn" id="diabYes" onclick="setYN('diab','yes')">🩸 Yes</div>
-        </div>
-      </div>
-
-      <div class="error" id="err">⚠️ Please fill in everything!</div>
-
-      <button class="btn btn-primary" onclick="calc()">Show My Countdown →</button>
+      <input type="hidden" id="bone"/>
     </div>
 
-    <!-- ── RESULT ── -->
-    <div id="resultCard" class="card hidden">
-      <div class="result-header">
-        <span id="rBone">Wrist</span> · <span id="rFrac">Simple</span>
+    <!-- STEP 2: FRACTURE -->
+    <div class="step">
+      <div class="step-label">
+        <span class="step-num">2</span>
+        How bad is the fracture?
       </div>
-
-      <div class="big-number" id="daysLeft">--</div>
-      <div class="big-label">days left</div>
-
-      <div class="progress-track">
-        <div class="progress-fill" id="progBar"></div>
+      <div class="frac-grid">
+        <div class="frac-tile" data-frac="simple"    onclick="pickFrac(this)"><span class="frac-emoji">😌</span><span class="frac-name">Simple</span><span class="frac-desc">Clean break</span></div>
+        <div class="frac-tile" data-frac="displaced" onclick="pickFrac(this)"><span class="frac-emoji">😬</span><span class="frac-name">Displaced</span><span class="frac-desc">Bone moved</span></div>
+        <div class="frac-tile" data-frac="complex"   onclick="pickFrac(this)"><span class="frac-emoji">😱</span><span class="frac-name">Complex</span><span class="frac-desc">Many pieces</span></div>
       </div>
-      <div class="progress-row">
-        <span>Cast on</span>
-        <span class="progress-pct" id="pctLabel">0%</span>
-        <span>Cast off</span>
-      </div>
+      <input type="hidden" id="frac"/>
+    </div>
 
-      <div class="phase" id="phaseBox">
-        <div class="phase-emoji" id="phaseE">🔴</div>
+    <!-- STEP 3: AGE + DATE -->
+    <div class="step">
+      <div class="step-label">
+        <span class="step-num">3</span>
+        About you
+      </div>
+      <div class="input-row">
+        <div class="input-wrap">
+          <label for="age">Your age</label>
+          <input type="number" id="age" class="inp" placeholder="e.g. 24" min="1" max="120"/>
+        </div>
+        <div class="input-wrap">
+          <label for="castDate">Cast date</label>
+          <input type="date" id="castDate" class="inp"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: HEALTH -->
+    <div class="step">
+      <div class="step-label">
+        <span class="step-num">4</span>
+        Health factors
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div>
-          <div class="phase-title" id="phaseT">Inflammation</div>
-          <div class="phase-desc" id="phaseD">Body is building scaffolding</div>
+          <div class="step-label" style="margin-bottom:8px;">🚬 Do you smoke?</div>
+          <div class="toggle-row">
+            <div class="toggle on-no" id="smokeNo"  onclick="setToggle('smoke','no')">No</div>
+            <div class="toggle"       id="smokeYes" onclick="setToggle('smoke','yes')">Yes</div>
+          </div>
+        </div>
+        <div>
+          <div class="step-label" style="margin-bottom:8px;">🩸 Diabetes?</div>
+          <div class="toggle-row">
+            <div class="toggle on-no" id="diabNo"  onclick="setToggle('diab','no')">No</div>
+            <div class="toggle"       id="diabYes" onclick="setToggle('diab','yes')">Yes</div>
+          </div>
         </div>
       </div>
-
-      <div class="dates">
-        <div class="date-col"><div class="date-sub">📅 Cast on</div><div class="date-val" id="dOn">--</div></div>
-        <div class="date-arrow">→</div>
-        <div class="date-col"><div class="date-sub">🎯 Est. off</div><div class="date-val" id="dOff">--</div></div>
-      </div>
-
-      <div class="mods" id="modsBox">
-        <div class="mods-title">⚡ Adjustments applied</div>
-        <ul id="modsList"></ul>
-      </div>
-
-      <button class="btn btn-share" onclick="share()">📤 Share My Countdown</button>
-      <button class="btn btn-ghost" onclick="reset()">← Start over</button>
-
-      <canvas id="shareCanvas" width="600" height="400" style="display:none"></canvas>
     </div>
 
-    <!-- ── CELEBRATION ── -->
-    <div id="celCard" class="card hidden">
-      <span class="cel-emoji">🎉🦴🎉</span>
-      <div class="cel-title">Cast-Off Day!</div>
-      <div class="cel-sub">You made it! Healing complete.</div>
-      <div class="cel-stats">
-        <div><div class="cel-num" id="celDays">--</div><div class="cel-lab">Days</div></div>
-        <div><div class="cel-num" id="celBone">--</div><div class="cel-lab">Bone</div></div>
-      </div>
-      <button class="btn btn-share" onclick="share(true)">📤 Share Cast-Off Day!</button>
-      <button class="btn btn-ghost" onclick="reset()">Track another bone</button>
+    <!-- ERROR + GO -->
+    <div class="step">
+      <div class="err-box" id="errBox">⚠️ Fill in all fields — bone, fracture type, age, and date!</div>
+      <button class="go-btn" onclick="calc()">Calculate My Countdown →</button>
     </div>
 
-    <!-- DISCLAIMER -->
-    <div class="disclaimer">
-      ⚠️ <strong>Disclaimer:</strong> General estimates based on orthopedic literature.
-      <strong>Not medical advice.</strong> Your doctor decides when to remove your cast.
-      <strong>Never remove it yourself.</strong>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     RESULT SCREEN
+══════════════════════════ -->
+<div id="resultScreen" class="result-screen">
+
+  <!-- Big counter -->
+  <div class="countdown-hero">
+    <div class="c-meta" id="rMeta">Broken Wrist · Simple Fracture</div>
+
+    <!-- Tick dots -->
+    <div class="progress-ticker" id="tickRow"></div>
+
+    <div class="c-number" id="cNum">0</div>
+    <div class="c-unit">days left</div>
+
+    <div class="heal-bar-wrap">
+      <div class="heal-track">
+        <div class="heal-fill" id="healFill"></div>
+      </div>
+      <div class="heal-pct" id="healPct">0% healed</div>
     </div>
   </div>
 
-  <div class="footer">
-    🦴 CastCountdown · Free forever ·
-    <a href="https://castcountdown.me">castcountdown.me</a>
+  <!-- Info cards -->
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="info-card-label">📅 Cast on</div>
+      <div class="info-card-value" id="iCastOn">--</div>
+      <div class="info-card-sub">Start of journey</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-label">🎯 Estimated off</div>
+      <div class="info-card-value" id="iCastOff">--</div>
+      <div class="info-card-sub">Estimated removal</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-label">⏱️ Days since cast</div>
+      <div class="info-card-value" id="iDaysSince">--</div>
+      <div class="info-card-sub">Days elapsed</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-label">📊 Total heal time</div>
+      <div class="info-card-value" id="iTotalDays">--</div>
+      <div class="info-card-sub">Estimated total</div>
+    </div>
   </div>
+
+  <!-- Phase -->
+  <div class="phase-card">
+    <div class="phase-inner" id="phaseInner">
+      <div class="phase-icon" id="phaseIcon">🔴</div>
+      <div>
+        <div class="phase-title" id="phaseTitle">Inflammation Phase</div>
+        <div class="phase-desc"  id="phaseDesc">Your body is forming a blood clot and beginning repair.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modifiers -->
+  <div class="mods-card">
+    <div class="mods-inner" id="modsInner">
+      <div class="mods-title">Healing adjustments applied</div>
+      <ul class="mods-list" id="modsList"></ul>
+    </div>
+  </div>
+
+  <!-- Buttons -->
+  <div class="share-section">
+    <button class="share-btn-big" onclick="doShare()">📤 Share My Countdown</button>
+    <button class="reset-btn" onclick="doReset()">← Start over</button>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="disclaimer-bar">
+    <div class="disclaimer-inner">
+      ⚠️ <strong>Medical disclaimer:</strong> These are general estimates based on published orthopedic research. This is <strong>not medical advice</strong>. Only your doctor decides when your cast comes off. <strong>Never remove your cast yourself.</strong>
+    </div>
+  </div>
+
+  <!-- Hidden share canvas -->
+  <canvas id="shareCanvas" width="600" height="400" style="display:none"></canvas>
+
+</div>
+
+<!-- ══════════════════════════
+     CELEBRATION SCREEN
+══════════════════════════ -->
+<div id="celScreen" class="cel-screen">
+  <span class="cel-big-emoji">🎉</span>
+  <div class="cel-title">Cast-Off Day!</div>
+  <div class="cel-sub">You made it through the whole thing. Healing complete!</div>
+  <div class="cel-stats">
+    <div class="cel-stat-card">
+      <div class="cel-stat-num" id="celDays">--</div>
+      <div class="cel-stat-lab">Days in cast</div>
+    </div>
+    <div class="cel-stat-card">
+      <div class="cel-stat-num" id="celBone">--</div>
+      <div class="cel-stat-lab">Bone healed</div>
+    </div>
+  </div>
+  <button class="share-btn-big" style="max-width:400px;margin:0 auto 12px;" onclick="doShare(true)">📤 Share Cast-Off Day!</button>
+  <button class="reset-btn" style="max-width:400px;margin:0 auto;" onclick="doReset()">Track another bone →</button>
+</div>
+
+<!-- FOOTER -->
+<div class="footer-bar">
+  🦴 CastCountdown · <a href="https://castcountdown.me">castcountdown.me</a> · Free forever
+</div>
 
 <script>
-// ════════════════════════════════
+// ════════════════════════════════════════
 //  DATA
-// ════════════════════════════════
-const bones={
-  finger:{n:'Finger',d:[28,35,42]},
-  wrist:{n:'Wrist',d:[35,49,63]},
-  forearm:{n:'Forearm',d:[49,63,84]},
-  elbow:{n:'Elbow',d:[35,49,63]},
-  clavicle:{n:'Collarbone',d:[35,49,56]},
-  ankle:{n:'Ankle',d:[49,63,84]},
-  tibia:{n:'Shin',d:[84,112,140]},
-  foot:{n:'Foot',d:[28,42,56]},
-  femur:{n:'Thigh',d:[112,140,168]}
+// ════════════════════════════════════════
+const BONES = {
+  finger:   { n:'Finger',      d:[28,35,42]   },
+  wrist:    { n:'Wrist',       d:[35,49,63]   },
+  forearm:  { n:'Forearm',     d:[49,63,84]   },
+  elbow:    { n:'Elbow',       d:[35,49,63]   },
+  clavicle: { n:'Collarbone',  d:[35,49,56]   },
+  ankle:    { n:'Ankle',       d:[49,63,84]   },
+  tibia:    { n:'Shin',        d:[84,112,140] },
+  foot:     { n:'Foot',        d:[28,42,56]   },
+  femur:    { n:'Thigh',       d:[112,140,168]}
 };
-const fracNames={simple:'Simple',displaced:'Displaced',complex:'Complex'};
-const phases=[
-  {min:0,max:33,e:'🔴',t:'Inflammation Phase',d:'Body is forming a blood clot and starting repair',c:'fill-red'},
-  {min:33,max:66,e:'🟡',t:'Repair Phase',d:'New bone tissue is forming at the fracture site',c:'fill-yellow'},
-  {min:66,max:101,e:'🟢',t:'Remodeling Phase',d:'Bone is strengthening and reshaping every day',c:'fill-green'}
+
+const FRAC_NAMES = { simple:'Simple', displaced:'Displaced', complex:'Complex' };
+
+const PHASES = [
+  {
+    min:0, max:33,
+    icon:'🔴', title:'Inflammation Phase',
+    desc:'Your body is forming a blood clot and sending repair cells to the fracture site.',
+    cls:'ph-red'
+  },
+  {
+    min:33, max:66,
+    icon:'🟡', title:'Repair Phase',
+    desc:'New soft bone tissue (callus) is bridging the break. Calcium is depositing.',
+    cls:'ph-yellow'
+  },
+  {
+    min:66, max:101,
+    icon:'🟢', title:'Remodeling Phase',
+    desc:'Hard bone is replacing soft callus. Your bone reshapes and strengthens daily.',
+    cls:'ph-green'
+  }
 ];
 
-// ════════════════════════════════
+// ════════════════════════════════════════
 //  STATE
-// ════════════════════════════════
-let sel={bone:'',frac:'',smoke:'no',diab:'no'};
+// ════════════════════════════════════════
+let S = { bone:'', frac:'', smoke:'no', diab:'no' };
 
-// ════════════════════════════════
+// ════════════════════════════════════════
 //  INIT
-// ════════════════════════════════
-document.getElementById('castDate').value=new Date().toISOString().split('T')[0];
+// ════════════════════════════════════════
+document.getElementById('castDate').value = new Date().toISOString().split('T')[0];
 
-// Bone clicks
-document.querySelectorAll('.bone-btn').forEach(b=>{
-  b.addEventListener('click',()=>{
-    document.querySelectorAll('.bone-btn').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    sel.bone=b.dataset.bone;
-  });
-});
-
-// Fracture clicks
-document.querySelectorAll('.frac-btn').forEach(b=>{
-  b.addEventListener('click',()=>{
-    document.querySelectorAll('.frac-btn').forEach(x=>{
-      x.classList.remove('active-s','active-d','active-c');
-    });
-    const cls={simple:'active-s',displaced:'active-d',complex:'active-c'};
-    b.classList.add(cls[b.dataset.frac]);
-    sel.frac=b.dataset.frac;
-  });
-});
-
-// Yes/No
-function setYN(type,val){
-  const no=document.getElementById(type+'No');
-  const yes=document.getElementById(type+'Yes');
-  no.classList.remove('no','yes');
-  yes.classList.remove('no','yes');
-  if(val==='no') no.classList.add('no');
-  else yes.classList.add('yes');
-  if(type==='smoke') sel.smoke=val;
-  else sel.diab=val;
+// Load saved data
+const raw = localStorage.getItem('cc_v2');
+if (raw) {
+  try { renderResult(JSON.parse(raw)); } catch(e) { localStorage.removeItem('cc_v2'); }
 }
 
-// Load saved
-const saved=localStorage.getItem('cc');
-if(saved){try{show(JSON.parse(saved));}catch(e){localStorage.removeItem('cc');}}
+// ════════════════════════════════════════
+//  PICK BONE
+// ════════════════════════════════════════
+function pickBone(el) {
+  document.querySelectorAll('.bone-tile').forEach(t => t.classList.remove('picked'));
+  el.classList.add('picked');
+  el.classList.add('pop');
+  el.addEventListener('animationend', () => el.classList.remove('pop'), {once:true});
+  S.bone = el.dataset.bone;
+  document.getElementById('bone').value = S.bone;
+}
 
-// ════════════════════════════════
+// ════════════════════════════════════════
+//  PICK FRACTURE
+// ════════════════════════════════════════
+function pickFrac(el) {
+  document.querySelectorAll('.frac-tile').forEach(t =>
+    t.classList.remove('picked-simple','picked-displaced','picked-complex')
+  );
+  const cls = {simple:'picked-simple',displaced:'picked-displaced',complex:'picked-complex'};
+  el.classList.add(cls[el.dataset.frac]);
+  el.classList.add('pop');
+  el.addEventListener('animationend', () => el.classList.remove('pop'), {once:true});
+  S.frac = el.dataset.frac;
+  document.getElementById('frac').value = S.frac;
+}
+
+// ════════════════════════════════════════
+//  TOGGLE YES/NO
+// ════════════════════════════════════════
+function setToggle(type, val) {
+  const no  = document.getElementById(type+'No');
+  const yes = document.getElementById(type+'Yes');
+  no.classList.remove('on-no','on-yes');
+  yes.classList.remove('on-no','on-yes');
+  val === 'no' ? no.classList.add('on-no') : yes.classList.add('on-yes');
+  if (type === 'smoke') S.smoke = val;
+  else S.diab = val;
+}
+
+// ════════════════════════════════════════
 //  CALCULATE
-// ════════════════════════════════
-function calc(){
-  const age=parseInt(document.getElementById('age').value);
-  const date=document.getElementById('castDate').value;
-  const err=document.getElementById('err');
+// ════════════════════════════════════════
+function calc() {
+  const age  = parseInt(document.getElementById('age').value);
+  const date = document.getElementById('castDate').value;
+  const err  = document.getElementById('errBox');
 
-  if(!sel.bone||!sel.frac||!age||!date){err.style.display='block';return;}
-  err.style.display='none';
+  if (!S.bone || !S.frac || !age || !date) {
+    err.style.display = 'block';
+    err.classList.add('pop');
+    err.addEventListener('animationend', () => err.classList.remove('pop'), {once:true});
+    return;
+  }
+  err.style.display = 'none';
 
-  const b=bones[sel.bone];
-  const fi={simple:0,displaced:1,complex:2}[sel.frac];
-  let days=b.d[fi];
-  const mods=[];
+  const b    = BONES[S.bone];
+  const fi   = {simple:0,displaced:1,complex:2}[S.frac];
+  let   days = b.d[fi];
+  const mods = [];
 
-  if(age<10){days=Math.round(days*0.55);mods.push('👶 Child: ~45% faster');}
-  else if(age<=17){days=Math.round(days*0.75);mods.push('🧒 Teen: ~25% faster');}
-  else if(age>=65){days=Math.round(days*1.35);mods.push('👴 65+: ~35% slower');}
-  if(sel.smoke==='yes'){days=Math.round(days*1.3);mods.push('🚬 Smoking: ~30% slower');}
-  if(sel.diab==='yes'){days=Math.round(days*1.25);mods.push('🩸 Diabetes: ~25% slower');}
+  if      (age < 10)  { days = Math.round(days*0.55); mods.push('👶 Child under 10: heals ~45% faster'); }
+  else if (age <= 17) { days = Math.round(days*0.75); mods.push('🧒 Teenager: heals ~25% faster'); }
+  else if (age >= 65) { days = Math.round(days*1.35); mods.push('👴 Age 65+: heals ~35% slower'); }
+  if (S.smoke==='yes'){ days = Math.round(days*1.30); mods.push('🚬 Smoking: heals ~30% slower'); }
+  if (S.diab==='yes') { days = Math.round(days*1.25); mods.push('🩸 Diabetes: heals ~25% slower'); }
 
-  const data={bone:sel.bone,bn:b.n,frac:sel.frac,fn:fracNames[sel.frac],age,date,days,mods};
-  localStorage.setItem('cc',JSON.stringify(data));
-  show(data);
+  const data = {
+    bone:S.bone, bn:b.n,
+    frac:S.frac, fn:FRAC_NAMES[S.frac],
+    age, date, days, mods
+  };
+
+  localStorage.setItem('cc_v2', JSON.stringify(data));
+  renderResult(data);
 }
 
-// ════════════════════════════════
-//  DISPLAY
-// ════════════════════════════════
-function show(d){
-  const cast=new Date(d.date);
-  const now=new Date();
-  const since=Math.floor((now-cast)/864e5);
-  const left=Math.max(d.days-since,0);
-  const pct=Math.min(Math.round(since/d.days*100),100);
-  const off=new Date(cast);off.setDate(off.getDate()+d.days);
-  const fmt=dt=>dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+// ════════════════════════════════════════
+//  RENDER RESULT
+// ════════════════════════════════════════
+function renderResult(d) {
+  const cast   = new Date(d.date);
+  const today  = new Date();
+  const since  = Math.floor((today - cast) / 864e5);
+  const left   = Math.max(d.days - since, 0);
+  const pct    = Math.min(Math.round(since / d.days * 100), 100);
+  const offD   = new Date(cast);
+  offD.setDate(offD.getDate() + d.days);
+  const fmt    = dt => dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const fmts   = dt => dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
 
-  if(left===0){
-    document.getElementById('celDays').textContent=d.days;
-    document.getElementById('celBone').textContent=d.bn;
-    document.getElementById('formCard').classList.add('hidden');
-    document.getElementById('resultCard').classList.add('hidden');
-    document.getElementById('celCard').classList.remove('hidden');
+  // Celebration?
+  if (left === 0) {
+    document.getElementById('celDays').textContent = d.days;
+    document.getElementById('celBone').textContent = d.bn;
+    show('cel');
+    launchConfetti();
     return;
   }
 
-  document.getElementById('rBone').textContent=d.bn;
-  document.getElementById('rFrac').textContent=d.fn;
-  document.getElementById('daysLeft').textContent=left;
-  document.getElementById('pctLabel').textContent=pct+'%';
-  document.getElementById('dOn').textContent=fmt(cast);
-  document.getElementById('dOff').textContent=fmt(off);
+  // Meta
+  document.getElementById('rMeta').textContent = d.bn + ' · ' + d.fn;
 
-  const bar=document.getElementById('progBar');
-  const ph=phases.find(p=>pct>=p.min&&pct<p.max)||phases[2];
-  bar.className='progress-fill '+ph.c;
-  setTimeout(()=>{bar.style.width=pct+'%';},100);
+  // Animated counter
+  animCount('cNum', left, 1200);
 
-  document.getElementById('phaseE').textContent=ph.e;
-  document.getElementById('phaseT').textContent=ph.t;
-  document.getElementById('phaseD').textContent=ph.d;
+  // Heal bar
+  setTimeout(() => {
+    document.getElementById('healFill').style.width = pct + '%';
+  }, 200);
+  document.getElementById('healPct').textContent = pct + '% healed';
 
-  const mb=document.getElementById('modsBox');
-  const ml=document.getElementById('modsList');
-  if(d.mods&&d.mods.length){
-    ml.innerHTML=d.mods.map(m=>'<li>'+m+'</li>').join('');
-    mb.style.display='block';
-  }else{mb.style.display='none';}
+  // Tick dots (10 dots = 10% each)
+  const tr = document.getElementById('tickRow');
+  tr.innerHTML = '';
+  for (let i = 0; i < 10; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'tick-dot' + (i < Math.round(pct/10) ? ' lit' : '');
+    tr.appendChild(dot);
+  }
 
-  document.getElementById('formCard').classList.add('hidden');
-  document.getElementById('resultCard').classList.remove('hidden');
-  document.getElementById('celCard').classList.add('hidden');
+  // Info cards
+  document.getElementById('iCastOn').textContent    = fmts(cast);
+  document.getElementById('iCastOff').textContent   = fmts(offD);
+  document.getElementById('iDaysSince').textContent = since + ' days';
+  document.getElementById('iTotalDays').textContent = d.days + ' days';
+
+  // Phase
+  const ph = PHASES.find(p => pct >= p.min && pct < p.max) || PHASES[2];
+  document.getElementById('phaseIcon').textContent  = ph.icon;
+  document.getElementById('phaseTitle').textContent = ph.title;
+  document.getElementById('phaseDesc').textContent  = ph.desc;
+  const pi = document.getElementById('phaseInner');
+  pi.className = 'phase-inner ' + ph.cls;
+
+  // Mods
+  const mi = document.getElementById('modsInner');
+  const ml = document.getElementById('modsList');
+  if (d.mods && d.mods.length) {
+    ml.innerHTML = d.mods.map(m => '<li>'+m+'</li>').join('');
+    mi.style.display = 'block';
+  } else {
+    mi.style.display = 'none';
+  }
+
+  show('result');
 }
 
-// ════════════════════════════════
-//  RESET
-// ════════════════════════════════
-function reset(){
-  localStorage.removeItem('cc');
-  sel={bone:'',frac:'',smoke:'no',diab:'no'};
-  document.querySelectorAll('.bone-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.frac-btn').forEach(b=>b.classList.remove('active-s','active-d','active-c'));
-  document.getElementById('age').value='';
-  document.getElementById('castDate').value=new Date().toISOString().split('T')[0];
-  setYN('smoke','no');setYN('diab','no');
-  document.getElementById('err').style.display='none';
-  document.getElementById('formCard').classList.remove('hidden');
-  document.getElementById('resultCard').classList.add('hidden');
-  document.getElementById('celCard').classList.add('hidden');
+// ════════════════════════════════════════
+//  SHOW SCREEN
+// ════════════════════════════════════════
+function show(which) {
+  document.getElementById('formScreen').style.display   = which==='form'   ? '' : 'none';
+  document.getElementById('resultScreen').style.display = which==='result' ? 'block' : 'none';
+  document.getElementById('celScreen').style.display    = which==='cel'    ? 'block' : 'none';
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// ════════════════════════════════
+// ════════════════════════════════════════
+//  RESET
+// ════════════════════════════════════════
+function doReset() {
+  localStorage.removeItem('cc_v2');
+  S = { bone:'', frac:'', smoke:'no', diab:'no' };
+  document.querySelectorAll('.bone-tile').forEach(t => t.classList.remove('picked'));
+  document.querySelectorAll('.frac-tile').forEach(t =>
+    t.classList.remove('picked-simple','picked-displaced','picked-complex')
+  );
+  document.getElementById('bone').value = '';
+  document.getElementById('frac').value = '';
+  document.getElementById('age').value  = '';
+  document.getElementById('castDate').value = new Date().toISOString().split('T')[0];
+  setToggle('smoke','no');
+  setToggle('diab','no');
+  show('form');
+}
+
+// ════════════════════════════════════════
+//  ANIMATE NUMBER COUNT-UP
+// ════════════════════════════════════════
+function animCount(id, target, dur) {
+  const el = document.getElementById(id);
+  const start = performance.now();
+  function step(now) {
+    const t = Math.min((now-start)/dur,1);
+    const ease = 1-Math.pow(1-t,4);
+    el.textContent = Math.round(ease*target);
+    if (t<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// ════════════════════════════════════════
 //  SHARE
-// ════════════════════════════════
-function share(cel){
-  const raw=localStorage.getItem('cc');
-  if(!raw)return;
-  const d=JSON.parse(raw);
-  const cast=new Date(d.date);
-  const since=Math.floor((new Date()-cast)/864e5);
-  const left=Math.max(d.days-since,0);
-  const pct=Math.min(Math.round(since/d.days*100),100);
+// ════════════════════════════════════════
+function doShare(cel) {
+  const raw = localStorage.getItem('cc_v2');
+  if (!raw) return;
+  const d    = JSON.parse(raw);
+  const cast = new Date(d.date);
+  const since= Math.floor((new Date()-cast)/864e5);
+  const left = Math.max(d.days-since,0);
+  const pct  = Math.min(Math.round(since/d.days*100),100);
 
-  const c=document.getElementById('shareCanvas');
-  const x=c.getContext('2d');
-  c.width=600;c.height=400;
+  const cv = document.getElementById('shareCanvas');
+  const cx = cv.getContext('2d');
+  cv.width = 600; cv.height = 400;
 
-  // BG
-  x.fillStyle=cel?'#fbbf24':'#111';
-  x.fillRect(0,0,600,400);
+  // Background
+  if (cel) {
+    const g = cx.createLinearGradient(0,0,600,400);
+    g.addColorStop(0,'#ffd200');
+    g.addColorStop(1,'#f7971e');
+    cx.fillStyle = g;
+  } else {
+    cx.fillStyle = '#111111';
+  }
+  cx.fillRect(0,0,600,400);
 
-  // Card bg
-  x.fillStyle=cel?'rgba(255,255,255,0.3)':'rgba(255,255,255,0.08)';
-  rr(x,40,35,520,330,20);
+  // Decorative bone watermark
+  cx.font = '180px serif';
+  cx.globalAlpha = 0.05;
+  cx.textAlign = 'center';
+  cx.fillStyle = '#fff';
+  cx.fillText('🦴', 480, 320);
+  cx.globalAlpha = 1;
 
-  x.textAlign='center';
+  // Card
+  cx.fillStyle = cel ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.06)';
+  rrect(cx, 40,35,520,330,18);
 
-  // Title
-  x.fillStyle=cel?'#111':'#fff';
-  x.font='bold 20px Inter,sans-serif';
-  x.fillText('🦴 CastCountdown',300,80);
+  cx.textAlign = 'center';
 
-  // Bone
-  x.fillStyle=cel?'rgba(0,0,0,0.5)':'rgba(255,255,255,0.4)';
-  x.font='500 14px Inter,sans-serif';
-  x.fillText(d.bn+' · '+d.fn,300,108);
+  // Logo
+  cx.fillStyle = cel ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
+  cx.font = '600 13px Inter,sans-serif';
+  cx.fillText('🦴 CASTCOUNTDOWN', 300, 78);
 
-  if(cel){
-    x.font='bold 36px Inter,sans-serif';
-    x.fillStyle='#111';
-    x.fillText("🎉 I'M CAST FREE! 🎉",300,210);
-    x.font='500 16px Inter,sans-serif';
-    x.fillStyle='rgba(0,0,0,0.5)';
-    x.fillText(d.days+' days of healing done!',300,248);
-  }else{
-    x.font='900 80px Inter,sans-serif';
-    x.fillStyle='#fff';
-    x.fillText(left,300,220);
-    x.font='700 12px Inter,sans-serif';
-    x.fillStyle='rgba(255,255,255,0.3)';
-    x.fillText('D A Y S   L E F T',300,248);
+  // Bone info
+  cx.fillStyle = cel ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.35)';
+  cx.font = '500 13px Inter,sans-serif';
+  cx.fillText(d.bn + '  ·  ' + d.fn, 300, 105);
 
-    // Progress bg
-    x.fillStyle='rgba(255,255,255,0.1)';
-    rr(x,100,268,400,12,6);
-    // Progress fill
-    const fw=Math.round(400*(pct/100));
-    if(fw>0){x.fillStyle=pct<33?'#ef4444':pct<66?'#f59e0b':'#22c55e';rr(x,100,268,fw,12,6);}
+  if (cel) {
+    cx.fillStyle = '#111';
+    cx.font = '900 42px Inter,sans-serif';
+    cx.fillText("🎉 I'M CAST FREE!", 300, 210);
+    cx.fillStyle = 'rgba(0,0,0,0.45)';
+    cx.font = '600 17px Inter,sans-serif';
+    cx.fillText(d.days + ' days of healing. Done!', 300, 252);
+  } else {
+    // Big number
+    cx.fillStyle = '#ffffff';
+    cx.font = '900 96px Inter,sans-serif';
+    cx.fillText(left, 300, 228);
+    cx.fillStyle = 'rgba(255,255,255,0.3)';
+    cx.font = '700 11px Inter,sans-serif';
+    cx.letterSpacing = '6px';
+    cx.fillText('D A Y S  L E F T', 300, 255);
 
-    x.fillStyle='rgba(255,255,255,0.4)';
-    x.font='600 12px Inter,sans-serif';
-    x.fillText(pct+'% healed',300,302);
+    // Progress bar
+    cx.fillStyle = 'rgba(255,255,255,0.08)';
+    rrect(cx, 100,274,400,10,5);
+    const fw = Math.round(400*(pct/100));
+    if (fw>0) {
+      cx.fillStyle = pct<33?'#ff4757':pct<66?'#ffa502':'#2ed573';
+      rrect(cx, 100,274,fw,10,5);
+    }
+    cx.fillStyle = 'rgba(255,255,255,0.35)';
+    cx.font = '600 12px Inter,sans-serif';
+    cx.fillText(pct+'% healed', 300, 305);
   }
 
-  x.fillStyle=cel?'rgba(0,0,0,0.3)':'rgba(255,255,255,0.2)';
-  x.font='500 11px Inter,sans-serif';
-  x.fillText('castcountdown.me',300,345);
+  // URL
+  cx.fillStyle = cel ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.18)';
+  cx.font = '500 11px Inter,sans-serif';
+  cx.fillText('castcountdown.me', 300, 345);
 
-  c.toBlob(async blob=>{
-    const f=new File([blob],'castcountdown.png',{type:'image/png'});
-    if(navigator.canShare&&navigator.canShare({files:[f]})){
-      try{await navigator.share({title:'CastCountdown',text:cel?'🎉 Cast free after '+d.days+' days! → castcountdown.me':'🦴 '+left+' days left! '+pct+'% healed → castcountdown.me',files:[f]});}
-      catch(e){dl(c);}
-    }else{dl(c);}
+  cv.toBlob(async blob => {
+    const f = new File([blob],'castcountdown.png',{type:'image/png'});
+    const txt = cel
+      ? `🎉 Finally CAST FREE after ${d.days} days! Track your broken bone at castcountdown.me`
+      : `🦴 Only ${left} days until my cast comes off! ${pct}% healed. Track yours → castcountdown.me`;
+
+    if (navigator.canShare && navigator.canShare({files:[f]})) {
+      try { await navigator.share({title:'CastCountdown',text:txt,files:[f]}); return; }
+      catch(e) {}
+    }
+    // Fallback: download
+    const a = document.createElement('a');
+    a.href = cv.toDataURL('image/png');
+    a.download = 'castcountdown.png';
+    a.click();
   },'image/png');
 }
 
-function dl(c){const a=document.createElement('a');a.href=c.toDataURL();a.download='castcountdown.png';a.click();}
-function rr(x,a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.lineTo(a+w-r,b);x.quadraticCurveTo(a+w,b,a+w,b+r);x.lineTo(a+w,b+h-r);x.quadraticCurveTo(a+w,b+h,a+w-r,b+h);x.lineTo(a+r,b+h);x.quadraticCurveTo(a,b+h,a,b+h-r);x.lineTo(a,b+r);x.quadraticCurveTo(a,b,a+r,b);x.closePath();x.fill();}
-</script>
+// ════════════════════════════════════════
+//  CONFETTI
+// ════════════════════════════════════════
+function launchConfetti() {
+  const cv = document.getElementById('confetti');
+  const cx = cv.getContext('2d');
+  cv.width  = window.innerWidth;
+  cv.height = window.innerHeight;
 
+  const COLS = ['#6c63ff','#ff4757','#ffa502','#2ed573','#1e90ff','#ffd200','#ff6b81'];
+  const pieces = Array.from({length:200}, () => ({
+    x: Math.random()*cv.width,
+    y: Math.random()*cv.height - cv.height,
+    w: Math.random()*14+4,
+    h: Math.random()*7+4,
+    c: COLS[Math.floor(Math.random()*COLS.length)],
+    sp: Math.random()*5+2,
+    an: Math.random()*360,
+    sp2: Math.random()*8-4
+  }));
+
+  let fr=0;
+  (function draw(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    fr++;
+    pieces.forEach(p=>{
+      cx.save();
+      cx.globalAlpha = Math.max(0,1-fr/200);
+      cx.translate(p.x+p.w/2,p.y+p.h/2);
+      cx.rotate(p.an*Math.PI/180);
+      cx.fillStyle=p.c;
+      cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      cx.restore();
+      p.y+=p.sp; p.an+=p.sp2; p.x+=Math.sin(p.an*.1)*2;
+    });
+    if(fr<220) requestAnimationFrame(draw);
+    else cx.clearRect(0,0,cv.width,cv.height);
+  })();
+}
+
+// ════════════════════════════════════════
+//  ROUND RECT HELPER
+// ════════════════════════════════════════
+function rrect(cx,x,y,w,h,r){
+  cx.beginPath();
+  cx.moveTo(x+r,y);
+  cx.lineTo(x+w-r,y);
+  cx.quadraticCurveTo(x+w,y,x+w,y+r);
+  cx.lineTo(x+w,y+h-r);
+  cx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  cx.lineTo(x+r,y+h);
+  cx.quadraticCurveTo(x,y+h,x,y+h-r);
+  cx.lineTo(x,y+r);
+  cx.quadraticCurveTo(x,y,x+r,y);
+  cx.closePath();
+  cx.fill();
+}
+</script>
 </body>
 </html>
