@@ -1,1801 +1,523 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cast Countdown — Track Your Recovery</title>
-  
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Animate.css -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-  
-  <!-- AOS (Animate on Scroll) -->
-  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
-  
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg-deep: #08080c;
-      --bg: #0c0c14;
-      --bg-card: #13131f;
-      --bg-card-hover: #1a1a2e;
-      --bg-elevated: #191930;
-      --accent: #6c5ce7;
-      --accent-light: #a29bfe;
-      --accent-glow: #6c5ce740;
-      --success: #00b894;
-      --success-light: #55efc4;
-      --warning: #fdcb6e;
-      --danger: #ff6b6b;
-      --info: #74b9ff;
-      --pink: #fd79a8;
-      --orange: #e17055;
-      --text: #e8e8f0;
-      --text-secondary: #9494b8;
-      --text-muted: #5a5a7a;
-      --border: #1e1e35;
-      --border-light: #2d2d50;
-      --radius: 16px;
-      --radius-lg: 24px;
-      --shadow: 0 8px 32px rgba(0,0,0,0.3);
-      --shadow-glow: 0 0 40px var(--accent-glow);
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    /* Selection */
-    ::selection {
-      background: var(--accent);
-      color: #fff;
-    }
-
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb {
-      background: var(--border-light);
-      border-radius: 3px;
-    }
-    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-    /* ──────────────────────────────────────
-       AMBIENT BACKGROUND
-    ────────────────────────────────────── */
-    .ambient-bg {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    .ambient-orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.12;
-      animation: orbFloat 20s ease-in-out infinite;
-    }
-
-    .ambient-orb:nth-child(1) {
-      width: 400px; height: 400px;
-      background: var(--accent);
-      top: -10%; left: -5%;
-      animation-delay: 0s;
-    }
-    .ambient-orb:nth-child(2) {
-      width: 350px; height: 350px;
-      background: var(--success);
-      bottom: -10%; right: -5%;
-      animation-delay: -7s;
-    }
-    .ambient-orb:nth-child(3) {
-      width: 300px; height: 300px;
-      background: var(--pink);
-      top: 40%; left: 50%;
-      animation-delay: -14s;
-    }
-
-    @keyframes orbFloat {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      25% { transform: translate(50px, -30px) scale(1.1); }
-      50% { transform: translate(-20px, 40px) scale(0.9); }
-      75% { transform: translate(30px, 20px) scale(1.05); }
-    }
-
-    /* Grid pattern overlay */
-    .grid-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      background-image:
-        linear-gradient(var(--border) 1px, transparent 1px),
-        linear-gradient(90deg, var(--border) 1px, transparent 1px);
-      background-size: 60px 60px;
-      opacity: 0.15;
-      mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
-      -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
-    }
-
-    /* ──────────────────────────────────────
-       SCREEN 1 — INPUT
-    ────────────────────────────────────── */
-    #screen-input {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 2rem 1rem;
-    }
-
-    .input-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 3rem 2.5rem;
-      width: 100%;
-      max-width: 500px;
-      box-shadow: var(--shadow);
-      position: relative;
-      overflow: hidden;
-      backdrop-filter: blur(20px);
-    }
-
-    .input-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--accent), var(--success), var(--accent), transparent);
-      animation: shimmer 3s ease-in-out infinite;
-    }
-
-    @keyframes shimmer {
-      0%, 100% { opacity: 0.5; }
-      50% { opacity: 1; }
-    }
-
-    .logo-section {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .logo-icon {
-      width: 72px;
-      height: 72px;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--success) 100%);
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1rem;
-      font-size: 2rem;
-      box-shadow: 0 8px 24px var(--accent-glow);
-      animation: logoPulse 3s ease-in-out infinite;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-
-    .logo-icon:hover { transform: scale(1.05); }
-
-    @keyframes logoPulse {
-      0%, 100% { box-shadow: 0 8px 24px var(--accent-glow); }
-      50% { box-shadow: 0 8px 40px var(--accent-glow), 0 0 60px var(--accent-glow); }
-    }
-
-    .logo-title {
-      font-size: 1.65rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      color: var(--text);
-    }
-
-    .logo-title span {
-      background: linear-gradient(135deg, var(--accent-light), var(--success-light));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .logo-subtitle {
-      color: var(--text-muted);
-      font-size: 0.88rem;
-      margin-top: 0.35rem;
-      font-weight: 400;
-    }
-
-    /* Form Fields */
-    .field {
-      margin-bottom: 1.25rem;
-    }
-
-    .field label {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 0.5rem;
-    }
-
-    .field label .label-icon {
-      font-size: 0.9rem;
-    }
-
-    .input-wrapper {
-      position: relative;
-    }
-
-    .field input,
-    .field select {
-      width: 100%;
-      background: var(--bg);
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      color: var(--text);
-      font-size: 0.95rem;
-      font-family: 'Inter', sans-serif;
-      padding: 0.8rem 1rem;
-      outline: none;
-      transition: all 0.25s ease;
-      appearance: none;
-      -webkit-appearance: none;
-    }
-
-    .field select {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239494b8' viewBox='0 0 16 16'%3E%3Cpath d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 1rem center;
-      padding-right: 2.5rem;
-    }
-
-    .field input:focus,
-    .field select:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    .field input::placeholder { color: var(--text-muted); }
-    .field select option { background: var(--bg-card); color: var(--text); }
-
-    .field input[type="date"]::-webkit-calendar-picker-indicator {
-      filter: invert(0.7);
-      cursor: pointer;
-    }
-
-    /* Row of two fields */
-    .field-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
-    }
-
-    /* Submit Button */
-    .btn-primary {
-      width: 100%;
-      padding: 0.95rem;
-      background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
-      border: none;
-      border-radius: 14px;
-      color: #fff;
-      font-size: 1rem;
-      font-weight: 700;
-      font-family: 'Inter', sans-serif;
-      cursor: pointer;
-      margin-top: 0.75rem;
-      letter-spacing: 0.01em;
-      transition: all 0.25s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn-primary::before {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%;
-      width: 100%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-      transition: left 0.5s;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px var(--accent-glow);
-    }
-
-    .btn-primary:hover::before { left: 100%; }
-    .btn-primary:active { transform: translateY(0); }
-
-    .btn-text {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-
-    .btn-arrow {
-      transition: transform 0.2s;
-    }
-
-    .btn-primary:hover .btn-arrow {
-      transform: translateX(3px);
-    }
-
-    /* ──────────────────────────────────────
-       SCREEN 2 — STATS DASHBOARD
-    ────────────────────────────────────── */
-    #screen-stats {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* HERO / STICKY TOP */
-    .hero {
-      width: 100%;
-      background: linear-gradient(180deg, var(--bg-deep) 0%, var(--bg) 100%);
-      text-align: center;
-      padding: 2rem 1rem 1.5rem;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      border-bottom: 1px solid var(--border);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-    }
-
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: var(--accent-glow);
-      border: 1px solid var(--accent);
-      border-radius: 99px;
-      padding: 0.3rem 0.9rem;
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--accent-light);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 0.6rem;
-    }
-
-    .hero-badge .pulse-dot {
-      width: 6px; height: 6px;
-      background: var(--success);
-      border-radius: 50%;
-      animation: pulseDot 2s ease-in-out infinite;
-    }
-
-    @keyframes pulseDot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.4); }
-    }
-
-    .hero-title {
-      font-size: clamp(1.3rem, 3.5vw, 2rem);
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      margin-bottom: 1rem;
-    }
-
-    .hero-title .gradient-text {
-      background: linear-gradient(135deg, var(--accent-light), var(--success-light));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    /* PREMIUM COUNTDOWN */
-    .countdown-container {
-      display: flex;
-      justify-content: center;
-      gap: 0.6rem;
-      margin-bottom: 1.2rem;
-    }
-
-    .cd-unit {
-      position: relative;
-      width: clamp(68px, 15vw, 90px);
-    }
-
-    .cd-flip {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 0.6rem 0.4rem 0.5rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .cd-flip::before {
-      content: '';
-      position: absolute;
-      top: 50%; left: 0; right: 0;
-      height: 1px;
-      background: var(--border);
-      z-index: 2;
-    }
-
-    .cd-flip::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 14px;
-      padding: 1px;
-      background: linear-gradient(180deg, transparent, var(--accent-glow));
-      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask-composite: exclude;
-      -webkit-mask-composite: xor;
-      pointer-events: none;
-      opacity: 0.5;
-    }
-
-    .cd-number {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: clamp(1.6rem, 4.5vw, 2.4rem);
-      font-weight: 700;
-      color: #fff;
-      display: block;
-      text-align: center;
-      line-height: 1.2;
-      position: relative;
-      z-index: 1;
-    }
-
-    .cd-number.flip-animate {
-      animation: flipDigit 0.3s ease-out;
-    }
-
-    @keyframes flipDigit {
-      0% { transform: perspective(200px) rotateX(-30deg); opacity: 0.5; }
-      100% { transform: perspective(200px) rotateX(0); opacity: 1; }
-    }
-
-    .cd-unit-label {
-      font-size: 0.62rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      text-align: center;
-      margin-top: 0.45rem;
-    }
-
-    .cd-separator {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 6px;
-      padding-bottom: 1.2rem;
-    }
-
-    .cd-separator span {
-      width: 5px; height: 5px;
-      background: var(--accent);
-      border-radius: 50%;
-      animation: separatorPulse 1s ease-in-out infinite;
-    }
-
-    .cd-separator span:nth-child(2) { animation-delay: 0.5s; }
-
-    @keyframes separatorPulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.2; }
-    }
-
-    /* PROGRESS */
-    .progress-section {
-      width: 100%;
-      max-width: 520px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-    }
-
-    .progress-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5rem;
-    }
-
-    .progress-label-left {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    .progress-pct {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--success);
-    }
-
-    .progress-track {
-      width: 100%;
-      height: 8px;
-      background: var(--border);
-      border-radius: 99px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--success));
-      border-radius: 99px;
-      transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-      position: relative;
-    }
-
-    .progress-fill::after {
-      content: '';
-      position: absolute;
-      top: 0; right: 0;
-      width: 30px; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
-      border-radius: 99px;
-      animation: progressShine 2s ease-in-out infinite;
-    }
-
-    @keyframes progressShine {
-      0%, 100% { opacity: 0; }
-      50% { opacity: 1; }
-    }
-
-    .progress-dates {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 0.4rem;
-      font-size: 0.7rem;
-      color: var(--text-muted);
-    }
-
-    /* CONTENT */
-    .dashboard {
-      width: 100%;
-      max-width: 720px;
-      padding: 2rem 1.2rem 4rem;
-    }
-
-    /* Quick Stats Row */
-    .quick-stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 0.75rem;
-      margin-bottom: 2rem;
-    }
-
-    .quick-stat {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.2rem 1rem;
-      text-align: center;
-      transition: all 0.3s ease;
-      cursor: default;
-    }
-
-    .quick-stat:hover {
-      border-color: var(--border-light);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow);
-    }
-
-    .quick-stat .qs-icon {
-      font-size: 1.5rem;
-      margin-bottom: 0.4rem;
-    }
-
-    .quick-stat .qs-value {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #fff;
-      line-height: 1.2;
-    }
-
-    .quick-stat .qs-label {
-      font-size: 0.68rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-top: 0.25rem;
-    }
-
-    /* Section Headers */
-    .section-divider {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin: 1.5rem 0 1rem;
-    }
-
-    .section-divider .divider-line {
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    .section-divider h2 {
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--text-muted);
-      white-space: nowrap;
-    }
-
-    /* Stat Cards */
-    .stat-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem 1.5rem;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s ease;
-      margin-bottom: 0.75rem;
-      cursor: default;
-    }
-
-    .stat-card:hover {
-      border-color: var(--border-light);
-      background: var(--bg-card-hover);
-      transform: translateY(-1px);
-    }
-
-    .stat-card .card-accent {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 2px;
-    }
-
-    .stat-card .card-glow {
-      position: absolute;
-      top: 0; left: 0;
-      width: 120px; height: 120px;
-      border-radius: 50%;
-      filter: blur(60px);
-      opacity: 0.06;
-      pointer-events: none;
-    }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 0.6rem;
-    }
-
-    .card-icon {
-      width: 40px; height: 40px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      flex-shrink: 0;
-    }
-
-    .card-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-secondary);
-    }
-
-    .card-value {
-      font-size: clamp(1.5rem, 4vw, 2rem);
-      font-weight: 800;
-      color: #fff;
-      letter-spacing: -0.02em;
-      line-height: 1.2;
-      margin-bottom: 0.4rem;
-    }
-
-    .card-value.mono {
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    .card-desc {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
-
-    /* Color variants */
-    .theme-purple .card-accent { background: linear-gradient(90deg, var(--accent), transparent); }
-    .theme-purple .card-glow { background: var(--accent); }
-    .theme-purple .card-icon { background: #6c5ce720; }
-
-    .theme-green .card-accent { background: linear-gradient(90deg, var(--success), transparent); }
-    .theme-green .card-glow { background: var(--success); }
-    .theme-green .card-icon { background: #00b89420; }
-
-    .theme-orange .card-accent { background: linear-gradient(90deg, var(--orange), transparent); }
-    .theme-orange .card-glow { background: var(--orange); }
-    .theme-orange .card-icon { background: #e1705520; }
-
-    .theme-red .card-accent { background: linear-gradient(90deg, var(--danger), transparent); }
-    .theme-red .card-glow { background: var(--danger); }
-    .theme-red .card-icon { background: #ff6b6b20; }
-
-    .theme-blue .card-accent { background: linear-gradient(90deg, var(--info), transparent); }
-    .theme-blue .card-glow { background: var(--info); }
-    .theme-blue .card-icon { background: #74b9ff20; }
-
-    .theme-pink .card-accent { background: linear-gradient(90deg, var(--pink), transparent); }
-    .theme-pink .card-glow { background: var(--pink); }
-    .theme-pink .card-icon { background: #fd79a820; }
-
-    .theme-yellow .card-accent { background: linear-gradient(90deg, var(--warning), transparent); }
-    .theme-yellow .card-glow { background: var(--warning); }
-    .theme-yellow .card-icon { background: #fdcb6e20; }
-
-    /* Fact Cards */
-    .fact-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.3rem 1.5rem;
-      display: flex;
-      gap: 1rem;
-      align-items: flex-start;
-      margin-bottom: 0.75rem;
-      transition: all 0.3s ease;
-      cursor: default;
-    }
-
-    .fact-card:hover {
-      border-color: var(--accent);
-      background: var(--bg-card-hover);
-    }
-
-    .fact-icon-wrap {
-      width: 44px; height: 44px;
-      border-radius: 12px;
-      background: var(--bg-elevated);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      flex-shrink: 0;
-    }
-
-    .fact-body h3 {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 0.3rem;
-    }
-
-    .fact-body p {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
-
-    /* Milestone Timeline */
-    .timeline {
-      position: relative;
-      padding-left: 2rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .timeline::before {
-      content: '';
-      position: absolute;
-      left: 8px; top: 0; bottom: 0;
-      width: 2px;
-      background: var(--border);
-    }
-
-    .timeline-item {
-      position: relative;
-      padding: 0.8rem 0;
-    }
-
-    .timeline-dot {
-      position: absolute;
-      left: -2rem;
-      top: 1rem;
-      width: 18px; height: 18px;
-      border-radius: 50%;
-      border: 2px solid var(--border);
-      background: var(--bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .timeline-dot.completed {
-      border-color: var(--success);
-      background: var(--success);
-    }
-
-    .timeline-dot.completed::after {
-      content: '✓';
-      font-size: 0.6rem;
-      color: #fff;
-      font-weight: 700;
-    }
-
-    .timeline-dot.current {
-      border-color: var(--accent);
-      background: var(--accent);
-      box-shadow: 0 0 12px var(--accent-glow);
-      animation: pulseDot 2s ease-in-out infinite;
-    }
-
-    .timeline-dot.current::after {
-      content: '';
-      width: 6px; height: 6px;
-      background: #fff;
-      border-radius: 50%;
-    }
-
-    .timeline-title {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    .timeline-desc {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      margin-top: 0.15rem;
-    }
-
-    .timeline-item.dimmed .timeline-title { color: var(--text-muted); }
-
-    /* Reset button */
-    .reset-section {
-      text-align: center;
-      padding: 2rem 0 3rem;
-    }
-
-    .btn-ghost {
-      padding: 0.7rem 1.8rem;
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      font-family: 'Inter', sans-serif;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-ghost:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    /* CELEBRATION OVERLAY */
-    .celebration {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 999;
-      background: rgba(8,8,12,0.95);
-      backdrop-filter: blur(20px);
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 2rem;
-    }
-
-    .celebration.show { display: flex; }
-
-    .celebration-icon {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-      animation: celebBounce 0.6s cubic-bezier(0.34,1.56,0.64,1);
-    }
-
-    @keyframes celebBounce {
-      from { transform: scale(0) rotate(-10deg); }
-      to { transform: scale(1) rotate(0deg); }
-    }
-
-    .celebration h1 {
-      font-size: clamp(2rem, 5vw, 3rem);
-      font-weight: 900;
-      margin-bottom: 0.5rem;
-      background: linear-gradient(135deg, var(--success-light), var(--accent-light));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: celebTitle 0.5s 0.2s cubic-bezier(0.34,1.56,0.64,1) both;
-    }
-
-    @keyframes celebTitle {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    .celebration p {
-      color: var(--text-secondary);
-      font-size: 1rem;
-      line-height: 1.6;
-      max-width: 400px;
-      animation: celebTitle 0.5s 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
-    }
-
-    .celebration .btn-primary {
-      max-width: 240px;
-      margin-top: 2rem;
-      animation: celebTitle 0.5s 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
-    }
-
-    /* Sound toggle */
-    .sound-toggle {
-      position: fixed;
-      bottom: 1.2rem;
-      right: 1.2rem;
-      z-index: 200;
-      width: 40px; height: 40px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: all 0.2s;
-      color: var(--text-muted);
-    }
-
-    .sound-toggle:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    /* Particle canvas */
-    #particle-canvas {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    /* Responsive */
-    @media (max-width: 480px) {
-      .input-card { padding: 2rem 1.5rem; }
-      .field-row { grid-template-columns: 1fr; }
-      .countdown-container { gap: 0.4rem; }
-      .quick-stats { grid-template-columns: repeat(2, 1fr); }
-      .dashboard { padding: 1.5rem 0.8rem 3rem; }
-    }
-
-    /* Loading animation */
-    .page-transition {
-      position: fixed;
-      inset: 0;
-      z-index: 500;
-      background: var(--bg-deep);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
-    }
-
-    .page-transition.hidden {
-      opacity: 0;
-      visibility: hidden;
-    }
-
-    .loader-ring {
-      width: 48px; height: 48px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Tooltip */
-    .tooltip {
-      position: relative;
-    }
-
-    .tooltip::after {
-      content: attr(data-tip);
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%) scale(0.9);
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 0.72rem;
-      padding: 0.4rem 0.7rem;
-      border-radius: 8px;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.2s;
-    }
-
-    .tooltip:hover::after {
-      opacity: 1;
-      transform: translateX(-50%) scale(1);
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CastCountdown — Track Your Fracture Recovery Journey</title>
+<meta name="description" content="Count down to your cast removal date with stunning stats and shareable progress cards. Share on TikTok & Reels.">
+<meta name="keywords" content="cast countdown, fracture recovery, cast removal date, broken bone healing time, cast removal countdown">
+<meta property="og:title" content="CastCountdown — Your Fracture Recovery Stats">
+<meta property="og:description" content="Beautiful stats and countdown for your cast removal. Share your healing progress!">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:auto}
+body{font-family:'Inter',ui-sans-serif,system-ui,-apple-system,sans-serif;background:#fff;color:#000;-webkit-font-smoothing:antialiased;overflow:hidden;height:100vh;width:100vw}
+.stat-number{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.4)}
+/* ── App container ── */
+#app{width:100%;height:100vh;position:relative}
+/* ── Screens ── */
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .45s cubic-bezier(.22,1,.36,1),transform .45s cubic-bezier(.22,1,.36,1);transform:translateY(40px)}
+.screen.active{opacity:1;pointer-events:auto;transform:translateY(0)}
+.screen.exit-up{opacity:0;transform:translateY(-30px)}
+/* ── Form screens ── */
+.form-screen{background:#fff;z-index:10}
+/* ── Progress bar ── */
+#progress-bar{position:fixed;top:0;left:0;height:2px;background:#000;z-index:100;transition:width .5s cubic-bezier(.22,1,.36,1)}
+/* ── Back button ── */
+.back-btn{position:fixed;top:20px;left:24px;z-index:100;font-size:14px;color:rgba(0,0,0,.25);background:none;border:none;cursor:pointer;font-family:inherit}
+.back-btn:hover{color:#000}
+/* ── Buttons ── */
+.btn{padding:12px 32px;border-radius:9999px;border:none;font-family:inherit;font-weight:600;font-size:16px;cursor:pointer;transition:transform .15s,opacity .2s}
+.btn:active{transform:scale(.96)}
+.btn-primary{background:#000;color:#fff}
+.btn-primary:hover{background:#2d2d4e}
+.btn-primary:disabled{opacity:.15;cursor:not-allowed}
+.btn-secondary{background:#fff;color:#000;border:1px solid rgba(0,0,0,.1)}
+.btn-blue{background:#2563EB;color:#fff;font-size:18px;padding:16px 40px}
+.btn-blue:disabled{opacity:.4}
+/* ── Input ── */
+.text-input{width:100%;max-width:360px;padding:12px 0;font-size:clamp(28px,5vw,38px);font-weight:300;text-align:center;background:transparent;border:none;border-bottom:2px solid rgba(0,0,0,.1);outline:none;font-family:inherit;transition:border-color .3s}
+.text-input:focus{border-color:#000}
+.text-input::placeholder{color:rgba(0,0,0,.12)}
+.date-input{width:100%;padding:12px 16px;font-size:18px;background:#fff;border:none;border-bottom:2px solid rgba(0,0,0,.1);outline:none;font-family:inherit;transition:border-color .3s}
+.date-input:focus{border-color:#000}
+/* ── Grid buttons ── */
+.grid-options{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-width:460px;width:100%}
+.grid-options.cols-3{grid-template-columns:repeat(3,1fr)}
+.option-btn{padding:12px 16px;border-radius:8px;border:1px solid rgba(0,0,0,.1);background:#fff;color:#000;font-size:13px;font-family:inherit;cursor:pointer;transition:all .15s;text-align:left}
+.option-btn:hover{border-color:rgba(0,0,0,.3)}
+.option-btn.selected{background:#000;color:#fff;border-color:#000}
+/* ── Color picker ── */
+.color-grid{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;max-width:320px}
+.color-btn{width:48px;height:48px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:all .15s}
+.color-btn:hover{transform:scale(1.15)}
+.color-btn.selected{border-color:#000;transform:scale(1.1)}
+/* ── Stats slide ── */
+.stats-viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#fff;z-index:20;overflow:hidden}
+.slide{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;opacity:0;transform:translateY(40px);transition:opacity .5s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1);pointer-events:none;width:100%;max-width:640px}
+.slide.active{opacity:1;transform:translateY(0);pointer-events:auto}
+/* ── Right dots ── */
+.dots{position:fixed;right:20px;top:50%;transform:translateY(-50%);z-index:50;display:flex;flex-direction:column;gap:6px}
+.dot{width:6px;border-radius:9999px;background:rgba(0,0,0,.12);border:none;cursor:pointer;transition:all .3s;padding:0}
+.dot.active{height:24px;background:#000}
+.dot:not(.active){height:6px}
+/* ── Slide counter ── */
+.slide-counter{position:fixed;bottom:20px;left:24px;z-index:50;font-size:11px;color:rgba(0,0,0,.2);letter-spacing:.05em}
+/* ── Scroll hint ── */
+.scroll-hint{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:50;display:flex;flex-direction:column;align-items:center;gap:4px;color:rgba(0,0,0,.2);font-size:12px;letter-spacing:.05em}
+.scroll-hint svg{animation:bounce 1.5s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+/* ── Share modal ── */
+.share-overlay{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.share-overlay.open{opacity:1;pointer-events:auto}
+.share-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.85)}
+.share-content{position:relative;z-index:10;width:100%;max-width:360px;padding:0 16px;display:flex;flex-direction:column;align-items:center}
+/* ── Share card ── */
+.share-card{width:100%;aspect-ratio:9/16;border-radius:16px;padding:32px 24px;display:flex;flex-direction:column;align-items:center;overflow:hidden;position:relative}
+.share-card .glow1{position:absolute;top:-20%;right:-20%;width:60%;height:60%;border-radius:50%;opacity:.2;filter:blur(60px);pointer-events:none;background:radial-gradient(circle,rgba(99,102,241,.6) 0%,transparent 70%)}
+.share-card .glow2{position:absolute;bottom:-15%;left:-15%;width:50%;height:50%;border-radius:50%;opacity:.15;filter:blur(60px);pointer-events:none;background:radial-gradient(circle,rgba(52,211,153,.5) 0%,transparent 70%)}
+.share-card>*{position:relative;z-index:1}
+.share-card-header{text-align:center;margin-bottom:auto}
+.share-card-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%}
+.share-card-footer{text-align:center;margin-top:auto;padding-top:16px}
+.card-dots{display:flex;gap:6px;margin-bottom:16px}
+.card-dot{height:4px;border-radius:9999px;border:none;cursor:pointer;transition:all .3s;padding:0}
+.card-dot.active{width:24px;background:#fff}
+.card-dot:not(.active){width:6px;background:rgba(255,255,255,.2)}
+.stat-row{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:10px 16px;width:100%;backdrop-filter:blur(8px);margin-bottom:8px}
+.stat-row .emoji{font-size:18px}
+.stat-row .val{font-size:16px;font-weight:700;color:#fff;line-height:1.2}
+.stat-row .lbl{font-size:10px;color:rgba(255,255,255,.25);line-height:1.2}
+.share-nav{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:16px;padding:0 8px}
+.share-nav button{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);border:none;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.share-nav button:hover{background:rgba(255,255,255,.2);color:#fff}
+.share-actions{display:flex;gap:8px;width:100%;margin-top:16px}
+.share-actions button{flex:1;padding:14px;border-radius:9999px;border:none;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;transition:transform .15s}
+.share-actions button:active{transform:scale(.97)}
+.share-actions .btn-share{background:#fff;color:#000}
+.share-actions .btn-copy{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.1)}
+/* ── Heart pulse ── */
+.heart-pulse{animation:pulse 1.2s ease-in-out infinite;display:inline-block;margin-top:24px;font-size:36px}
+@keyframes pulse{0%,100%{transform:scale(1)}25%{transform:scale(1.2)}50%{transform:scale(1)}75%{transform:scale(1.15)}}
+/* ── Floating emoji ── */
+.float{animation:float 2.5s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+/* ── Progress ring ── */
+.ring-track{stroke:rgba(0,0,0,.03);fill:none;stroke-width:4}
+.ring-fill{fill:none;stroke:#000;stroke-width:4;stroke-linecap:round;transition:stroke-dasharray 1.5s cubic-bezier(.22,1,.36,1)}
+/* ── Responsive ── */
+@media(min-width:768px){
+  .grid-options.cols-3{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:480px){
+  .grid-options{grid-template-columns:repeat(2,1fr)}
+  .grid-options.cols-3{grid-template-columns:repeat(2,1fr)}
+}
+</style>
 </head>
 <body>
-
-<!-- Ambient Background -->
-<div class="ambient-bg">
-  <div class="ambient-orb"></div>
-  <div class="ambient-orb"></div>
-  <div class="ambient-orb"></div>
+<div id="app">
+  <!-- Progress bar -->
+  <div id="progress-bar" style="width:0%"></div>
+  <!-- ═══════════════ FORM SCREENS ═══════════════ -->
+  <!-- Screen 0: Landing -->
+  <div class="screen form-screen active" id="screen-landing">
+    <p class="float" style="font-size:clamp(60px,12vw,80px);margin-bottom:24px">🦴</p>
+    <h1 style="font-size:clamp(40px,8vw,64px);font-weight:800;letter-spacing:-.02em;margin-bottom:12px">CastCountdown</h1>
+    <p style="font-size:clamp(16px,3vw,20px);color:rgba(0,0,0,.4);max-width:400px;margin-bottom:8px">Your fracture recovery, visualized.</p>
+    <p style="font-size:14px;color:rgba(0,0,0,.2);max-width:340px;margin-bottom:48px">Beautiful stats. Live countdown. Shareable cards for TikTok & Reels.</p>
+    <button class="btn btn-primary" style="font-size:18px;padding:16px 40px" onclick="goToStep(1)">Start my countdown →</button>
+    <div style="margin-top:80px;display:grid;grid-template-columns:repeat(3,1fr);gap:40px;max-width:600px;text-align:center;width:100%">
+      <div><p style="font-size:28px;margin-bottom:12px">⏱</p><h3 style="font-size:13px;font-weight:600;margin-bottom:4px">Live Countdown</h3><p style="font-size:11px;color:rgba(0,0,0,.25);line-height:1.5">Watch every second tick down until your cast comes off.</p></div>
+      <div><p style="font-size:28px;margin-bottom:12px">📊</p><h3 style="font-size:13px;font-weight:600;margin-bottom:4px">Mind-blowing Stats</h3><p style="font-size:11px;color:rgba(0,0,0,.25);line-height:1.5">Heartbeats, bone cells, itches since day one.</p></div>
+      <div><p style="font-size:28px;margin-bottom:12px">📱</p><h3 style="font-size:13px;font-weight:600;margin-bottom:4px">Share Everywhere</h3><p style="font-size:11px;color:rgba(0,0,0,.25);line-height:1.5">Screenshot-ready cards for TikTok and Reels.</p></div>
+    </div>
+  </div>
+  <!-- Screen 1: Name -->
+  <div class="screen form-screen" id="screen-name">
+    <p style="font-size:13px;color:rgba(0,0,0,.3);text-transform:uppercase;letter-spacing:.15em;margin-bottom:12px">Step 1</p>
+    <h2 style="font-size:clamp(28px,5vw,44px);font-weight:800;margin-bottom:40px">What's your name?</h2>
+    <input type="text" id="input-name" class="text-input" placeholder="Your name" autocomplete="off">
+    <button class="btn btn-primary" style="margin-top:40px" id="btn-name" disabled onclick="goToStep(2)">Continue</button>
+  </div>
+  <!-- Screen 2: Body Part -->
+  <div class="screen form-screen" id="screen-bodypart">
+    <p style="font-size:13px;color:rgba(0,0,0,.3);text-transform:uppercase;letter-spacing:.15em;margin-bottom:12px">Step 2</p>
+    <h2 style="font-size:clamp(28px,5vw,44px);font-weight:800;margin-bottom:12px">What did you break?</h2>
+    <p style="font-size:14px;color:rgba(0,0,0,.3);margin-bottom:40px">Select the body part</p>
+    <div class="grid-options cols-3" id="bodypart-grid"></div>
+  </div>
+  <!-- Screen 3: Fracture Type -->
+  <div class="screen form-screen" id="screen-fracture">
+    <p style="font-size:13px;color:rgba(0,0,0,.3);text-transform:uppercase;letter-spacing:.15em;margin-bottom:12px">Step 3</p>
+    <h2 style="font-size:clamp(28px,5vw,44px);font-weight:800;margin-bottom:12px">Type of fracture?</h2>
+    <p style="font-size:14px;color:rgba(0,0,0,.3);margin-bottom:40px">Don't worry if you're not sure</p>
+    <div class="grid-options" id="fracture-grid"></div>
+  </div>
+  <!-- Screen 4: Dates -->
+  <div class="screen form-screen" id="screen-dates">
+    <p style="font-size:13px;color:rgba(0,0,0,.3);text-transform:uppercase;letter-spacing:.15em;margin-bottom:12px">Step 4</p>
+    <h2 style="font-size:clamp(28px,5vw,44px);font-weight:800;margin-bottom:12px">The dates</h2>
+    <p style="font-size:14px;color:rgba(0,0,0,.3);margin-bottom:40px">When was the cast put on, and when does it come off?</p>
+    <div style="width:100%;max-width:360px">
+      <label style="display:block;font-size:11px;color:rgba(0,0,0,.3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Cast applied</label>
+      <input type="date" id="input-cast-date" class="date-input" style="margin-bottom:32px">
+      <label style="display:block;font-size:11px;color:rgba(0,0,0,.3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Expected removal</label>
+      <input type="date" id="input-removal-date" class="date-input">
+    </div>
+    <button class="btn btn-primary" style="margin-top:40px" id="btn-dates" disabled onclick="goToStep(5)">Continue</button>
+  </div>
+  <!-- Screen 5: Color -->
+  <div class="screen form-screen" id="screen-color">
+    <p style="font-size:13px;color:rgba(0,0,0,.3);text-transform:uppercase;letter-spacing:.15em;margin-bottom:12px">Step 5</p>
+    <h2 style="font-size:clamp(28px,5vw,44px);font-weight:800;margin-bottom:12px">Cast color?</h2>
+    <p style="font-size:14px;color:rgba(0,0,0,.3);margin-bottom:40px">Pick the closest match</p>
+    <div class="color-grid" id="color-grid"></div>
+    <p id="color-label" style="font-size:12px;color:rgba(0,0,0,.2);margin-top:16px"></p>
+    <button class="btn btn-blue" style="margin-top:40px" onclick="startStats()">See my stats →</button>
+  </div>
+  <!-- Back button (hidden on landing) -->
+  <button class="back-btn" id="back-btn" style="display:none" onclick="goBack()">← Back</button>
+  <!-- ═══════════════ STATS VIEWPORT ═══════════════ -->
+  <div class="stats-viewport" id="stats-viewport" style="display:none"></div>
+  <div class="dots" id="dots-container" style="display:none"></div>
+  <div class="slide-counter stat-number" id="slide-counter" style="display:none"></div>
+  <div class="scroll-hint" id="scroll-hint" style="display:none">
+    <span>scroll</span>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+  <!-- ═══════════════ SHARE MODAL ═══════════════ -->
+  <div class="share-overlay" id="share-overlay">
+    <div class="share-backdrop" onclick="closeShare()"></div>
+    <div class="share-content">
+      <button onclick="closeShare()" style="position:absolute;top:-8px;right:16px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);border:none;cursor:pointer;font-size:14px;z-index:10;display:flex;align-items:center;justify-content:center">✕</button>
+      <div class="card-dots" id="card-dots"></div>
+      <div id="share-card-container" style="width:100%;position:relative"></div>
+      <div class="share-nav">
+        <button onclick="prevCard()">‹</button>
+        <span style="color:rgba(255,255,255,.3);font-size:12px" id="card-counter"></span>
+        <button onclick="nextCard()">›</button>
+      </div>
+      <div class="share-actions">
+        <button class="btn-share" onclick="nativeShare()">Share 📱</button>
+        <button class="btn-copy" id="copy-btn" onclick="copyLink()">Copy Link 🔗</button>
+      </div>
+      <p style="color:rgba(255,255,255,.12);font-size:10px;margin-top:16px;text-align:center">📸 Screenshot any card to share on TikTok, Reels & Stories</p>
+    </div>
+  </div>
 </div>
-<div class="grid-overlay"></div>
-
-<!-- Particle Canvas -->
-<canvas id="particle-canvas"></canvas>
-
-<!-- Page Transition -->
-<div class="page-transition" id="page-transition">
-  <div class="loader-ring"></div>
-</div>
-
-<!-- Sound Toggle -->
-<button class="sound-toggle" id="sound-toggle" title="Toggle sounds">🔊</button>
-
-<!-- ════════════════════════════════════════
-     SCREEN 1 — INPUT
-════════════════════════════════════════ -->
-<section id="screen-input">
-  <div class="input-card animate__animated animate__fadeInUp">
-    <div class="logo-section">
-      <div class="logo-icon" id="logo-icon-btn">🦴</div>
-      <h1 class="logo-title">Cast <span>Countdown</span></h1>
-      <p class="logo-subtitle">Track your fracture recovery in real time</p>
-    </div>
-
-    <div class="field-row">
-      <div class="field">
-        <label><span class="label-icon">📅</span> Cast Applied</label>
-        <input type="date" id="cast-start" />
-      </div>
-      <div class="field">
-        <label><span class="label-icon">🎯</span> Cast Removal</label>
-        <input type="date" id="cast-end" />
-      </div>
-    </div>
-
-    <div class="field">
-      <label><span class="label-icon">🦴</span> Broken Bone</label>
-      <select id="bone-type">
-        <option value="">Select bone...</option>
-        <option value="Radius (Wrist)">Radius (Wrist)</option>
-        <option value="Ulna (Forearm)">Ulna (Forearm)</option>
-        <option value="Humerus (Upper Arm)">Humerus (Upper Arm)</option>
-        <option value="Tibia (Shin)">Tibia (Shin)</option>
-        <option value="Fibula (Lower Leg)">Fibula (Lower Leg)</option>
-        <option value="Femur (Thigh)">Femur (Thigh)</option>
-        <option value="Clavicle (Collarbone)">Clavicle (Collarbone)</option>
-        <option value="Metatarsal (Foot)">Metatarsal (Foot)</option>
-        <option value="Phalanx (Finger/Toe)">Phalanx (Finger/Toe)</option>
-        <option value="Scaphoid (Wrist)">Scaphoid (Wrist)</option>
-        <option value="Ankle">Ankle</option>
-        <option value="Other">Other</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label><span class="label-icon">⚡</span> Fracture Type</label>
-      <select id="fracture-type">
-        <option value="">Select type...</option>
-        <option value="Hairline">Hairline</option>
-        <option value="Stress">Stress</option>
-        <option value="Simple (Clean Break)">Simple (Clean Break)</option>
-        <option value="Comminuted (Multiple Pieces)">Comminuted (Multiple Pieces)</option>
-        <option value="Compound (Open)">Compound (Open)</option>
-        <option value="Greenstick">Greenstick</option>
-        <option value="Avulsion">Avulsion</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label><span class="label-icon">👤</span> Your Name <span style="color:var(--text-muted);text-transform:none;font-weight:400">(optional)</span></label>
-      <input type="text" id="user-name" placeholder="e.g. Alex" maxlength="30" />
-    </div>
-
-    <button class="btn-primary" id="btn-start" onclick="startStats()">
-      <span class="btn-text">Start Tracking <span class="btn-arrow">→</span></span>
-    </button>
-  </div>
-</section>
-
-<!-- ════════════════════════════════════════
-     CELEBRATION OVERLAY
-════════════════════════════════════════ -->
-<div class="celebration" id="celebration">
-  <div class="celebration-icon">🎉</div>
-  <h1>You Did It!</h1>
-  <p>Your cast is coming off! After all those days, your bone has healed. Time to celebrate your incredible recovery.</p>
-  <button class="btn-primary" onclick="closeCelebration()">
-    <span class="btn-text">View My Journey <span class="btn-arrow">→</span></span>
-  </button>
-</div>
-
-<!-- ════════════════════════════════════════
-     SCREEN 2 — STATS
-════════════════════════════════════════ -->
-<section id="screen-stats">
-  <div class="hero">
-    <div class="hero-badge"><div class="pulse-dot"></div> Live Tracking</div>
-    <h1 class="hero-title" id="hero-title">Cast <span class="gradient-text">Countdown</span></h1>
-
-    <!-- Premium Countdown -->
-    <div class="countdown-container" id="countdown-container">
-      <div class="cd-unit">
-        <div class="cd-flip">
-          <span class="cd-number" id="cd-days">--</span>
-        </div>
-        <div class="cd-unit-label">Days</div>
-      </div>
-      <div class="cd-separator"><span></span><span></span></div>
-      <div class="cd-unit">
-        <div class="cd-flip">
-          <span class="cd-number" id="cd-hours">--</span>
-        </div>
-        <div class="cd-unit-label">Hours</div>
-      </div>
-      <div class="cd-separator"><span></span><span></span></div>
-      <div class="cd-unit">
-        <div class="cd-flip">
-          <span class="cd-number" id="cd-mins">--</span>
-        </div>
-        <div class="cd-unit-label">Minutes</div>
-      </div>
-      <div class="cd-separator"><span></span><span></span></div>
-      <div class="cd-unit">
-        <div class="cd-flip">
-          <span class="cd-number" id="cd-secs">--</span>
-        </div>
-        <div class="cd-unit-label">Seconds</div>
-      </div>
-    </div>
-
-    <!-- Progress -->
-    <div class="progress-section">
-      <div class="progress-meta">
-        <span class="progress-label-left">Recovery Progress</span>
-        <span class="progress-pct" id="pct-label">0%</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
-      </div>
-      <div class="progress-dates">
-        <span id="date-start-label">Start</span>
-        <span id="date-end-label">End</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="dashboard" id="dashboard">
-    <!-- Injected by JS -->
-  </div>
-
-  <div class="reset-section">
-    <button class="btn-ghost" onclick="resetApp()">← Start Over</button>
-  </div>
-</section>
-
-<!-- Libraries -->
-<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-
 <script>
-/* ════════════════════════════════════════
-   AUDIO ENGINE
-════════════════════════════════════════ */
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let audioCtx = null;
-let soundEnabled = true;
-
-function initAudio() {
-  if (!audioCtx) audioCtx = new AudioCtx();
+/* ═══════════════════════════════════════════════════
+   DATA & STATE
+═══════════════════════════════════════════════════ */
+const BODY_PARTS = ["Wrist","Forearm","Elbow","Upper Arm (Humerus)","Collarbone","Ankle","Shin (Tibia)","Fibula","Knee","Thigh (Femur)","Hand","Finger","Foot","Toe","Hip","Shoulder"];
+const FRACTURE_TYPES = ["Simple/Closed Fracture","Compound/Open Fracture","Hairline/Stress Fracture","Greenstick Fracture","Comminuted Fracture","Spiral Fracture","Avulsion Fracture","Compression Fracture","Buckle/Torus Fracture","Oblique Fracture","Transverse Fracture","I don't know / Other"];
+const CAST_COLORS = [{n:"Classic White",v:"#E2E8F0"},{n:"Royal Blue",v:"#3B82F6"},{n:"Indigo",v:"#4F46E5"},{n:"Hot Pink",v:"#EC4899"},{n:"Emerald",v:"#10B981"},{n:"Fiery Red",v:"#EF4444"},{n:"Purple",v:"#8B5CF6"},{n:"Orange",v:"#F97316"},{n:"Teal",v:"#14B8A6"},{n:"Black",v:"#1E293B"}];
+const EMOJIS={"Wrist":"✋","Forearm":"💪","Elbow":"🦾","Upper Arm (Humerus)":"💪","Collarbone":"🦴","Ankle":"🦶","Shin (Tibia)":"🦵","Fibula":"🦵","Knee":"🦵","Thigh (Femur)":"🦵","Hand":"🤚","Finger":"☝️","Foot":"🦶","Toe":"🦶","Hip":"🦴","Shoulder":"💪"};
+const GRADIENTS=["linear-gradient(135deg,#0f0c29,#302b63 50%,#24243e)","linear-gradient(135deg,#0d0d0d,#1a1a2e 40%,#16213e)","linear-gradient(135deg,#000428,#004e92)","linear-gradient(135deg,#1a1a2e,#2d1b69 50%,#11998e)","linear-gradient(135deg,#0f2027,#203a43 50%,#2c5364)"];
+let state={step:0,name:"",bodyPart:"",fractureType:"",castDate:"",removalDate:"",castColor:"#4F46E5"};
+let currentSlide=0, totalSlides=12, lastScrollTime=0;
+let shareCardIndex=0;
+const TOTAL_SHARE_CARDS=5;
+/* ═══════════════════════════════════════════════════
+   FORM LOGIC
+═══════════════════════════════════════════════════ */
+function goToStep(n){
+  const screens=["screen-landing","screen-name","screen-bodypart","screen-fracture","screen-dates","screen-color"];
+  document.getElementById(screens[state.step]).classList.remove("active");
+  state.step=n;
+  document.getElementById(screens[n]).classList.add("active");
+  document.getElementById("progress-bar").style.width=n===0?"0%":`${(n/5)*100}%`;
+  document.getElementById("back-btn").style.display=n>0?"block":"none";
+  if(n===1)setTimeout(()=>document.getElementById("input-name").focus(),400);
 }
-
-function playTone(freq, duration, type = 'sine', volume = 0.08) {
-  if (!soundEnabled || !audioCtx) return;
-  try {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + duration);
-  } catch(e) {}
-}
-
-function sfxClick() {
-  playTone(800, 0.08, 'sine', 0.06);
-  setTimeout(() => playTone(1200, 0.06, 'sine', 0.04), 40);
-}
-
-function sfxSuccess() {
-  playTone(523, 0.15, 'sine', 0.07);
-  setTimeout(() => playTone(659, 0.15, 'sine', 0.07), 100);
-  setTimeout(() => playTone(784, 0.2, 'sine', 0.07), 200);
-  setTimeout(() => playTone(1047, 0.3, 'sine', 0.06), 300);
-}
-
-function sfxTick() {
-  playTone(1800, 0.02, 'square', 0.015);
-}
-
-function sfxCelebration() {
-  const notes = [523, 659, 784, 1047, 784, 1047, 1318];
-  notes.forEach((n, i) => {
-    setTimeout(() => playTone(n, 0.2, 'sine', 0.06), i * 120);
-  });
-}
-
-function sfxHover() {
-  playTone(600, 0.03, 'sine', 0.02);
-}
-
-// Sound toggle
-const soundToggle = document.getElementById('sound-toggle');
-soundToggle.addEventListener('click', () => {
-  initAudio();
-  soundEnabled = !soundEnabled;
-  soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
-  if (soundEnabled) sfxClick();
+function goBack(){if(state.step>0)goToStep(state.step-1);}
+// Name input
+document.getElementById("input-name").addEventListener("input",e=>{
+  state.name=e.target.value;
+  document.getElementById("btn-name").disabled=!e.target.value.trim();
 });
-
-/* ════════════════════════════════════════
-   PARTICLES
-════════════════════════════════════════ */
-const canvas = document.getElementById('particle-canvas');
-const ctx = canvas.getContext('2d');
-let particles = [];
-let animFrame;
-
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+document.getElementById("input-name").addEventListener("keydown",e=>{if(e.key==="Enter"&&state.name.trim())goToStep(2);});
+// Body parts grid
+const bpGrid=document.getElementById("bodypart-grid");
+BODY_PARTS.forEach(bp=>{
+  const btn=document.createElement("button");
+  btn.className="option-btn";
+  btn.textContent=bp;
+  btn.onclick=()=>{state.bodyPart=bp;bpGrid.querySelectorAll(".option-btn").forEach(b=>b.classList.remove("selected"));btn.classList.add("selected");setTimeout(()=>goToStep(3),200);};
+  bpGrid.appendChild(btn);
+});
+// Fracture types grid
+const ftGrid=document.getElementById("fracture-grid");
+FRACTURE_TYPES.forEach(ft=>{
+  const btn=document.createElement("button");
+  btn.className="option-btn";
+  btn.textContent=ft;
+  btn.onclick=()=>{state.fractureType=ft;ftGrid.querySelectorAll(".option-btn").forEach(b=>b.classList.remove("selected"));btn.classList.add("selected");setTimeout(()=>goToStep(4),200);};
+  ftGrid.appendChild(btn);
+});
+// Date inputs
+const castDateInput=document.getElementById("input-cast-date");
+const removalDateInput=document.getElementById("input-removal-date");
+function checkDates(){document.getElementById("btn-dates").disabled=!(castDateInput.value&&removalDateInput.value);}
+castDateInput.addEventListener("change",e=>{state.castDate=e.target.value;checkDates();});
+removalDateInput.addEventListener("change",e=>{state.removalDate=e.target.value;checkDates();});
+// Color grid
+const cGrid=document.getElementById("color-grid");
+CAST_COLORS.forEach((c,i)=>{
+  const btn=document.createElement("button");
+  btn.className="color-btn"+(c.v===state.castColor?" selected":"");
+  btn.style.backgroundColor=c.v;
+  btn.title=c.n;
+  btn.onclick=()=>{state.castColor=c.v;cGrid.querySelectorAll(".color-btn").forEach(b=>b.classList.remove("selected"));btn.classList.add("selected");document.getElementById("color-label").textContent=c.n;};
+  cGrid.appendChild(btn);
+});
+document.getElementById("color-label").textContent=CAST_COLORS.find(c=>c.v===state.castColor)?.n||"";
+/* ═══════════════════════════════════════════════════
+   STATS CALCULATION
+═══════════════════════════════════════════════════ */
+function calcStats(){
+  const now=new Date(),cd=new Date(state.castDate),rd=new Date(state.removalDate);
+  const totalDays=Math.ceil((rd-cd)/(864e5));
+  const elapsed=Math.max(0,now-cd),remaining=Math.max(0,rd-now),isComplete=now>=rd;
+  const de=Math.floor(elapsed/864e5),dr=Math.ceil(remaining/864e5);
+  const hr=Math.floor(remaining/36e5),mr=Math.floor(remaining/6e4),sr=Math.floor(remaining/1e3);
+  const totalMs=rd-cd,pct=isComplete?100:Math.min(99.9,Math.max(0,(elapsed/totalMs)*100));
+  const d=Math.max(1,de);
+  const heartbeats=Math.round(d*100000),breaths=Math.round(d*23000),blinks=Math.round(d*15000);
+  const sleepHours=Math.round(d*8),meals=d*3,steps=Math.round(d*7500);
+  const itches=Math.round(d*47),showers=d,asked=Math.round(d*3.5),netflix=Math.round(d*5);
+  const fmtBig=n=>n>=1e12?(n/1e12).toFixed(1)+" trillion":n>=1e9?(n/1e9).toFixed(1)+" billion":n>=1e6?(n/1e6).toFixed(1)+" million":n>=1e3?(n/1e3).toFixed(1)+"K":n.toString();
+  const cellsRegen=fmtBig(d*33e10),boneCells=fmtBig(d*1e6);
+  let phase="",phaseDesc="",nextPhase="",daysNext=0,boneHealed=Math.min(100,Math.round(pct*1.05));
+  if(pct<10){phase="🩸 Inflammatory Phase";phaseDesc="Your body is sending blood and immune cells to the fracture site. Swelling and pain are at their peak.";nextPhase="Soft Callus Formation";daysNext=Math.ceil(totalDays*.1)-de;}
+  else if(pct<40){phase="🧵 Soft Callus Formation";phaseDesc="A soft, rubbery callus of cartilage is forming around the break — nature's biological glue.";nextPhase="Hard Callus Formation";daysNext=Math.ceil(totalDays*.4)-de;}
+  else if(pct<75){phase="🦴 Hard Callus Formation";phaseDesc="Osteoblasts are working overtime, depositing minerals to rebuild your skeleton with hard bone.";nextPhase="Bone Remodeling";daysNext=Math.ceil(totalDays*.75)-de;}
+  else{phase="✨ Bone Remodeling";phaseDesc="Your bone is reshaping itself back to its original form. The final phase — getting stronger every day.";nextPhase="Full Recovery!";daysNext=dr;}
+  return{totalDays,daysElapsed:de,daysRemaining:dr,hoursRemaining:hr,minutesRemaining:mr,secondsRemaining:sr,percentComplete:pct,isComplete,heartbeats,breaths,blinks,sleepHours,meals,stepsNotTaken:steps,itchesEstimated:itches,showersWithBag:showers,timesAsked:asked,netflix,cellsRegenerated:cellsRegen,boneCellsWorking:boneCells,percentBoneHealed:boneHealed,healingPhase:phase,healingPhaseDescription:phaseDesc,nextPhase,daysUntilNextPhase:daysNext};
 }
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
-
-class Particle {
-  constructor() {
-    this.reset();
+const fmt=n=>n.toLocaleString("en-US");
+/* ═══════════════════════════════════════════════════
+   STATS SLIDES
+═══════════════════════════════════════════════════ */
+function startStats(){
+  // Hide form
+  document.querySelectorAll(".form-screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById("progress-bar").style.display="none";
+  document.getElementById("back-btn").style.display="none";
+  // Save to URL hash for sharing
+  const data=btoa(JSON.stringify(state));
+  history.replaceState(null,"","#"+data);
+  // Show stats
+  document.getElementById("stats-viewport").style.display="flex";
+  document.getElementById("dots-container").style.display="flex";
+  document.getElementById("slide-counter").style.display="block";
+  document.getElementById("scroll-hint").style.display="flex";
+  document.body.style.overflow="hidden";
+  buildSlides();
+  showSlide(0);
+  startTicker();
+  setupScrollHijack();
+}
+function buildSlides(){
+  const vp=document.getElementById("stats-viewport");
+  vp.innerHTML="";
+  const s=calcStats();
+  const emoji=EMOJIS[state.bodyPart]||"🦴";
+  const firstName=state.name.split(" ")[0];
+  const slides=[];
+  // 0: Welcome
+  slides.push(`<p class="float" style="font-size:clamp(60px,12vw,80px);margin-bottom:32px">${emoji}</p><h1 style="font-size:clamp(32px,6vw,56px);font-weight:700;letter-spacing:-.02em;margin-bottom:12px">${esc(state.name)}</h1><p style="font-size:18px;color:rgba(0,0,0,.4)">${esc(state.bodyPart)} · ${esc(state.fractureType)}</p>`);
+  // 1: Days in cast
+  slides.push(`<p style="font-size:16px;color:rgba(0,0,0,.4);margin-bottom:12px">You have been wearing a cast for</p><p class="stat-number count-up" data-to="${s.daysElapsed}" style="font-size:clamp(60px,16vw,130px);font-weight:700;line-height:1">0</p><p style="font-size:20px;color:rgba(0,0,0,.4);margin-top:12px">${s.daysElapsed===1?"day":"days"}</p>`);
+  // 2: Countdown
+  if(s.isComplete){
+    slides.push(`<p style="font-size:60px;margin-bottom:24px">🎉</p><p style="font-size:clamp(40px,8vw,64px);font-weight:700">Cast is off!</p><p style="font-size:20px;color:rgba(0,0,0,.4);margin-top:16px">You did it, ${esc(firstName)}.</p>`);
+  }else{
+    slides.push(`<p style="font-size:16px;color:rgba(0,0,0,.4);margin-bottom:12px">Time remaining</p><div id="countdown-display" style="display:flex;align-items:baseline;gap:clamp(8px,2vw,16px);justify-content:center"></div>`);
   }
-  reset() {
-    this.x = Math.random() * canvas.width;
-    this.y = Math.random() * canvas.height;
-    this.size = Math.random() * 1.5 + 0.5;
-    this.speedX = (Math.random() - 0.5) * 0.3;
-    this.speedY = (Math.random() - 0.5) * 0.3;
-    this.opacity = Math.random() * 0.3 + 0.05;
-    this.pulse = Math.random() * Math.PI * 2;
+  // 3: Progress
+  slides.push(`<p style="font-size:16px;color:rgba(0,0,0,.4);margin-bottom:12px">You are</p><p class="stat-number count-up" data-to="${s.percentComplete}" data-decimals="1" data-suffix="%" style="font-size:clamp(60px,16vw,130px);font-weight:700;line-height:1">0%</p><p style="font-size:20px;color:rgba(0,0,0,.4);margin-top:12px">of the way there</p><div style="width:min(384px,90%);margin-top:32px"><div style="height:10px;background:rgba(0,0,0,.05);border-radius:9999px;overflow:hidden"><div id="progress-fill" style="height:100%;border-radius:9999px;background:#000;width:0%;transition:width 1.5s cubic-bezier(.22,1,.36,1)"></div></div></div>`);
+  // 4: Healing Phase
+  slides.push(`<p style="font-size:16px;color:rgba(0,0,0,.4);margin-bottom:12px">Your bone is currently in the</p><p style="font-size:clamp(24px,5vw,44px);font-weight:700;margin-bottom:24px">${s.healingPhase}</p><p style="font-size:16px;color:rgba(0,0,0,.4);max-width:420px;line-height:1.6">${s.healingPhaseDescription}</p>`);
+  // 5: Heartbeats
+  slides.push(`<p style="font-size:16px;color:rgba(0,0,0,.4);margin-bottom:12px">Since your cast went on, your heart has beaten</p><p class="stat-number count-up" data-to="${s.heartbeats}" style="font-size:clamp(48px,12vw,110px);font-weight:700;line-height:1">0</p><p style="font-size:20px;color:rgba(0,0,0,.4);margin-top:12px">times</p><span class="heart-pulse">❤️</span>`);
+  // 6: Breaths
+  slides.push(`<p style="font-size:16px;color:rgba(0,0,0,.4);margin-bottom:12px">You have taken</p><p class="stat-number count-up" data-to="${s.breaths}" style="font-size:clamp(48px,12vw,110px);font-weight:700;line-height:1">0</p><p style="font-size:20px;color:rgba(0,0,0,.4);margin-top:12px">breaths</p><p style="font-size:13px;color:rgba(0,0,0,.2);margin-top:16px;max-width:300px">Every one delivering oxygen to your healing bone.</p>`);
+  // 7: Sleep
+  slides.push(`<p style="font-size:16px;color:rgba(0,0,0,.4);margin-bottom:12px">You have slept for about</p><p class="stat-number count-up" data-to="${s.sleepHours}" style="font-size:clamp(48px,12vw,110px);font-weight:700;line-height:1">0</p><p style="font-size:20px;color:rgba(0,0,0,.4);margin-top:12px">hours</p><p style="font-size:13px;color:rgba(0,0,0,.2);margin-top:16px;max-width:300px">That's ${Math.round(s.sleepHours/24)} full days. Your body repairs bone fastest while you sleep.</p>`);
+  // 8: Cells
+  slides.push(`<p style="font-size:16px;color:rgba(0,0,0,.4);margin-bottom:12px">Your body has regenerated roughly</p><p style="font-size:clamp(40px,10vw,80px);font-weight:700;line-height:1">${s.cellsRegenerated}</p><p style="font-size:20px;color:rgba(0,0,0,.4);margin-top:12px">cells</p><p style="font-size:13px;color:rgba(0,0,0,.2);margin-top:16px;max-width:300px">Right now, millions of osteoblasts are building new bone inside you.</p>`);
+  // 9: Cast Life
+  const rows=[[s.timesAsked,`"what happened?" asks`],[s.itchesEstimated,"estimated itches","~"],[s.showersWithBag,"showers with a bag"],[s.stepsNotTaken,"steps you couldn't take"],[s.netflix,"Netflix episodes of time"]];
+  let castLifeHTML=`<p style="font-size:16px;color:rgba(0,0,0,.4);margin-bottom:24px">The cast life</p><div style="width:100%;max-width:380px">`;
+  rows.forEach(([n,t,prefix])=>{castLifeHTML+=`<div style="display:flex;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.05)"><span class="stat-number" style="font-size:clamp(20px,4vw,28px);font-weight:700;min-width:clamp(80px,20vw,130px);text-align:right">${prefix||""}${fmt(n)}</span><span style="font-size:14px;color:rgba(0,0,0,.4)">${t}</span></div>`;});
+  castLifeHTML+=`</div>`;
+  slides.push(castLifeHTML);
+  // 10: Bone healed
+  const circ=2*Math.PI*44;
+  slides.push(`<p style="font-size:16px;color:rgba(0,0,0,.4);margin-bottom:12px">Your bone is estimated to be</p><p class="stat-number count-up" data-to="${s.percentBoneHealed}" data-suffix="% healed" style="font-size:clamp(48px,10vw,100px);font-weight:700;line-height:1">0% healed</p><div style="width:144px;height:144px;margin-top:24px"><svg viewBox="0 0 100 100" style="width:100%;height:100%;transform:rotate(-90deg)"><circle class="ring-track" cx="50" cy="50" r="44"/><circle class="ring-fill" cx="50" cy="50" r="44" id="bone-ring" stroke-dasharray="0 ${circ.toFixed(1)}" data-target="${((s.percentBoneHealed/100)*circ).toFixed(1)}" data-circ="${circ.toFixed(1)}"/></svg></div>${!s.isComplete&&s.daysUntilNextPhase>0?`<p style="font-size:13px;color:rgba(0,0,0,.25);margin-top:16px">Next: ${s.nextPhase} in ~${s.daysUntilNextPhase} days</p>`:""}`);
+  // 11: CTA
+  const ctaMsg=s.isComplete?`<p style="font-size:60px;margin-bottom:24px">🎉</p><p style="font-size:clamp(32px,6vw,56px);font-weight:700;margin-bottom:16px">You did it, ${esc(firstName)}.</p><p style="font-size:16px;color:rgba(0,0,0,.4);max-width:360px;margin-bottom:40px">${s.totalDays} days. ${fmt(s.heartbeats)} heartbeats. Countless itches. You're free.</p>`:`<p style="font-size:60px;margin-bottom:24px">💪</p><p style="font-size:clamp(32px,6vw,56px);font-weight:700;margin-bottom:16px">Keep going, ${esc(firstName)}.</p><p style="font-size:16px;color:rgba(0,0,0,.4);max-width:360px;margin-bottom:40px">${s.daysElapsed} days down. ${s.daysRemaining} to go. Your bone is ${s.percentBoneHealed}% healed.</p>`;
+  slides.push(`${ctaMsg}<div style="display:flex;gap:12px"><button class="btn btn-primary" onclick="openShare()">Share my stats</button><button class="btn btn-secondary" onclick="copyLink()">Copy link</button></div><a href="javascript:void(0)" onclick="location.reload()" style="margin-top:32px;font-size:13px;color:rgba(0,0,0,.2);text-decoration:none">← Create your own</a>`);
+  slides.forEach((html,i)=>{
+    const div=document.createElement("div");
+    div.className="slide"+(i===0?" active":"");
+    div.id="slide-"+i;
+    div.innerHTML=html;
+    vp.appendChild(div);
+  });
+  // Build dots
+  const dc=document.getElementById("dots-container");
+  dc.innerHTML="";
+  for(let i=0;i<totalSlides;i++){
+    const d=document.createElement("button");
+    d.className="dot"+(i===0?" active":"");
+    d.onclick=()=>showSlide(i);
+    dc.appendChild(d);
   }
-  update() {
-    this.x += this.speedX;
-    this.y += this.speedY;
-    this.pulse += 0.01;
-    if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
-      this.reset();
+  updateCounter();
+}
+function showSlide(n){
+  currentSlide=n;
+  document.querySelectorAll(".slide").forEach((s,i)=>{s.classList.toggle("active",i===n);});
+  document.querySelectorAll(".dot").forEach((d,i)=>{d.classList.toggle("active",i===n);});
+  document.getElementById("scroll-hint").style.display=n===0?"flex":"none";
+  updateCounter();
+  // Trigger animations for active slide
+  const active=document.getElementById("slide-"+n);
+  if(!active)return;
+  // Count-up numbers
+  active.querySelectorAll(".count-up").forEach(el=>{
+    if(el.dataset.animated)return;
+    el.dataset.animated="1";
+    const to=parseFloat(el.dataset.to),dec=parseInt(el.dataset.decimals||"0"),suf=el.dataset.suffix||"";
+    animateNumber(el,0,to,1800,dec,suf);
+  });
+  // Progress fill
+  const pf=document.getElementById("progress-fill");
+  if(pf&&n===3)setTimeout(()=>{pf.style.width=calcStats().percentComplete+"%";},400);
+  // Bone ring
+  const br=document.getElementById("bone-ring");
+  if(br&&n===10)setTimeout(()=>{br.style.strokeDasharray=br.dataset.target+" "+br.dataset.circ;},300);
+  // Countdown
+  if(n===2&&!calcStats().isComplete)updateCountdown();
+}
+function updateCounter(){document.getElementById("slide-counter").textContent=`${currentSlide+1} / ${totalSlides}`;}
+function animateNumber(el,from,to,duration,dec,suffix){
+  const start=performance.now();
+  function tick(now){
+    const t=Math.min((now-start)/duration,1);
+    const ease=1-Math.pow(1-t,3); // ease out cubic
+    const v=from+(to-from)*ease;
+    el.textContent=(dec>0?v.toFixed(dec):Math.round(v).toLocaleString("en-US"))+suffix;
+    if(t<1)requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+/* ═══════════════════════════════════════════════════
+   LIVE TICKER
+═══════════════════════════════════════════════════ */
+let tickerInterval;
+function startTicker(){
+  tickerInterval=setInterval(()=>{if(currentSlide===2&&!calcStats().isComplete)updateCountdown();},1000);
+}
+function updateCountdown(){
+  const s=calcStats(),el=document.getElementById("countdown-display");
+  if(!el)return;
+  const units=[[s.daysRemaining,"days"],[s.hoursRemaining%24,"hrs"],[s.minutesRemaining%60,"min"],[s.secondsRemaining%60,"sec"]];
+  el.innerHTML=units.map(([v,l],i)=>`${i>0?'<span style="font-size:clamp(28px,5vw,44px);color:rgba(0,0,0,.12);font-weight:200">:</span>':""}<div style="text-align:center"><span class="stat-number" style="font-size:clamp(40px,8vw,64px);font-weight:700;line-height:1">${String(v).padStart(2,"0")}</span><span style="display:block;font-size:10px;color:rgba(0,0,0,.25);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">${l}</span></div>`).join("");
+}
+/* ═══════════════════════════════════════════════════
+   SCROLL HIJACK
+═══════════════════════════════════════════════════ */
+function setupScrollHijack(){
+  window.addEventListener("wheel",e=>{e.preventDefault();const now=Date.now();if(now-lastScrollTime<600)return;lastScrollTime=now;if(e.deltaY>0)showSlide(Math.min(currentSlide+1,totalSlides-1));else showSlide(Math.max(currentSlide-1,0));},{passive:false});
+  let touchY=0;
+  window.addEventListener("touchstart",e=>{touchY=e.touches[0].clientY},{passive:true});
+  window.addEventListener("touchend",e=>{const dy=touchY-e.changedTouches[0].clientY;const now=Date.now();if(now-lastScrollTime<600)return;lastScrollTime=now;if(dy>40)showSlide(Math.min(currentSlide+1,totalSlides-1));else if(dy<-40)showSlide(Math.max(currentSlide-1,0));},{passive:true});
+  window.addEventListener("keydown",e=>{if(e.key==="ArrowDown"||e.key===" "){e.preventDefault();showSlide(Math.min(currentSlide+1,totalSlides-1));}else if(e.key==="ArrowUp"){e.preventDefault();showSlide(Math.max(currentSlide-1,0));}});
+}
+/* ═══════════════════════════════════════════════════
+   SHARE CARDS
+═══════════════════════════════════════════════════ */
+function getWarriorTitle(s){
+  if(s.isComplete)return["Unbreakable","You conquered it all."];
+  if(s.percentComplete>90)return["Almost Free","The finish line is right there."];
+  if(s.percentComplete>75)return["Battle-Hardened","Your bone is almost battle-ready."];
+  if(s.percentComplete>50)return["Halfway Hero","More than halfway. No stopping now."];
+  if(s.percentComplete>25)return["Rising Fighter","Every day is progress."];
+  return["Fresh Warrior","The journey begins."];
+}
+function buildShareCard(idx){
+  const s=calcStats(),emoji=EMOJIS[state.bodyPart]||"🦴",firstName=state.name.split(" ")[0];
+  const [title,subtitle]=getWarriorTitle(s);
+  const container=document.getElementById("share-card-container");
+  const hdr=`<div class="share-card-header"><p style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.35em;text-transform:uppercase">CastCountdown</p><p style="font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.2em;text-transform:uppercase;margin-top:4px">${["YOUR HEALING IDENTITY","RECOVERY PROGRESS","COUNTING DOWN","WHILE HEALING","THE CAST LIFE"][idx]}</p></div>`;
+  const ftr=`<div class="share-card-footer"><p style="font-size:10px;color:rgba(255,255,255,.12)">${esc(state.bodyPart)} · ${esc(state.fractureType)}</p><p style="font-size:9px;color:rgba(255,255,255,.08);letter-spacing:.15em;margin-top:4px">castcountdown.app</p></div>`;
+  let body="";
+  if(idx===0){
+    body=`<p style="font-size:48px;margin-bottom:16px">${emoji}</p><p style="font-size:11px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.3em;margin-bottom:8px">${esc(firstName)} is a</p><h2 style="font-size:clamp(32px,8vw,44px);font-weight:900;color:#fff;line-height:1.1">${title}</h2><p style="font-size:14px;color:rgba(255,255,255,.4);margin-top:12px">${subtitle}</p><div style="margin-top:32px;padding:8px 20px;border-radius:9999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05)"><p style="font-size:11px;color:rgba(255,255,255,.5)">Day <strong style="color:#fff">${s.daysElapsed}</strong> of <strong style="color:#fff">${s.totalDays}</strong></p></div>`;
+  }else if(idx===1){
+    const circ=2*Math.PI*42;
+    body=`<div style="width:176px;height:176px;position:relative;margin-bottom:24px"><svg viewBox="0 0 100 100" style="width:100%;height:100%;transform:rotate(-90deg)"><circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="6"/><circle cx="50" cy="50" r="42" fill="none" stroke="url(#sg)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(s.percentComplete/100*circ).toFixed(1)} ${circ.toFixed(1)}"/><defs><linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="${state.castColor}"/><stop offset="100%" stop-color="#34d399"/></linearGradient></defs></svg><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><p class="stat-number" style="font-size:32px;font-weight:900;color:#fff">${s.percentComplete.toFixed(1)}%</p></div></div><div style="display:flex;gap:32px"><div style="text-align:center"><p class="stat-number" style="font-size:24px;font-weight:700;color:#fff">${s.daysElapsed}</p><p style="font-size:10px;color:rgba(255,255,255,.2)">done</p></div><div style="text-align:center"><p class="stat-number" style="font-size:24px;font-weight:700;color:#fff">${s.daysRemaining}</p><p style="font-size:10px;color:rgba(255,255,255,.2)">to go</p></div></div><div style="width:200px;margin-top:24px"><div style="height:6px;background:rgba(255,255,255,.08);border-radius:9999px;overflow:hidden"><div style="height:100%;border-radius:9999px;width:${s.percentComplete}%;background:linear-gradient(90deg,${state.castColor},#34d399)"></div></div></div><p style="font-size:12px;color:rgba(255,255,255,.3);margin-top:16px">${s.healingPhase}</p>`;
+  }else if(idx===2){
+    if(s.isComplete){body=`<p style="font-size:48px;margin-bottom:12px">🎉</p><p style="font-size:28px;font-weight:900;color:#fff">FREEDOM!</p>`;}
+    else{body=`<p style="font-size:11px;color:rgba(255,255,255,.2);text-transform:uppercase;letter-spacing:.2em;margin-bottom:12px">Time remaining</p><p class="stat-number" style="font-size:clamp(56px,14vw,72px);font-weight:900;color:#fff;line-height:1">${s.daysRemaining}</p><p style="font-size:18px;color:rgba(255,255,255,.4)">days</p><div style="display:flex;gap:20px;margin-top:32px;text-align:center"><div><p class="stat-number" style="font-size:24px;font-weight:700;color:#fff">${String(s.hoursRemaining%24).padStart(2,"0")}</p><p style="font-size:9px;color:rgba(255,255,255,.2);text-transform:uppercase;letter-spacing:.1em">hrs</p></div><p style="font-size:24px;color:rgba(255,255,255,.12)">:</p><div><p class="stat-number" style="font-size:24px;font-weight:700;color:#fff">${String(s.minutesRemaining%60).padStart(2,"0")}</p><p style="font-size:9px;color:rgba(255,255,255,.2);text-transform:uppercase;letter-spacing:.1em">min</p></div><p style="font-size:24px;color:rgba(255,255,255,.12)">:</p><div><p class="stat-number" style="font-size:24px;font-weight:700;color:#fff">${String(s.secondsRemaining%60).padStart(2,"0")}</p><p style="font-size:9px;color:rgba(255,255,255,.2);text-transform:uppercase;letter-spacing:.1em">sec</p></div></div><p style="font-size:11px;color:rgba(255,255,255,.15);margin-top:32px;padding:6px 16px;border-radius:9999px;border:1px solid rgba(255,255,255,.08)">until ${esc(firstName)}'s cast comes off</p>`;}
+  }else if(idx===3){
+    const rows=[["❤️",fmt(s.heartbeats),"heartbeats"],["💨",fmt(s.breaths),"breaths taken"],["🧬",s.cellsRegenerated,"cells regenerated"],["👁️",fmt(s.blinks),"blinks"],["😴",fmt(s.sleepHours)+" hrs","of healing sleep"]];
+    body=`<p style="font-size:12px;color:rgba(255,255,255,.3);margin-bottom:20px">My body has been busy</p>`+rows.map(([e,v,l])=>`<div class="stat-row"><span class="emoji">${e}</span><div><p class="val stat-number">${v}</p><p class="lbl">${l}</p></div></div>`).join("");
+  }else{
+    const rows=[["🤔",fmt(s.timesAsked),'"what happened?" asks'],["😤","~"+fmt(s.itchesEstimated),"itches under the cast"],["🚿",fmt(s.showersWithBag),"plastic bag showers"],["🚶",fmt(s.stepsNotTaken),"steps not taken"],["📺",fmt(s.netflix),"Netflix episodes of time"]];
+    body=`<p style="font-size:12px;color:rgba(255,255,255,.3);margin-bottom:20px">Only cast warriors understand</p>`+rows.map(([e,v,l])=>`<div class="stat-row"><span class="emoji">${e}</span><div><p class="val stat-number">${v}</p><p class="lbl">${l}</p></div></div>`).join("")+`<p style="font-size:10px;color:rgba(255,255,255,.15);margin-top:24px;font-style:italic">Tag someone who gets it 🦴</p>`;
+  }
+  container.innerHTML=`<div class="share-card" style="background:${GRADIENTS[idx]}"><div class="glow1"></div><div class="glow2"></div>${hdr}<div class="share-card-body">${body}</div>${ftr}</div>`;
+  // Update dots
+  const dots=document.getElementById("card-dots");
+  dots.innerHTML="";
+  for(let i=0;i<TOTAL_SHARE_CARDS;i++){
+    const d=document.createElement("button");
+    d.className="card-dot"+(i===idx?" active":"");
+    d.onclick=()=>{shareCardIndex=i;buildShareCard(i);};
+    dots.appendChild(d);
+  }
+  document.getElementById("card-counter").textContent=`${idx+1}/${TOTAL_SHARE_CARDS}`;
+}
+function openShare(){shareCardIndex=0;buildShareCard(0);document.getElementById("share-overlay").classList.add("open");}
+function closeShare(){document.getElementById("share-overlay").classList.remove("open");}
+function nextCard(){shareCardIndex=(shareCardIndex+1)%TOTAL_SHARE_CARDS;buildShareCard(shareCardIndex);}
+function prevCard(){shareCardIndex=(shareCardIndex-1+TOTAL_SHARE_CARDS)%TOTAL_SHARE_CARDS;buildShareCard(shareCardIndex);}
+function nativeShare(){
+  const s=calcStats();
+  if(navigator.share){
+    navigator.share({title:`${state.name}'s Cast Countdown`,text:`I'm ${s.percentComplete.toFixed(0)}% through my fracture recovery! ${s.daysRemaining} days to go 🦴💪`,url:location.href}).catch(()=>copyLink());
+  }else copyLink();
+}
+function copyLink(){
+  navigator.clipboard.writeText(location.href);
+  const btn=document.getElementById("copy-btn");
+  btn.textContent="Copied! ✅";
+  setTimeout(()=>{btn.textContent="Copy Link 🔗";},2000);
+}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+/* ═══════════════════════════════════════════════════
+   LOAD FROM URL HASH (for shared links)
+═══════════════════════════════════════════════════ */
+if(location.hash.length>1){
+  try{
+    const data=JSON.parse(atob(location.hash.slice(1)));
+    if(data.name&&data.castDate&&data.removalDate){
+      state=data;
+      startStats();
     }
-  }
-  draw() {
-    const o = this.opacity + Math.sin(this.pulse) * 0.05;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(108, 92, 231, ${o})`;
-    ctx.fill();
-  }
+  }catch(e){}
 }
-
-for (let i = 0; i < 60; i++) particles.push(new Particle());
-
-function animateParticles() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  particles.forEach(p => { p.update(); p.draw(); });
-  animFrame = requestAnimationFrame(animateParticles);
-}
-animateParticles();
-
-/* ════════════════════════════════════════
-   PAGE LOAD
-════════════════════════════════════════ */
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    document.getElementById('page-transition').classList.add('hidden');
-  }, 600);
-});
-
-// Add hover sound to interactive elements
-document.addEventListener('mouseover', (e) => {
-  if (e.target.closest('.btn-primary, .btn-ghost, .sound-toggle, .quick-stat')) {
-    sfxHover();
-  }
-});
-
-/* ════════════════════════════════════════
-   DATA
-════════════════════════════════════════ */
-const FACTS = [
-  { emoji:"🔬", title:"How Bones Heal", text:"Bone healing happens in 4 stages: inflammation (days 1–5), soft callus (weeks 1–3), hard callus (weeks 3–12), and remodelling that can take up to 2 years." },
-  { emoji:"🩸", title:"Nature's First Responder", text:"Within minutes of a fracture, your body forms a blood clot called a fracture haematoma — the very first step of healing." },
-  { emoji:"💪", title:"Bone is Living Tissue", text:"Your bones contain osteoblasts (builders) and osteoclasts (removers) that constantly remodel bone tissue — especially active during recovery." },
-  { emoji:"🧲", title:"Electrical Healing Signals", text:"Bone generates small electrical signals under stress (piezoelectricity). This is why gentle movement, once approved, can speed up healing." },
-  { emoji:"🥛", title:"Calcium is Key", text:"Your body needs extra calcium and Vitamin D right now. Dairy, leafy greens, almonds, and sunlight all help build denser, stronger bones." },
-  { emoji:"🚫", title:"Smoking Slows Healing", text:"Smokers take up to 30% longer to heal fractures. Nicotine restricts blood flow to the healing site, starving it of nutrients." },
-  { emoji:"🦕", title:"Ancient Fractures", text:"Healed fractures have been found in dinosaur fossils — broken bones and recovery is as old as life on land!" },
-  { emoji:"⚡", title:"Bones Can Get Stronger", text:"Wolff's Law: bone remodels in response to stress. A properly healed fracture can become denser than the original bone." },
-  { emoji:"🏥", title:"Cast History", text:"Plaster casts were first used in the 1800s. Modern fibreglass casts weren't introduced until the 1970s — lighter and cooler." },
-  { emoji:"🧬", title:"Stem Cells at Work", text:"Mesenchymal stem cells activate at the fracture site and can transform into bone, cartilage, or fat depending on what's needed." },
-  { emoji:"🌡️", title:"The Heat is Normal", text:"It's completely normal for the fracture area to feel warm. Your immune system increases blood flow to deliver healing materials." },
-  { emoji:"🎯", title:"Protein Matters", text:"About 35% of bone mass is protein (mainly collagen). Eating adequate protein helps build the scaffold that new bone forms around." },
-];
-
-/* ════════════════════════════════════════
-   STATE
-════════════════════════════════════════ */
-let timerInterval = null;
-let userData = {};
-let prevSecs = null;
-
-/* ════════════════════════════════════════
-   START
-════════════════════════════════════════ */
-function startStats() {
-  initAudio();
-  sfxClick();
-
-  const startVal = document.getElementById('cast-start').value;
-  const endVal = document.getElementById('cast-end').value;
-  const bone = document.getElementById('bone-type').value;
-  const fracture = document.getElementById('fracture-type').value;
-  const name = document.getElementById('user-name').value.trim();
-
-  if (!startVal || !endVal) {
-    playTone(200, 0.3, 'sawtooth', 0.05);
-    shakeElement(document.getElementById('btn-start'));
-    return;
-  }
-
-  const startDate = new Date(startVal);
-  const endDate = new Date(endVal);
-  endDate.setHours(23, 59, 59);
-
-  if (endDate <= startDate) {
-    playTone(200, 0.3, 'sawtooth', 0.05);
-    shakeElement(document.getElementById('btn-start'));
-    return;
-  }
-
-  userData = { startDate, endDate, bone, fracture, name, startVal, endVal };
-
-  sfxSuccess();
-
-  // Transition
-  const transition = document.getElementById('page-transition');
-  transition.classList.remove('hidden');
-
-  setTimeout(() => {
-    document.getElementById('screen-input').style.display = 'none';
-    const statsEl = document.getElementById('screen-stats');
-    statsEl.style.display = 'flex';
-
-    const displayName = name || 'Your';
-    document.getElementById('hero-title').innerHTML =
-      `${displayName}${name ? "'s" : ''} <span class="gradient-text">Recovery</span>`;
-
-    // Date labels
-    document.getElementById('date-start-label').textContent = formatDateShort(startDate);
-    document.getElementById('date-end-label').textContent = formatDateShort(endDate);
-
-    buildDashboard();
-    updateCountdown();
-    timerInterval = setInterval(updateCountdown, 1000);
-
-    // Check celebration
-    const today = new Date(); today.setHours(0,0,0,0);
-    const removeDay = new Date(endVal); removeDay.setHours(0,0,0,0);
-    if (today >= removeDay) {
-      setTimeout(() => {
-        document.getElementById('celebration').classList.add('show');
-        sfxCelebration();
-        launchConfetti();
-      }, 800);
-    }
-
-    // Init AOS
-    setTimeout(() => {
-      AOS.init({
-        duration: 600,
-        easing: 'ease-out-cubic',
-        once: true,
-        offset: 60
-      });
-      transition.classList.add('hidden');
-    }, 300);
-  }, 700);
-}
-
-function shakeElement(el) {
-  el.style.animation = 'none';
-  el.offsetHeight;
-  el.style.animation = 'shake 0.4s ease';
-  setTimeout(() => el.style.animation = '', 500);
-}
-
-// Add shake keyframe
-const shakeStyle = document.createElement('style');
-shakeStyle.textContent = `@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }`;
-document.head.appendChild(shakeStyle);
-
-function formatDateShort(d) {
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-/* ════════════════════════════════════════
-   BUILD DASHBOARD
-════════════════════════════════════════ */
-function buildDashboard() {
-  const container = document.getElementById('dashboard');
-  container.innerHTML = '';
-
-  const { startDate, endDate, bone, fracture } = userData;
-  const totalMs = endDate - startDate;
-  const totalDays = Math.ceil(totalMs / 86400000);
-  const now = new Date();
-  const elapsed = Math.max(0, now - startDate);
-  const elapsedDays = Math.floor(elapsed / 86400000);
-  const pct = Math.min(100, Math.round((elapsed / totalMs) * 100));
-
-  const boneName = bone || 'your bone';
-  const fractureType = fracture || 'your fracture';
-  const totalWeeks = Math.round(totalDays / 7);
-
-  // ── Quick Stats ──
-  const quickHtml = `
-    <div class="quick-stats">
-      <div class="quick-stat" data-aos="fade-up" data-aos-delay="0">
-        <div class="qs-icon">📆</div>
-        <div class="qs-value">${totalDays}</div>
-        <div class="qs-label">Total Days</div>
-      </div>
-      <div class="quick-stat" data-aos="fade-up" data-aos-delay="50">
-        <div class="qs-icon">✅</div>
-        <div class="qs-value">${elapsedDays}</div>
-        <div class="qs-label">Days Done</div>
-      </div>
-      <div class="quick-stat" data-aos="fade-up" data-aos-delay="100">
-        <div class="qs-icon">📊</div>
-        <div class="qs-value">${pct}%</div>
-        <div class="qs-label">Complete</div>
-      </div>
-      <div class="quick-stat" data-aos="fade-up" data-aos-delay="150">
-        <div class="qs-icon">🗓️</div>
-        <div class="qs-value">${totalWeeks}</div>
-        <div class="qs-label">Total Weeks</div>
-      </div>
-    </div>`;
-  container.insertAdjacentHTML('beforeend', quickHtml);
-
-  // ── Healing Timeline ──
-  addDivider(container, '🗺️ Healing Timeline');
-
-  const stages = [
-    { name: 'Inflammation', range: 'Days 1–5', desc: 'Blood clot forms, immune response activates', maxDay: 5 },
-    { name: 'Soft Callus', range: 'Weeks 1–3', desc: 'Cartilage bridge forms across the fracture', maxDay: 21 },
-    { name: 'Hard Callus', range: 'Weeks 3–12', desc: 'Cartilage replaced with mineralised bone', maxDay: 84 },
-    { name: 'Remodelling', range: 'Months 3+', desc: 'Bone fine-tunes its structure and density', maxDay: 9999 },
-  ];
-
-  let timelineHtml = '<div class="timeline" data-aos="fade-up">';
-  stages.forEach((s, i) => {
-    const isDone = elapsedDays > s.maxDay;
-    const isCurrent = !isDone && (i === 0 || elapsedDays > stages[i-1].maxDay);
-    const dimmed = !isDone && !isCurrent;
-    const dotClass = isDone ? 'completed' : isCurrent ? 'current' : '';
-    timelineHtml += `
-      <div class="timeline-item ${dimmed ? 'dimmed' : ''}">
-        <div class="timeline-dot ${dotClass}"></div>
-        <div class="timeline-title">${s.name} ${isCurrent ? '← You are here' : ''}</div>
-        <div class="timeline-desc">${s.range} — ${s.desc}</div>
-      </div>`;
-  });
-  timelineHtml += '</div>';
-  container.insertAdjacentHTML('beforeend', timelineHtml);
-
-  // ── Live Stats ──
-  addDivider(container, '📊 Live Body Stats');
-
-  const cards = [
-    { theme:'purple', icon:'⏳', label:'Time in Cast', id:'stat-time', desc:`Your ${boneName} has been healing non-stop since day one.`, live:() => {
-      const ms = Math.max(0, new Date() - startDate);
-      const d = Math.floor(ms/86400000);
-      const h = Math.floor((ms%86400000)/3600000);
-      return `${d}d ${h}h`;
-    }},
-    { theme:'orange', icon:'🔥', label:'Hours of Active Healing', id:'stat-hours', desc:'Your osteoblasts work 24/7 — they never take a break.', live:() => {
-      return Math.floor((new Date()-startDate)/3600000).toLocaleString()+' hrs';
-    }},
-    { theme:'red', icon:'💓', label:'Heartbeats Delivering Nutrients', id:'stat-heartbeats', desc:'Every beat pumps nutrient-rich blood to your healing fracture.', live:() => {
-      const s = (new Date()-startDate)/1000;
-      return Math.round(s*1.1667).toLocaleString();
-    }},
-    { theme:'blue', icon:'🫁', label:'Breaths Supplying Oxygen', id:'stat-breaths', desc:'Every breath brings oxygen that gets delivered to your healing bone.', live:() => {
-      const s = (new Date()-startDate)/1000;
-      return Math.round(s*0.267).toLocaleString();
-    }},
-    { theme:'pink', icon:'🧱', label:'New Cells Created (est.)', id:'stat-cells', desc:`Your body generates ~2 million cells per second — many are dedicated to ${boneName} repair.`, live:() => {
-      const s = Math.max(0,(new Date()-startDate)/1000);
-      return Math.round(s*2000000).toLocaleString();
-    }},
-    { theme:'green', icon:'😴', label:'Recovery Sleep Hours', id:null, desc:'Growth hormone peaks during deep sleep, driving osteoblast activity.', value:`~${Math.round(elapsedDays*8)} hrs`},
-    { theme:'yellow', icon:'🎯', label:'Current Healing Stage', id:null, desc:getHealingStageDesc(elapsedDays), value:getHealingStage(elapsedDays)},
-  ];
-
-  if (fracture) {
-    cards.push({ theme:'red', icon:'⚡', label:'Fracture Type', id:null, desc:getFractureDesc(fracture), value:fractureType });
-  }
-
-  cards.forEach((c, i) => {
-    const val = c.live ? '' : (c.value || '');
-    const html = `
-      <div class="stat-card theme-${c.theme}" data-aos="fade-up" data-aos-delay="${i*40}">
-        <div class="card-accent"></div>
-        <div class="card-glow"></div>
-        <div class="card-header">
-          <div class="card-icon">${c.icon}</div>
-          <div class="card-label">${c.label}</div>
-        </div>
-        <div class="card-value ${c.live ? 'mono' : ''}" ${c.id ? `id="${c.id}"` : ''}>${val}</div>
-        <div class="card-desc">${c.desc}</div>
-      </div>`;
-    container.insertAdjacentHTML('beforeend', html);
-  });
-
-  window._liveCards = cards.filter(c => c.live && c.id);
-
-  // ── Fun Facts ──
-  addDivider(container, '🧠 Recovery Facts');
-
-  // Shuffle and pick 8
-  const shuffled = [...FACTS].sort(() => Math.random() - 0.5).slice(0, 8);
-  shuffled.forEach((f, i) => {
-    const html = `
-      <div class="fact-card" data-aos="fade-up" data-aos-delay="${i*30}">
-        <div class="fact-icon-wrap">${f.emoji}</div>
-        <div class="fact-body">
-          <h3>${f.title}</h3>
-          <p>${f.text}</p>
-        </div>
-      </div>`;
-    container.insertAdjacentHTML('beforeend', html);
-  });
-}
-
-function addDivider(container, title) {
-  container.insertAdjacentHTML('beforeend', `
-    <div class="section-divider" data-aos="fade">
-      <div class="divider-line"></div>
-      <h2>${title}</h2>
-      <div class="divider-line"></div>
-    </div>`);
-}
-
-/* ════════════════════════════════════════
-   HEALING STAGES
-════════════════════════════════════════ */
-function getHealingStage(days) {
-  if (days <= 5) return 'Inflammation';
-  if (days <= 21) return 'Soft Callus';
-  if (days <= 84) return 'Hard Callus';
-  return 'Remodelling';
-}
-
-function getHealingStageDesc(days) {
-  if (days <= 5) return 'Your immune system is flooding the area with healing cells. Swelling and pain are signs it\'s working.';
-  if (days <= 21) return 'A soft, cartilage-like material is bridging the fracture gap. The break is stabilising every day.';
-  if (days <= 84) return 'Soft callus is being replaced with hard, mineralised bone tissue. Real bone is forming right now.';
-  return 'The fracture has healed but your bone is still optimising its structure — this can continue for up to 2 years.';
-}
-
-function getFractureDesc(type) {
-  const map = {
-    'Hairline': 'A tiny crack — often from overuse. Heals well with rest and immobilisation.',
-    'Stress': 'A small crack from repetitive force. Very responsive to rest and proper nutrition.',
-    'Simple (Clean Break)': 'A clean break with no displacement. One of the most straightforward fractures to heal.',
-    'Comminuted (Multiple Pieces)': 'The bone fragmented into several pieces. Requires careful immobilisation — you\'re doing amazing.',
-    'Compound (Open)': 'The bone broke through the skin. Healed under expert care — your resilience is remarkable.',
-    'Greenstick': 'A partial fracture where the bone bends and cracks — common in younger bones.',
-    'Avulsion': 'A fragment pulled away by a tendon or ligament. A unique but fully healable injury.'
-  };
-  return map[type] || 'Every fracture heals in its own remarkable way.';
-}
-
-/* ════════════════════════════════════════
-   LIVE COUNTDOWN
-════════════════════════════════════════ */
-function updateCountdown() {
-  const now = new Date();
-  const diff = userData.endDate - now;
-  const total = userData.endDate - userData.startDate;
-  const elapsed = now - userData.startDate;
-  const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
-
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('pct-label').textContent = Math.round(pct) + '%';
-
-  if (diff <= 0) {
-    setCD('0', '00', '00', '00');
-    clearInterval(timerInterval);
-    return;
-  }
-
-  const days = Math.floor(diff / 86400000);
-  const hours = Math.floor((diff % 86400000) / 3600000);
-  const mins = Math.floor((diff % 3600000) / 60000);
-  const secs = Math.floor((diff % 60000) / 1000);
-
-  const newSecs = String(secs).padStart(2, '0');
-
-  setCD(
-    String(days),
-    String(hours).padStart(2, '0'),
-    String(mins).padStart(2, '0'),
-    newSecs
-  );
-
-  // Tick sound on second change
-  if (prevSecs !== null && prevSecs !== newSecs) {
-    sfxTick();
-  }
-  prevSecs = newSecs;
-
-  // Flip animation on seconds
-  const secsEl = document.getElementById('cd-secs');
-  secsEl.classList.remove('flip-animate');
-  void secsEl.offsetHeight;
-  secsEl.classList.add('flip-animate');
-
-  // Update live stat values
-  if (window._liveCards) {
-    window._liveCards.forEach(c => {
-      const el = document.getElementById(c.id);
-      if (el) el.textContent = c.live();
-    });
-  }
-}
-
-function setCD(d, h, m, s) {
-  document.getElementById('cd-days').textContent = d;
-  document.getElementById('cd-hours').textContent = h;
-  document.getElementById('cd-mins').textContent = m;
-  document.getElementById('cd-secs').textContent = s;
-}
-
-/* ════════════════════════════════════════
-   CELEBRATION
-════════════════════════════════════════ */
-function closeCelebration() {
-  sfxClick();
-  document.getElementById('celebration').classList.remove('show');
-}
-
-function launchConfetti() {
-  if (typeof confetti === 'function') {
-    const end = Date.now() + 3000;
-    const interval = setInterval(() => {
-      if (Date.now() > end) return clearInterval(interval);
-      confetti({
-        particleCount: 3,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0, y: 0.7 },
-        colors: ['#6c5ce7', '#00b894', '#fd79a8', '#fdcb6e', '#74b9ff']
-      });
-      confetti({
-        particleCount: 3,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1, y: 0.7 },
-        colors: ['#6c5ce7', '#00b894', '#fd79a8', '#fdcb6e', '#74b9ff']
-      });
-    }, 50);
-  }
-}
-
-/* ════════════════════════════════════════
-   RESET
-════════════════════════════════════════ */
-function resetApp() {
-  sfxClick();
-  clearInterval(timerInterval);
-  prevSecs = null;
-
-  const transition = document.getElementById('page-transition');
-  transition.classList.remove('hidden');
-
-  setTimeout(() => {
-    document.getElementById('screen-stats').style.display = 'none';
-    document.getElementById('screen-input').style.display = 'flex';
-    document.getElementById('dashboard').innerHTML = '';
-    transition.classList.add('hidden');
-  }, 500);
-}
-
-/* ════════════════════════════════════════
-   LOGO CLICK EASTER EGG
-════════════════════════════════════════ */
-let logoClicks = 0;
-document.getElementById('logo-icon-btn').addEventListener('click', () => {
-  initAudio();
-  logoClicks++;
-  sfxClick();
-  const el = document.getElementById('logo-icon-btn');
-  el.style.transform = 'scale(0.9)';
-  setTimeout(() => el.style.transform = '', 150);
-
-  if (logoClicks >= 5) {
-    logoClicks = 0;
-    el.textContent = ['🦴','💀','🩻','🦷','🏥'][Math.floor(Math.random()*5)];
-    sfxSuccess();
-  }
-});
-
-/* ════════════════════════════════════════
-   FORM INPUT SOUNDS
-════════════════════════════════════════ */
-document.querySelectorAll('.field input, .field select').forEach(el => {
-  el.addEventListener('focus', () => {
-    initAudio();
-    playTone(440, 0.04, 'sine', 0.02);
-  });
-  el.addEventListener('change', () => {
-    initAudio();
-    sfxClick();
-  });
-});
 </script>
 </body>
 </html>
